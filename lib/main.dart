@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/onboarding/onboarding_screen.dart';
@@ -8,6 +9,19 @@ import 'constants/app_colors.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      statusBarBrightness: Brightness.light,
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarDividerColor: Colors.transparent,
+      systemNavigationBarIconBrightness: Brightness.dark,
+      systemNavigationBarContrastEnforced: false,
+    ),
+  );
 
   // Initialize shared preferences
   await SharedPreferences.getInstance();
@@ -25,7 +39,7 @@ class KarmicHealingApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         scaffoldBackgroundColor: AppColors.backgroundPrimary,
-        fontFamily: '.SF Pro Text',
+        fontFamily: 'Inter',
         appBarTheme: const AppBarTheme(
           backgroundColor: AppColors.backgroundPrimary,
           foregroundColor: AppColors.textPrimary,
@@ -34,7 +48,7 @@ class KarmicHealingApp extends StatelessWidget {
           scrolledUnderElevation: 0,
           titleTextStyle: TextStyle(
             color: AppColors.textPrimary,
-            fontFamily: '.SF Pro Display',
+            fontFamily: 'Inter',
             fontSize: 17,
             fontWeight: FontWeight.w600,
           ),

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../constants/app_colors.dart';
 import '../../widgets/aura_widgets.dart';
+import '../../widgets/disclosure_cell.dart';
 import '../../widgets/gradient_background.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -32,46 +33,40 @@ class SettingsScreen extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    AuraDisclosure(
-                      label: 'About',
-                      level: AuraLevel.crown,
+                    DisclosureCell(
+                      title: 'About',
                       onTap: () => _show(
                         context,
                         'About',
                         'Karmic Healing\nVersion 1.0',
                       ),
                     ),
-                    AuraDisclosure(
-                      label: 'Theme',
-                      level: AuraLevel.brow,
+                    DisclosureCell(
+                      title: 'Theme',
                       onTap: () => _show(context, 'Theme', 'System appearance'),
                     ),
-                    AuraDisclosure(
-                      label: 'Session Duration',
-                      level: AuraLevel.brow,
+                    DisclosureCell(
+                      title: 'Session Duration',
                       onTap: () => _show(
                         context,
                         'Session Duration',
                         '5 minutes per step',
                       ),
                     ),
-                    AuraDisclosure(
-                      label: 'Change Language',
-                      level: AuraLevel.brow,
+                    DisclosureCell(
+                      title: 'Change Language',
                       onTap: () => _show(context, 'Language', 'English'),
                     ),
-                    AuraDisclosure(
-                      label: 'Privacy Policy',
-                      level: AuraLevel.crown,
+                    DisclosureCell(
+                      title: 'Privacy Policy',
                       onTap: () => _show(
                         context,
                         'Privacy Policy',
                         'Your information stays private.',
                       ),
                     ),
-                    AuraDisclosure(
-                      label: 'Write to Us',
-                      level: AuraLevel.brow,
+                    DisclosureCell(
+                      title: 'Write to Us',
                       onTap: () => _show(
                         context,
                         'Write to Us',
@@ -94,10 +89,7 @@ class SettingsScreen extends StatelessWidget {
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.backgroundSecondary,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
-          title,
-          style: const TextStyle(fontFamily: '.SF Pro Display'),
-        ),
+        title: Text(title, style: const TextStyle(fontFamily: 'Inter')),
         content: Text(message),
         actions: [
           TextButton(

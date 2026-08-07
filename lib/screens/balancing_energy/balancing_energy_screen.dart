@@ -226,7 +226,7 @@ class _BalancingEnergyScreenState extends State<BalancingEnergyScreen>
             Text(
               step.title,
               style: const TextStyle(
-                fontFamily: '.SF Pro Display',
+                fontFamily: 'Inter',
                 fontSize: 24,
                 color: AppColors.textPrimary,
               ),

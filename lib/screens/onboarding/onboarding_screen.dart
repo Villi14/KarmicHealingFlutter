@@ -54,86 +54,78 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    body: AnimatedSwitcher(
-      duration: const Duration(milliseconds: 350),
-      child: GradientBackground(
-        key: ValueKey(_level),
-        tone: _level.color,
-        child: SafeArea(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 700),
-              child: Column(
-                children: [
-                  SizedBox(
-                    height: 60,
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: _current == 0
-                          ? TextButton(
-                              onPressed: _complete,
-                              child: const Text(
-                                'Skip',
-                                style: TextStyle(
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                            )
-                          : const SizedBox(width: 64),
+    body: GradientBackground(
+      tone: _level.color,
+      child: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 700),
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 60,
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: _current == 0
+                        ? TextButton(
+                            onPressed: _complete,
+                            child: const Text(
+                              'Skip',
+                              style: TextStyle(color: AppColors.textSecondary),
+                            ),
+                          )
+                        : const SizedBox(width: 64),
+                  ),
+                ),
+                Expanded(
+                  child: PageView.builder(
+                    controller: _controller,
+                    itemCount: _steps.length,
+                    onPageChanged: (value) => setState(() => _current = value),
+                    itemBuilder: (context, index) => _StepView(
+                      step: _steps[index],
+                      level: AuraLevel.values[(index / 3 * 6).round()],
                     ),
                   ),
-                  Expanded(
-                    child: PageView.builder(
-                      controller: _controller,
-                      itemCount: _steps.length,
-                      onPageChanged: (value) =>
-                          setState(() => _current = value),
-                      itemBuilder: (context, index) => _StepView(
-                        step: _steps[index],
-                        level: AuraLevel.values[(index / 3 * 6).round()],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    _steps.length,
+                    (index) => AnimatedContainer(
+                      duration: const Duration(milliseconds: 250),
+                      width: 6,
+                      height: 6,
+                      margin: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: index == _current
+                            ? _level.color
+                            : AppColors.textSecondary.withValues(alpha: .25),
+                        borderRadius: BorderRadius.circular(4),
                       ),
                     ),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(
-                      _steps.length,
-                      (index) => AnimatedContainer(
-                        duration: const Duration(milliseconds: 250),
-                        width: 6,
-                        height: 6,
-                        margin: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: index == _current
-                              ? _level.color
-                              : AppColors.textSecondary.withValues(alpha: .25),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        if (_current > 0)
-                          TextButton(
-                            onPressed: _back,
-                            child: const Text('Back'),
-                          ),
-                        const Spacer(),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      if (_current > 0)
                         AuraButton(
-                          label: _current == _steps.length - 1
-                              ? 'Done'
-                              : 'Next',
+                          label: 'Back',
                           level: _level,
-                          onPressed: _next,
+                          onPressed: _back,
                         ),
-                      ],
-                    ),
+                      const Spacer(),
+                      AuraButton(
+                        label: _current == _steps.length - 1 ? 'Done' : 'Next',
+                        level: _level,
+                        onPressed: _next,
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
@@ -189,8 +181,8 @@ class _StepView extends StatelessWidget {
           step.title,
           textAlign: TextAlign.center,
           style: const TextStyle(
-            // Georgia is the closest cross-platform system serif to iOS New York.
-            fontFamily: 'Georgia',
+            // Source Serif 4 is the bundled cross-platform counterpart to New York.
+            fontFamily: 'Source Serif 4',
             fontSize: 28,
             color: AppColors.textPrimary,
           ),

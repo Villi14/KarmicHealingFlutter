@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../constants/app_colors.dart';
@@ -14,17 +15,38 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Karmic Healing')),
+    extendBodyBehindAppBar: true,
+    appBar: AppBar(
+      backgroundColor: Colors.transparent,
+      shadowColor: Colors.transparent,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      systemOverlayStyle: SystemUiOverlayStyle.dark,
+      title: const Text(
+        'Karmic Healing',
+        style: TextStyle(
+          fontFamily: 'Source Serif 4',
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    ),
     body: GradientBackground(
       tone: AppColors.health,
       child: SafeArea(
         top: false,
-        child: Center(
+        child: Align(
+          alignment: Alignment.topCenter,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 700),
             child: LayoutBuilder(
               builder: (context, constraints) => SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  MediaQuery.paddingOf(context).top + kToolbarHeight + 12,
+                  16,
+                  28,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -36,7 +58,7 @@ class HomeScreen extends StatelessWidget {
                     const Text(
                       'Your tools',
                       style: TextStyle(
-                        fontFamily: '.SF Pro Display',
+                        fontFamily: 'Source Serif 4',
                         fontSize: 20,
                         color: AppColors.textPrimary,
                       ),
@@ -44,6 +66,8 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(height: 12),
                     GridView.count(
                       crossAxisCount: 2,
+                      primary: false,
+                      padding: EdgeInsets.zero,
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       crossAxisSpacing: 12,
@@ -109,7 +133,7 @@ class _HeroCard extends StatelessWidget {
           ),
           child: const Center(
             child: AuraIcon(
-              Icons.self_improvement,
+              Icons.eco_outlined,
               level: AuraLevel.heart,
               size: 36,
             ),
@@ -121,7 +145,7 @@ class _HeroCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'TODAY’S PRACTICE',
+                'TODAY',
                 style: TextStyle(
                   color: AppColors.health,
                   fontSize: 11,
@@ -131,16 +155,16 @@ class _HeroCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               const Text(
-                'Balance your energy',
+                'A moment to return to yourself',
                 style: TextStyle(
-                  fontFamily: '.SF Pro Display',
+                  fontFamily: 'Source Serif 4',
                   color: AppColors.textPrimary,
                   fontSize: 28,
                 ),
               ),
               const SizedBox(height: 8),
               const Text(
-                'A guided practice to restore calm, clarity and connection.',
+                'Take a few quiet minutes to balance your energy and continue your practice.',
                 style: TextStyle(
                   color: AppColors.textSecondary,
                   fontSize: 15,
@@ -203,7 +227,7 @@ class _ToolCard extends StatelessWidget {
         Text(
           title,
           style: const TextStyle(
-            fontFamily: '.SF Pro Display',
+            fontFamily: 'Source Serif 4',
             fontSize: 17,
             color: AppColors.textPrimary,
           ),

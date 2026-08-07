@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../constants/app_colors.dart';
 import '../../widgets/aura_widgets.dart';
+import '../../widgets/disclosure_cell.dart';
 import '../../widgets/gradient_background.dart';
 import 'balancing_energy_screen.dart';
 
@@ -32,7 +34,14 @@ class _State extends State<BalancingEnergyListScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
+    extendBodyBehindAppBar: true,
     appBar: AppBar(
+      backgroundColor: Colors.transparent,
+      shadowColor: Colors.transparent,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      systemOverlayStyle: SystemUiOverlayStyle.dark,
       title: const Text('Energy Balancing'),
       leading: IconButton(
         onPressed: Get.back,
@@ -53,7 +62,12 @@ class _State extends State<BalancingEnergyListScreen> {
           child: Align(
             alignment: Alignment.topCenter,
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.fromLTRB(
+                16,
+                MediaQuery.paddingOf(context).top + kToolbarHeight + 16,
+                16,
+                16,
+              ),
               child: AuraCard(
                 level: AuraLevel.heart,
                 padding: EdgeInsets.zero,
@@ -61,20 +75,17 @@ class _State extends State<BalancingEnergyListScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (!_initialProcessCompleted)
-                      AuraDisclosure(
-                        label: 'Initial Process',
-                        level: AuraLevel.heart,
+                      DisclosureCell(
+                        title: 'Initial Process',
                         onTap: () =>
                             _open('Initial Process', EnergySteps.part1),
                       ),
-                    AuraDisclosure(
-                      label: 'Essential Self',
-                      level: AuraLevel.heart,
+                    DisclosureCell(
+                      title: 'Essential Self',
                       onTap: () => _open('Essential Self', EnergySteps.part2),
                     ),
-                    AuraDisclosure(
-                      label: 'Divine Self',
-                      level: AuraLevel.heart,
+                    DisclosureCell(
+                      title: 'Divine Self',
                       onTap: () => _open('Divine Self', EnergySteps.part3),
                     ),
                   ],
@@ -127,7 +138,7 @@ class _HelpSheet extends StatelessWidget {
           const Text(
             'Energy Balancing',
             style: TextStyle(
-              fontFamily: '.SF Pro Display',
+              fontFamily: 'Inter',
               fontSize: 28,
               color: AppColors.textPrimary,
             ),
