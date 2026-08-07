@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 
 import '../../constants/app_colors.dart';
+import '../../constants/design_constants.dart';
 import '../../widgets/aura_widgets.dart';
 import '../../widgets/gradient_background.dart';
+import '../../widgets/scroll_blur.dart';
+import '../../widgets/sf_symbols.dart';
 import '../balancing_energy/balancing_energy_list_screen.dart';
 import '../reminders/reminders_screen.dart';
 import '../requests/requests_screen.dart';
@@ -14,47 +16,64 @@ class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    extendBodyBehindAppBar: true,
-    appBar: AppBar(
-      backgroundColor: Colors.transparent,
-      shadowColor: Colors.transparent,
-      surfaceTintColor: Colors.transparent,
-      elevation: 0,
-      scrolledUnderElevation: 0,
-      systemOverlayStyle: SystemUiOverlayStyle.dark,
-      title: const Text(
-        'Karmic Healing',
-        style: TextStyle(
-          fontFamily: 'Source Serif 4',
-          fontWeight: FontWeight.w600,
+  Widget build(BuildContext context) => ScrollBlur(
+    child: Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        flexibleSpace: const ScrollBlurBackdrop(),
+        backgroundColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
+        title: const Text(
+          'Karmic Healing',
+          style: TextStyle(
+            fontFamily: 'Source Serif 4',
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
-    ),
-    body: GradientBackground(
-      tone: AppColors.health,
-      child: SafeArea(
-        top: false,
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 700),
-            child: LayoutBuilder(
-              builder: (context, constraints) => SingleChildScrollView(
+      body: GradientBackground(
+        tone: AppColors.health,
+        child: SafeArea(
+          top: false,
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: DesignConstants.maxContentWidth,
+              ),
+              child: SingleChildScrollView(
                 padding: EdgeInsets.fromLTRB(
-                  16,
-                  MediaQuery.paddingOf(context).top + kToolbarHeight + 12,
-                  16,
-                  28,
+                  DesignConstants.paddingLarge,
+                  DesignConstants.navigationBarInset(context) +
+                      DesignConstants.screenVerticalPadding(context),
+                  DesignConstants.paddingLarge,
+                  DesignConstants.screenVerticalPadding(context),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _HeroCard(
-                      onTap: () =>
-                          Get.to(() => const BalancingEnergyListScreen()),
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const BalancingEnergyListScreen(),
+                        ),
+                      ),
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(
+                      height:
+                          DesignConstants.sectionSpacing(context) +
+                          // The heading carries a little extra air above it,
+                          // which a short phone gives back.
+                          DesignConstants.compact(
+                            context,
+                            DesignConstants.paddingSmall,
+                            0,
+                          ),
+                    ),
                     const Text(
                       'Your tools',
                       style: TextStyle(
@@ -63,36 +82,57 @@ class HomeScreen extends StatelessWidget {
                         color: AppColors.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: DesignConstants.sectionSpacing(context)),
                     GridView.count(
                       crossAxisCount: 2,
                       primary: false,
                       padding: EdgeInsets.zero,
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                      childAspectRatio: constraints.maxHeight <= 600
-                          ? 1.45
-                          : 1.28,
+                      crossAxisSpacing: DesignConstants.spacingMedium,
+                      mainAxisSpacing: DesignConstants.spacingMedium,
+                      childAspectRatio: DesignConstants.cardAspectRatio(
+                        context,
+                      ),
                       children: [
                         _ToolCard(
                           title: 'Requests',
-                          icon: Icons.spa_outlined,
+                          icon: const AuraIcon(
+                            SFSymbols.staroflife,
+                            level: AuraLevel.sacral,
+                          ),
                           level: AuraLevel.sacral,
-                          onTap: () => Get.to(() => const RequestsScreen()),
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => const RequestsScreen(),
+                            ),
+                          ),
                         ),
                         _ToolCard(
                           title: 'Reminders',
-                          icon: Icons.edit_note_rounded,
+                          icon: const AuraIcon.drawn(
+                            SFGlyph.pencilAndListClipboard,
+                            level: AuraLevel.solar,
+                          ),
                           level: AuraLevel.solar,
-                          onTap: () => Get.to(() => const RemindersScreen()),
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => const RemindersScreen(),
+                            ),
+                          ),
                         ),
                         _ToolCard(
                           title: 'Settings',
-                          icon: Icons.settings_outlined,
+                          icon: const AuraIcon.drawn(
+                            SFGlyph.gearshape,
+                            level: AuraLevel.brow,
+                          ),
                           level: AuraLevel.brow,
-                          onTap: () => Get.to(() => const SettingsScreen()),
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => const SettingsScreen(),
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -114,7 +154,13 @@ class _HeroCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => AuraCard(
     level: AuraLevel.heart,
-    padding: const EdgeInsets.all(24),
+    padding: EdgeInsets.all(
+      DesignConstants.compact(
+        context,
+        DesignConstants.paddingXLarge,
+        DesignConstants.paddingLarge,
+      ),
+    ),
     onTap: onTap,
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -132,8 +178,8 @@ class _HeroCard extends StatelessWidget {
             ),
           ),
           child: const Center(
-            child: AuraIcon(
-              Icons.eco_outlined,
+            child: AuraIcon.drawn(
+              SFGlyph.meditate,
               level: AuraLevel.heart,
               size: 36,
             ),
@@ -171,12 +217,15 @@ class _HeroCard extends StatelessWidget {
                   height: 1.35,
                 ),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(
+                height:
+                    DesignConstants.spacingSmall + DesignConstants.paddingSmall,
+              ),
               Align(
                 alignment: Alignment.centerLeft,
                 child: AuraButton(
                   label: 'Start session',
-                  icon: Icons.arrow_forward,
+                  icon: SFSymbols.arrowRight,
                   level: AuraLevel.heart,
                   onPressed: onTap,
                 ),
@@ -198,7 +247,7 @@ class _ToolCard extends StatelessWidget {
   });
 
   final String title;
-  final IconData icon;
+  final Widget icon;
   final AuraLevel level;
   final VoidCallback onTap;
 
@@ -212,7 +261,7 @@ class _ToolCard extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            AuraIcon(icon, level: level),
+            icon,
             Container(
               width: 8,
               height: 8,

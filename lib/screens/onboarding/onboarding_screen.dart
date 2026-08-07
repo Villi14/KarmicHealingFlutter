@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../constants/app_colors.dart';
 import '../../widgets/aura_widgets.dart';
 import '../../widgets/gradient_background.dart';
+import '../../widgets/sf_symbols.dart';
 import '../home/home_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -20,22 +20,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   static const _steps = [
     _Step(
-      Icons.book_outlined,
+      SFSymbols.book,
       "Based on Diana Stein's Book",
       "This app is a supplement to the Russian edition 'Karmic Healing', which is a translation of the English edition 'Psychic Healing with Spirit Guides and Angels' by Diana Stein.",
     ),
     _Step(
-      Icons.auto_awesome,
+      SFSymbols.sparkles,
       'Your Spiritual Companion',
       'Transform the teachings from the book into regular practice. Track your healing journey, manage requests, and work with the Lords of Karma step by step.',
     ),
     _Step(
-      Icons.favorite_outline,
+      SFSymbols.heart,
       'Karmic Healing Process',
       'Learn to work with the Lords of Karma through guided requests. Heal relationships, overcome negative traits, and transform life situations with their guidance.',
     ),
     _Step(
-      Icons.star_outline,
+      SFSymbols.staroflife,
       'Begin Your Transformation',
       'Change your past, present, and future with the help of the Lords of Karma. Start your journey of spiritual healing and personal transformation today.',
     ),
@@ -152,7 +152,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Future<void> _complete() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('onboarding_completed', true);
-    Get.offAll(() => const HomeScreen());
+    if (!mounted) return;
+    await Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute<void>(builder: (_) => const HomeScreen()),
+      (_) => false,
+    );
   }
 }
 

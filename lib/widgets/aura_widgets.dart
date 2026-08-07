@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
+import 'sf_symbols.dart';
 
 enum AuraLevel { root, sacral, solar, heart, throat, brow, crown }
 
@@ -31,6 +32,7 @@ class AuraRings extends StatelessWidget {
   const AuraRings({
     super.key,
     required this.level,
+    this.tone,
     this.size = 78,
     this.count = 3,
     this.opacity = .5,
@@ -38,6 +40,7 @@ class AuraRings extends StatelessWidget {
   });
 
   final AuraLevel level;
+  final Color? tone;
   final double size;
   final int count;
   final double opacity;
@@ -48,7 +51,9 @@ class AuraRings extends StatelessWidget {
     dimension: size,
     child: CustomPaint(
       painter: _RingsPainter(
-        colors: [level.color, level.nextColor],
+        colors: tone == null
+            ? [level.color, level.nextColor]
+            : [tone!, Color.lerp(tone!, Colors.white, .3)!],
         count: count,
         opacity: opacity,
         core: core,
@@ -98,6 +103,14 @@ class _RingsPainter extends CustomPainter {
   bool shouldRepaint(covariant _RingsPainter oldDelegate) => false;
 }
 
+/// The two-tone sheen built from a colour the row or card carries itself:
+/// that colour, and the same colour lightened.
+LinearGradient toneGradient(Color tone) => LinearGradient(
+  begin: Alignment.bottomLeft,
+  end: Alignment.topRight,
+  colors: [tone, Color.lerp(tone, Colors.white, .3)!],
+);
+
 class AuraCard extends StatelessWidget {
   const AuraCard({
     super.key,
@@ -106,6 +119,8 @@ class AuraCard extends StatelessWidget {
     this.padding = const EdgeInsets.all(16),
     this.watermark = true,
     this.onTap,
+    this.tone,
+    this.elevated = true,
   });
 
   final AuraLevel level;
@@ -113,6 +128,8 @@ class AuraCard extends StatelessWidget {
   final EdgeInsets padding;
   final bool watermark;
   final VoidCallback? onTap;
+  final Color? tone;
+  final bool elevated;
 
   @override
   Widget build(BuildContext context) {
@@ -122,16 +139,22 @@ class AuraCard extends StatelessWidget {
         color: AppColors.backgroundSecondary,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: level.nextColor.withValues(alpha: .45),
+          color:
+              (tone == null
+                      ? level.nextColor
+                      : Color.lerp(tone!, Colors.white, .3)!)
+                  .withValues(alpha: .45),
           width: .5,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: .18),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        boxShadow: elevated
+            ? [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: .18),
+                  blurRadius: 16,
+                  offset: const Offset(0, 8),
+                ),
+              ]
+            : null,
       ),
       child: Stack(
         children: [
@@ -139,7 +162,7 @@ class AuraCard extends StatelessWidget {
             Positioned(
               right: -34,
               bottom: -34,
-              child: AuraRings(level: level, size: 96, opacity: .3),
+              child: AuraRings(level: level, tone: tone, size: 96, opacity: .3),
             ),
           Padding(padding: padding, child: child),
         ],
@@ -156,18 +179,81 @@ class AuraCard extends StatelessWidget {
 }
 
 class AuraIcon extends StatelessWidget {
-  const AuraIcon(this.icon, {super.key, required this.level, this.size = 24});
+  const AuraIcon(
+    IconData icon, {
+    super.key,
+    required this.level,
+    this.size = 24,
+  }) : _symbol = icon,
+       _glyph = null;
 
-  final IconData icon;
+  /// For the SF Symbols that Cupertino Icons has no glyph for, so they take the
+  /// same gradient as the ones that do.
+  const AuraIcon.drawn(
+    SFGlyph glyph, {
+    super.key,
+    required this.level,
+    this.size = 24,
+  }) : _glyph = glyph,
+       _symbol = null;
+
+  final IconData? _symbol;
+  final SFGlyph? _glyph;
   final AuraLevel level;
   final double size;
 
   @override
   Widget build(BuildContext context) => ShaderMask(
     shaderCallback: level.gradient.createShader,
+    child: _symbol != null
+        ? Icon(_symbol, size: size, color: Colors.white)
+        : SFIcon(_glyph!, size: size, color: Colors.white),
+  );
+}
+
+/// The same glyph treatment as [AuraIcon], tinted by a colour a topic or a
+/// request carries rather than by a spectrum level.
+class ToneIcon extends StatelessWidget {
+  const ToneIcon(this.icon, {super.key, required this.tone, this.size = 18});
+
+  final IconData icon;
+  final Color tone;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) => ShaderMask(
+    shaderCallback: toneGradient(tone).createShader,
     child: Icon(icon, size: size, color: Colors.white),
   );
 }
+
+/// The uppercase eyebrow above a step or a section: "STEP 4 OF 14".
+///
+/// The spectrum is tuned to read on a dark surface, so as tiny uppercase text
+/// on a light one the tone comes down or the eyebrow washes out against the page.
+class AuraLabel extends StatelessWidget {
+  const AuraLabel(this.text, {super.key, this.tone});
+
+  final String text;
+  final Color? tone;
+
+  @override
+  Widget build(BuildContext context) => Text(
+    text.toUpperCase(),
+    style: TextStyle(
+      color: tone == null
+          ? AppColors.textSecondary
+          : Color.lerp(tone, Colors.black, .3),
+      fontSize: 11,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 1.2,
+    ),
+  );
+}
+
+/// How loudly a button asks to be pressed: filled with the tone for the one
+/// action that moves the screen forward, the tone on a wash of itself otherwise.
+enum AuraProminence { filled, quiet }
 
 class AuraButton extends StatelessWidget {
   const AuraButton({
@@ -176,17 +262,28 @@ class AuraButton extends StatelessWidget {
     required this.level,
     required this.onPressed,
     this.icon,
+    this.prominence = AuraProminence.filled,
   });
 
   final String label;
   final AuraLevel level;
   final VoidCallback onPressed;
   final IconData? icon;
+  final AuraProminence prominence;
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
     decoration: BoxDecoration(
-      gradient: level.gradient,
+      gradient: prominence == AuraProminence.filled
+          ? level.gradient
+          : LinearGradient(
+              begin: Alignment.bottomLeft,
+              end: Alignment.topRight,
+              colors: [
+                level.color.withValues(alpha: .22),
+                level.nextColor.withValues(alpha: .16),
+              ],
+            ),
       borderRadius: BorderRadius.circular(20),
     ),
     child: TextButton.icon(
@@ -194,7 +291,9 @@ class AuraButton extends StatelessWidget {
       icon: icon == null ? const SizedBox.shrink() : Icon(icon, size: 18),
       label: Text(label),
       style: TextButton.styleFrom(
-        foregroundColor: AppColors.onAccent,
+        foregroundColor: prominence == AuraProminence.filled
+            ? AppColors.onAccent
+            : level.color,
         minimumSize: const Size(80, 48),
         padding: const EdgeInsets.symmetric(horizontal: 24),
         textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
