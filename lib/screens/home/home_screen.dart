@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../constants/app_colors.dart';
 import '../../constants/design_constants.dart';
@@ -26,7 +25,6 @@ class HomeScreen extends StatelessWidget {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
         title: const Text(
           'Karmic Healing',
           style: TextStyle(
@@ -36,7 +34,7 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
       body: GradientBackground(
-        tone: AppColors.health,
+        tone: AppColors.of(context).health,
         child: SafeArea(
           top: false,
           child: Align(
@@ -74,12 +72,12 @@ class HomeScreen extends StatelessWidget {
                             0,
                           ),
                     ),
-                    const Text(
+                    Text(
                       'Your tools',
                       style: TextStyle(
                         fontFamily: 'Source Serif 4',
                         fontSize: 20,
-                        color: AppColors.textPrimary,
+                        color: AppColors.of(context).textPrimary,
                       ),
                     ),
                     SizedBox(height: DesignConstants.sectionSpacing(context)),
@@ -172,8 +170,8 @@ class _HeroCard extends StatelessWidget {
             shape: BoxShape.circle,
             gradient: LinearGradient(
               colors: [
-                AppColors.health.withValues(alpha: .22),
-                AppColors.clam.withValues(alpha: .16),
+                AppColors.of(context).health.withValues(alpha: .22),
+                AppColors.of(context).clam.withValues(alpha: .16),
               ],
             ),
           ),
@@ -190,29 +188,29 @@ class _HeroCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'TODAY',
                 style: TextStyle(
-                  color: AppColors.health,
+                  color: AppColors.of(context).health,
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.2,
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 'A moment to return to yourself',
                 style: TextStyle(
                   fontFamily: 'Source Serif 4',
-                  color: AppColors.textPrimary,
+                  color: AppColors.of(context).textPrimary,
                   fontSize: 28,
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 'Take a few quiet minutes to balance your energy and continue your practice.',
                 style: TextStyle(
-                  color: AppColors.textSecondary,
+                  color: AppColors.of(context).textSecondary,
                   fontSize: 15,
                   height: 1.35,
                 ),
@@ -267,7 +265,7 @@ class _ToolCard extends StatelessWidget {
               height: 8,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: level.gradient,
+                gradient: level.gradient(context),
               ),
             ),
           ],
@@ -275,10 +273,10 @@ class _ToolCard extends StatelessWidget {
         const Spacer(),
         Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: 'Source Serif 4',
             fontSize: 17,
-            color: AppColors.textPrimary,
+            color: AppColors.of(context).textPrimary,
           ),
         ),
       ],

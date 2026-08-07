@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../constants/app_colors.dart';
 import '../../constants/design_constants.dart';
 import '../../widgets/aura_widgets.dart';
+import '../../widgets/bottom_bar.dart';
 import '../../widgets/gradient_background.dart';
 import '../../widgets/scroll_blur.dart';
 import '../../widgets/sf_symbols.dart';
@@ -31,6 +31,7 @@ class RequestDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) => ScrollBlur(
     child: Scaffold(
       extendBodyBehindAppBar: true,
+      extendBody: true,
       appBar: AppBar(
         flexibleSpace: const ScrollBlurBackdrop(),
         backgroundColor: Colors.transparent,
@@ -38,46 +39,30 @@ class RequestDetailScreen extends StatelessWidget {
         shadowColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
         leading: IconButton(
           onPressed: () => Navigator.of(context).pop(),
           icon: const AuraIcon(SFSymbols.chevronLeft, level: AuraLevel.sacral),
         ),
       ),
-      bottomNavigationBar: DecoratedBox(
-        decoration: BoxDecoration(
-          color: AppColors.backgroundPrimary.withValues(alpha: .92),
-          border: Border(
-            top: BorderSide(
-              color: AppColors.textSecondary.withValues(alpha: .12),
-              width: .5,
-            ),
-          ),
-        ),
-        child: SafeArea(
-          top: false,
-          child: SizedBox(
-            height: 48,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const SubrequestFormScreen(),
-                  ),
-                ),
-                icon: ToneIcon(SFSymbols.plus, tone: color),
-                label: Text(
-                  'Add Subrequest',
-                  style: TextStyle(color: color, fontSize: 17),
-                ),
+      bottomNavigationBar: KarmicBottomBar(
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const SubrequestFormScreen(),
               ),
+            ),
+            icon: ToneIcon(SFSymbols.plus, tone: color),
+            label: Text(
+              'Add Subrequest',
+              style: TextStyle(color: color, fontSize: 17),
             ),
           ),
         ),
       ),
       body: GradientBackground(
-        tone: AppColors.friendly,
+        tone: AppColors.of(context).friendly,
         child: SafeArea(
           top: false,
           bottom: false,
@@ -90,7 +75,8 @@ class RequestDetailScreen extends StatelessWidget {
                   20,
                   DesignConstants.navigationBarInset(context) + 8,
                   20,
-                  24,
+                  DesignConstants.bottomBarInset(context) +
+                      DesignConstants.paddingXLarge,
                 ),
                 children: [
                   _RequestHeader(title: title, color: color),
@@ -139,9 +125,12 @@ class _RequestHeader extends StatelessWidget {
         ],
       ),
       const SizedBox(height: 4),
-      const Text(
+      Text(
         'Fulfil every subrequest first',
-        style: TextStyle(color: AppColors.textSecondary, fontSize: 15),
+        style: TextStyle(
+          color: AppColors.of(context).textSecondary,
+          fontSize: 15,
+        ),
       ),
     ],
   );
@@ -176,8 +165,8 @@ class _SubrequestRow extends StatelessWidget {
                 item.title,
                 style: TextStyle(
                   color: item.completed
-                      ? AppColors.textSecondary
-                      : AppColors.textPrimary,
+                      ? AppColors.of(context).textSecondary
+                      : AppColors.of(context).textPrimary,
                   fontSize: 17,
                   fontWeight: FontWeight.w500,
                   decoration: item.completed
@@ -191,8 +180,8 @@ class _SubrequestRow extends StatelessWidget {
                   item.notes,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
+                  style: TextStyle(
+                    color: AppColors.of(context).textSecondary,
                     fontSize: 15,
                     height: 1.25,
                   ),

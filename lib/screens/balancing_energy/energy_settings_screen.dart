@@ -1,8 +1,9 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../constants/app_colors.dart';
+import '../../constants/app_theme.dart';
 import '../../widgets/aura_widgets.dart';
 import '../../widgets/gradient_background.dart';
 import '../../widgets/sf_symbols.dart';
@@ -24,10 +25,10 @@ class _EnergySettingsScreenState extends State<EnergySettingsScreen> {
 
   @override
   Widget build(BuildContext context) => AnnotatedRegion<SystemUiOverlayStyle>(
-    value: SystemUiOverlayStyle.dark,
+    value: statusBarStyle(Theme.of(context).brightness),
     child: Scaffold(
       body: GradientBackground(
-        tone: AppColors.health,
+        tone: AppColors.of(context).health,
         child: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
@@ -36,12 +37,12 @@ class _EnergySettingsScreenState extends State<EnergySettingsScreen> {
                 constraints: const BoxConstraints(maxWidth: 300),
                 child: Column(
                   children: [
-                    const Text(
+                    Text(
                       'Settings',
                       style: TextStyle(
                         fontFamily: 'Source Serif 4',
                         fontSize: 28,
-                        color: AppColors.textPrimary,
+                        color: AppColors.of(context).textPrimary,
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -94,16 +95,16 @@ class _EnergySettingsScreenState extends State<EnergySettingsScreen> {
                             'Volume',
                             style: TextStyle(
                               color: _sound
-                                  ? AppColors.textPrimary
-                                  : AppColors.textSecondary,
+                                  ? AppColors.of(context).textPrimary
+                                  : AppColors.of(context).textSecondary,
                               fontSize: 17,
                             ),
                           ),
                           const Spacer(),
                           Text(
                             '${(_volume * 100).round()}%',
-                            style: const TextStyle(
-                              color: AppColors.textSecondary,
+                            style: TextStyle(
+                              color: AppColors.of(context).textSecondary,
                               fontSize: 17,
                             ),
                           ),
@@ -112,9 +113,11 @@ class _EnergySettingsScreenState extends State<EnergySettingsScreen> {
                     ),
                     SliderTheme(
                       data: SliderTheme.of(context).copyWith(
-                        activeTrackColor: AppColors.health,
-                        thumbColor: AppColors.health,
-                        overlayColor: AppColors.health.withValues(alpha: .12),
+                        activeTrackColor: AppColors.of(context).health,
+                        thumbColor: AppColors.of(context).health,
+                        overlayColor: AppColors.of(
+                          context,
+                        ).health.withValues(alpha: .12),
                       ),
                       child: Slider(
                         value: _volume,
@@ -151,11 +154,11 @@ class _EnergySettingsScreenState extends State<EnergySettingsScreen> {
                         onSelected: (value) => setState(() => _delay = value),
                       ),
                       const SizedBox(height: 12),
-                      const Text(
+                      Text(
                         'The screen darkens between steps and lights up again on the next one.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: AppColors.textSecondary,
+                          color: AppColors.of(context).textSecondary,
                           fontSize: 15,
                           height: 1.35,
                         ),
@@ -217,12 +220,15 @@ class _SwitchRow extends StatelessWidget {
         Expanded(
           child: Text(
             title,
-            style: const TextStyle(color: AppColors.textPrimary, fontSize: 17),
+            style: TextStyle(
+              color: AppColors.of(context).textPrimary,
+              fontSize: 17,
+            ),
           ),
         ),
         CupertinoSwitch(
           value: value,
-          activeTrackColor: AppColors.health,
+          activeTrackColor: AppColors.of(context).health,
           onChanged: onChanged,
         ),
       ],
@@ -258,7 +264,10 @@ class _MenuRow extends StatelessWidget {
         Expanded(
           child: Text(
             title,
-            style: const TextStyle(color: AppColors.textPrimary, fontSize: 17),
+            style: TextStyle(
+              color: AppColors.of(context).textPrimary,
+              fontSize: 17,
+            ),
           ),
         ),
         PopupMenuButton<int>(
@@ -286,8 +295,8 @@ class _MenuRow extends StatelessWidget {
             children: [
               Text(
                 value,
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
+                style: TextStyle(
+                  color: AppColors.of(context).textSecondary,
                   fontSize: 17,
                 ),
               ),

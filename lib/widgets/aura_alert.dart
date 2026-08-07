@@ -50,10 +50,10 @@ Future<void> showAuraAlert(
             Text(
               title,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: 'Source Serif 4',
                 fontSize: 20,
-                color: AppColors.textPrimary,
+                color: AppColors.of(context).textPrimary,
               ),
             ),
             if (message != null) ...[
@@ -61,8 +61,8 @@ Future<void> showAuraAlert(
               Text(
                 message,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
+                style: TextStyle(
+                  color: AppColors.of(context).textSecondary,
                   fontSize: 15,
                   height: 1.35,
                 ),

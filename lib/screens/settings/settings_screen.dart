@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../constants/app_colors.dart';
 import '../../constants/design_constants.dart';
@@ -27,7 +26,6 @@ class SettingsScreen extends StatelessWidget {
         shadowColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
         title: const Text('Settings'),
         leading: IconButton(
           onPressed: () => Navigator.of(context).pop(),
@@ -35,7 +33,7 @@ class SettingsScreen extends StatelessWidget {
         ),
       ),
       body: GradientBackground(
-        tone: AppColors.peace,
+        tone: AppColors.of(context).peace,
         child: Align(
           alignment: Alignment.topCenter,
           child: ConstrainedBox(

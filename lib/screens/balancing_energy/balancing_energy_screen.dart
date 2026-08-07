@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../constants/app_colors.dart';
@@ -112,11 +111,11 @@ class _BalancingEnergyScreenState extends State<BalancingEnergyScreen>
     final lower = position.floor().clamp(0, 6);
     final upper = (lower + 1).clamp(0, 6);
     return Color.lerp(
-          AuraLevel.values[lower].color,
-          AuraLevel.values[upper].color,
+          AuraLevel.values[lower].color(context),
+          AuraLevel.values[upper].color(context),
           position - lower,
         ) ??
-        _sessionLevel.color;
+        _sessionLevel.color(context);
   }
 
   @override
@@ -129,7 +128,6 @@ class _BalancingEnergyScreenState extends State<BalancingEnergyScreen>
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
         title: Text(widget.title),
         leading: IconButton(
           onPressed: () => Navigator.of(context).pop(),
@@ -157,14 +155,14 @@ class _BalancingEnergyScreenState extends State<BalancingEnergyScreen>
           child: Column(
             children: [
               SizedBox(height: DesignConstants.navigationBarInset(context)),
-              const Padding(
+              Padding(
                 padding: EdgeInsets.fromLTRB(24, 16, 24, 0),
                 child: Text(
                   'COMPLETE THE PREVIOUS STEP BEFORE MOVING ON TO THE NEXT ONE. EACH STEP TAKES ABOUT FIVE MINUTES.',
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   style: TextStyle(
-                    color: AppColors.textSecondary,
+                    color: AppColors.of(context).textSecondary,
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 1.2,
@@ -237,8 +235,10 @@ class _BalancingEnergyScreenState extends State<BalancingEnergyScreen>
             child: CircularProgressIndicator(
               value: _isPaused ? 1 : _timerProgress,
               strokeWidth: 1,
-              color: _sessionLevel.color,
-              backgroundColor: _sessionLevel.color.withValues(alpha: .5),
+              color: _sessionLevel.color(context),
+              backgroundColor: _sessionLevel
+                  .color(context)
+                  .withValues(alpha: .5),
             ),
           ),
           const SizedBox(width: 8),
@@ -354,7 +354,7 @@ class _StepCard extends StatelessWidget {
           Text(
             'STEP $number OF $count',
             style: TextStyle(
-              color: level.color,
+              color: level.color(context),
               fontSize: 11,
               fontWeight: FontWeight.w600,
               letterSpacing: 1.2,
@@ -365,18 +365,18 @@ class _StepCard extends StatelessWidget {
           const SizedBox(height: 20),
           Text(
             step.title,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Source Serif 4',
               fontSize: 20,
-              color: AppColors.textPrimary,
+              color: AppColors.of(context).textPrimary,
             ),
           ),
           if (step.description.isNotEmpty) ...[
             const SizedBox(height: 12),
             Text(
               step.description,
-              style: const TextStyle(
-                color: AppColors.textSecondary,
+              style: TextStyle(
+                color: AppColors.of(context).textSecondary,
                 fontSize: 15,
                 height: 1.35,
               ),
@@ -411,16 +411,18 @@ class _StepLadder extends StatelessWidget {
           margin: EdgeInsets.only(bottom: index == 0 ? 0 : 8),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            gradient: index <= currentStep ? level.gradient : null,
+            gradient: index <= currentStep ? level.gradient(context) : null,
             border: Border.all(
-              color: level.color.withValues(
-                alpha: index <= currentStep ? 1 : .5,
-              ),
+              color: level
+                  .color(context)
+                  .withValues(alpha: index <= currentStep ? 1 : .5),
             ),
             boxShadow: index == currentStep
                 ? [
                     BoxShadow(
-                      color: AppColors.health.withValues(alpha: .22),
+                      color: AppColors.of(
+                        context,
+                      ).health.withValues(alpha: .22),
                       spreadRadius: 4,
                     ),
                   ]

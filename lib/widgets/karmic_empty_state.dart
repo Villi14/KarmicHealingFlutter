@@ -28,7 +28,7 @@ class KarmicEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) => AuraCard(
     level: level,
-    tone: tone ?? level.color,
+    tone: tone ?? level.color(context),
     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
     child: Column(
       children: [
@@ -43,18 +43,18 @@ class KarmicEmptyState extends StatelessWidget {
         Text(
           title,
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: 'Source Serif 4',
             fontSize: 20,
-            color: AppColors.textPrimary,
+            color: AppColors.of(context).textPrimary,
           ),
         ),
         const SizedBox(height: 16),
         Text(
           message,
           textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: AppColors.textSecondary,
+          style: TextStyle(
+            color: AppColors.of(context).textSecondary,
             fontSize: 15,
             height: 1.35,
           ),

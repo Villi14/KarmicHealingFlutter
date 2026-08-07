@@ -65,41 +65,113 @@ class _ScrollBlurScope extends InheritedNotifier<ValueNotifier<double>> {
 /// [Scaffold] needs `extendBodyBehindAppBar: true` for there to be anything
 /// behind the bar to blur.
 class ScrollBlurBackdrop extends StatelessWidget {
-  const ScrollBlurBackdrop({
-    super.key,
-    this.sigma = 18,
-    this.distance = 28,
-    this.tint = AppColors.backgroundPrimary,
-  });
+  const ScrollBlurBackdrop({super.key, this.sigma = 12, this.distance = 28});
 
-  /// Blur at full strength.
+  /// Blur of one layer at full strength; the layers stack, so the band right
+  /// under the status bar ends up several times this.
   final double sigma;
 
   /// How far the content travels before the bar reaches full strength.
   final double distance;
-
-  final Color tint;
 
   @override
   Widget build(BuildContext context) {
     final t = (_ScrollBlurScope.of(context) / distance).clamp(0.0, 1.0);
     // A zero-sigma BackdropFilter still forces a saveLayer, so at rest draw nothing.
     if (t == 0) return const SizedBox.expand();
+    return EdgeBlur(edge: VerticalEdge.top, sigma: sigma * t, opacity: t);
+  }
+}
+
+/// Which end of a strip the frosting gathers at.
+enum VerticalEdge { top, bottom }
+
+/// A strip of glass that thickens towards one edge: clear where it meets the
+/// content, fully frosted where it meets the screen's edge.
+///
+/// A single blur across the whole strip draws a visible seam where it stops —
+/// the iOS bars this mirrors ramp the blur instead, so the material has no edge
+/// of its own. The ramp here is a stack of blurs, each clipped to a shorter
+/// band than the one beneath it: a backdrop filter takes in everything already
+/// painted behind it, so the layers compound, and the strength climbs a step at
+/// every band boundary until the screen's edge.
+///
+/// The obvious way to write that — one blur behind a gradient [ShaderMask] —
+/// renders nothing on Impeller, where a backdrop filter inside a save layer has
+/// no backdrop to read. Hence the clipped bands, whose steps the tint gradient
+/// over them softens.
+class EdgeBlur extends StatelessWidget {
+  const EdgeBlur({
+    super.key,
+    required this.edge,
+    this.sigma = 12,
+    this.layers = 4,
+    this.opacity = 1,
+  });
+
+  final VerticalEdge edge;
+
+  /// Blur applied by one layer.
+  final double sigma;
+
+  /// How many times the ramp is stepped. More is smoother and costs a pass each.
+  final int layers;
+
+  /// Scales the whole effect, for a bar that fades in as content reaches it.
+  final double opacity;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    // Every gradient here runs from the screen's edge inwards, so a stop of 0
+    // is the frosted end and a stop of 1 the clear one.
+    final atEdge = edge == VerticalEdge.top
+        ? Alignment.topCenter
+        : Alignment.bottomCenter;
+    final inwards = edge == VerticalEdge.top
+        ? Alignment.bottomCenter
+        : Alignment.topCenter;
+
     return ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: sigma * t, sigmaY: sigma * t),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: tint.withValues(alpha: .55 * t),
-            border: Border(
-              bottom: BorderSide(
-                color: AppColors.textSecondary.withValues(alpha: .16 * t),
-                width: .5,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Layer 0 covers the whole strip, each one after it stops a step
+          // shorter of the content. The shorter the band the stronger its
+          // blur, so the step down at the strip's inner edge — the one that
+          // would read as a seam across the content — is the faintest of them.
+          for (var i = 0; i < layers; i++)
+            Align(
+              alignment: atEdge,
+              child: FractionallySizedBox(
+                heightFactor: (layers - i) / layers,
+                child: ClipRect(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(
+                      sigmaX: sigma * (i + 1) / layers,
+                      sigmaY: sigma * (i + 1) / layers,
+                    ),
+                    child: const SizedBox.expand(),
+                  ),
+                ),
               ),
             ),
+          // The wash that keeps a title legible over whatever passes beneath,
+          // laid on the same ramp so it too has no edge.
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: atEdge,
+                end: inwards,
+                colors: [
+                  colors.backgroundPrimary.withValues(alpha: .55 * opacity),
+                  colors.backgroundPrimary.withValues(alpha: 0),
+                ],
+              ),
+            ),
+            child: const SizedBox.expand(),
           ),
-          child: const SizedBox.expand(),
-        ),
+        ],
       ),
     );
   }

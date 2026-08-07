@@ -40,10 +40,12 @@ class KarmicSearchBar extends StatelessWidget {
             child: TextField(
               controller: controller,
               onChanged: onChanged,
-              cursorColor: AppColors.clam,
+              cursorColor: AppColors.of(context).clam,
               decoration: InputDecoration(
                 hintText: hint,
-                hintStyle: const TextStyle(color: AppColors.textSecondary),
+                hintStyle: TextStyle(
+                  color: AppColors.of(context).textSecondary,
+                ),
                 border: InputBorder.none,
                 isDense: true,
                 contentPadding: EdgeInsets.zero,

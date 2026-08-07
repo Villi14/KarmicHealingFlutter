@@ -33,7 +33,7 @@ class _ReminderFormScreenState extends State<ReminderFormScreen> {
   @override
   Widget build(BuildContext context) => KarmicFormShell(
     title: widget.screenTitle,
-    tone: AppColors.clarity,
+    tone: AppColors.of(context).clarity,
     child: ListView(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
       children: [
@@ -58,14 +58,17 @@ class _ReminderFormScreenState extends State<ReminderFormScreen> {
         ),
         if (_hasDate) ...[
           const SizedBox(height: 12),
-          const KarmicFormCard(
+          KarmicFormCard(
             level: AuraLevel.solar,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text(
                   'Aug 7, 2026 at 8:00 PM',
-                  style: TextStyle(color: AppColors.clarity, fontSize: 17),
+                  style: TextStyle(
+                    color: AppColors.of(context).clarity,
+                    fontSize: 17,
+                  ),
                 ),
               ],
             ),
@@ -124,12 +127,17 @@ class TopicFormScreen extends StatefulWidget {
 }
 
 class _TopicFormScreenState extends State<TopicFormScreen> {
-  static const _palette = [
-    Color(0xFF4A99EF),
-    AppColors.friendly,
-    AppColors.health,
-    Color(0xFFB25DD3),
-  ];
+  /// The colours a topic can wear. The two in the middle come from the
+  /// spectrum, so they follow the appearance.
+  static List<Color> _palette(BuildContext context) {
+    final colors = AppColors.of(context);
+    return [
+      const Color(0xFF4A99EF),
+      colors.friendly,
+      colors.health,
+      const Color(0xFFB25DD3),
+    ];
+  }
 
   late Color _color = widget.color;
   late final _controller = TextEditingController(text: widget.title);
@@ -143,7 +151,7 @@ class _TopicFormScreenState extends State<TopicFormScreen> {
   @override
   Widget build(BuildContext context) => KarmicFormShell(
     title: widget.screenTitle,
-    tone: AppColors.clarity,
+    tone: AppColors.of(context).clarity,
     child: ListView(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
       children: [
@@ -153,17 +161,17 @@ class _TopicFormScreenState extends State<TopicFormScreen> {
             controller: _controller,
             maxLines: null,
             textAlign: TextAlign.center,
-            cursorColor: AppColors.clarity,
+            cursorColor: AppColors.of(context).clarity,
             style: TextStyle(
               fontFamily: 'Source Serif 4',
               fontSize: 20,
               color: _color,
             ),
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               hintText: 'New topic',
               hintStyle: TextStyle(
                 fontFamily: 'Source Serif 4',
-                color: AppColors.textSecondary,
+                color: AppColors.of(context).textSecondary,
               ),
               border: InputBorder.none,
             ),
@@ -174,13 +182,16 @@ class _TopicFormScreenState extends State<TopicFormScreen> {
           level: AuraLevel.solar,
           child: Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Color',
-                  style: TextStyle(color: AppColors.textPrimary, fontSize: 17),
+                  style: TextStyle(
+                    color: AppColors.of(context).textPrimary,
+                    fontSize: 17,
+                  ),
                 ),
               ),
-              for (final color in _palette)
+              for (final color in _palette(context))
                 GestureDetector(
                   onTap: () => setState(() => _color = color),
                   child: Container(
@@ -192,7 +203,7 @@ class _TopicFormScreenState extends State<TopicFormScreen> {
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: color == _color
-                            ? AppColors.textPrimary
+                            ? AppColors.of(context).textPrimary
                             : Colors.white,
                         width: 3,
                       ),

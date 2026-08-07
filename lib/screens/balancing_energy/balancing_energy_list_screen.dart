@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../constants/app_colors.dart';
@@ -46,7 +45,6 @@ class _State extends State<BalancingEnergyListScreen> {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
         title: const Text('Energy Balancing'),
         leading: IconButton(
           onPressed: () => Navigator.of(context).pop(),
@@ -63,7 +61,7 @@ class _State extends State<BalancingEnergyListScreen> {
         ],
       ),
       body: GradientBackground(
-        tone: AppColors.health,
+        tone: AppColors.of(context).health,
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 700),
@@ -128,7 +126,7 @@ class _State extends State<BalancingEnergyListScreen> {
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    backgroundColor: AppColors.backgroundPrimary,
+    backgroundColor: AppColors.of(context).backgroundPrimary,
     builder: (context) => const FractionallySizedBox(
       heightFactor: 1,
       child: BalancingEnergyHelpScreen(),
@@ -150,9 +148,9 @@ class BalancingEnergyHelpScreen extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) => const HelpScreen(
+  Widget build(BuildContext context) => HelpScreen(
     level: AuraLevel.heart,
-    tone: AppColors.health,
+    tone: AppColors.of(context).health,
     extras: [
       TipsCard(
         title: 'Meditation Step Settings',

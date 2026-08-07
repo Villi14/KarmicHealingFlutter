@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../constants/app_colors.dart';
 import '../../constants/design_constants.dart';
 import '../../widgets/aura_widgets.dart';
+import '../../widgets/bottom_bar.dart';
 import '../../widgets/gradient_background.dart';
 import '../../widgets/list_row.dart';
 import '../../widgets/scroll_blur.dart';
@@ -62,6 +62,7 @@ class RemindersDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) => ScrollBlur(
     child: Scaffold(
       extendBodyBehindAppBar: true,
+      extendBody: true,
       appBar: AppBar(
         flexibleSpace: const ScrollBlurBackdrop(),
         backgroundColor: Colors.transparent,
@@ -69,7 +70,6 @@ class RemindersDetailScreen extends StatelessWidget {
         shadowColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
         leading: IconButton(
           onPressed: () => Navigator.of(context).pop(),
           icon: const AuraIcon(SFSymbols.chevronLeft, level: AuraLevel.solar),
@@ -81,40 +81,25 @@ class RemindersDetailScreen extends StatelessWidget {
           ),
         ],
       ),
-      bottomNavigationBar: DecoratedBox(
-        decoration: BoxDecoration(
-          color: AppColors.backgroundPrimary.withValues(alpha: .92),
-          border: Border(
-            top: BorderSide(
-              color: AppColors.textSecondary.withValues(alpha: .12),
-              width: .5,
-            ),
-          ),
-        ),
-        child: SafeArea(
-          top: false,
-          child: SizedBox(
-            height: 48,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => ReminderFormScreen(topicColor: color),
-                  ),
-                ),
-                icon: ToneIcon(SFSymbols.plus, tone: color),
-                label: Text(
-                  'Reminder',
-                  style: TextStyle(color: color, fontSize: 17),
-                ),
+      bottomNavigationBar: KarmicBottomBar(
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => ReminderFormScreen(topicColor: color),
               ),
+            ),
+            icon: ToneIcon(SFSymbols.plus, tone: color),
+            label: Text(
+              'Reminder',
+              style: TextStyle(color: color, fontSize: 17),
             ),
           ),
         ),
       ),
       body: GradientBackground(
-        tone: AppColors.clarity,
+        tone: AppColors.of(context).clarity,
         child: SafeArea(
           top: false,
           bottom: false,
@@ -127,7 +112,8 @@ class RemindersDetailScreen extends StatelessWidget {
                   20,
                   DesignConstants.navigationBarInset(context) + 8,
                   20,
-                  24,
+                  DesignConstants.bottomBarInset(context) +
+                      DesignConstants.paddingXLarge,
                 ),
                 children: [
                   _TopicHeader(title: title, color: color),
@@ -204,7 +190,7 @@ class _ReminderRow extends StatelessWidget {
                       '!' * reminder.priority,
                       style: TextStyle(
                         color: reminder.isCompleted
-                            ? AppColors.textSecondary
+                            ? AppColors.of(context).textSecondary
                             : color,
                         fontSize: 17,
                         fontWeight: FontWeight.w500,
@@ -217,14 +203,14 @@ class _ReminderRow extends StatelessWidget {
                       reminder.title,
                       style: TextStyle(
                         color: reminder.isCompleted
-                            ? AppColors.textSecondary
-                            : AppColors.textPrimary,
+                            ? AppColors.of(context).textSecondary
+                            : AppColors.of(context).textPrimary,
                         fontSize: 17,
                         fontWeight: FontWeight.w500,
                         decoration: reminder.isCompleted
                             ? TextDecoration.lineThrough
                             : null,
-                        decorationColor: AppColors.textSecondary,
+                        decorationColor: AppColors.of(context).textSecondary,
                       ),
                     ),
                   ),
@@ -236,8 +222,8 @@ class _ReminderRow extends StatelessWidget {
                   reminder.notes,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
+                  style: TextStyle(
+                    color: AppColors.of(context).textSecondary,
                     fontSize: 15,
                     height: 1.25,
                   ),

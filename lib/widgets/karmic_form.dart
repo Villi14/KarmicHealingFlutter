@@ -1,8 +1,9 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../constants/app_colors.dart';
+import '../constants/app_theme.dart';
 import '../constants/design_constants.dart';
 import 'aura_widgets.dart';
 import 'gradient_background.dart';
@@ -28,7 +29,7 @@ class KarmicFormShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => AnnotatedRegion<SystemUiOverlayStyle>(
-    value: SystemUiOverlayStyle.dark,
+    value: statusBarStyle(Theme.of(context).brightness),
     child: ScrollBlur(
       child: Scaffold(
         extendBodyBehindAppBar: true,
@@ -39,7 +40,6 @@ class KarmicFormShell extends StatelessWidget {
           shadowColor: Colors.transparent,
           elevation: 0,
           scrolledUnderElevation: 0,
-          systemOverlayStyle: SystemUiOverlayStyle.dark,
           automaticallyImplyLeading: false,
           leadingWidth: 90,
           leading: TextButton(
@@ -65,10 +65,10 @@ class KarmicFormShell extends StatelessWidget {
                   child: Text(
                     title,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Source Serif 4',
                       fontSize: 20,
-                      color: AppColors.textPrimary,
+                      color: AppColors.of(context).textPrimary,
                     ),
                   ),
                 ),
@@ -132,17 +132,17 @@ class KarmicFormField extends StatelessWidget {
       minLines: minLines,
       maxLines: null,
       textAlign: centered ? TextAlign.center : TextAlign.start,
-      cursorColor: level.color,
+      cursorColor: level.color(context),
       style: TextStyle(
         fontFamily: serif ? 'Source Serif 4' : 'Inter',
         fontSize: serif ? 20 : 17,
-        color: color ?? AppColors.textPrimary,
+        color: color ?? AppColors.of(context).textPrimary,
       ),
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: TextStyle(
           fontFamily: serif ? 'Source Serif 4' : 'Inter',
-          color: AppColors.textSecondary,
+          color: AppColors.of(context).textSecondary,
         ),
         border: InputBorder.none,
       ),
@@ -177,12 +177,15 @@ class KarmicFormToggle extends StatelessWidget {
         Expanded(
           child: Text(
             title,
-            style: const TextStyle(color: AppColors.textPrimary, fontSize: 17),
+            style: TextStyle(
+              color: AppColors.of(context).textPrimary,
+              fontSize: 17,
+            ),
           ),
         ),
         CupertinoSwitch(
           value: value,
-          activeTrackColor: AppColors.health,
+          activeTrackColor: AppColors.of(context).health,
           onChanged: onChanged,
         ),
       ],
@@ -218,17 +221,20 @@ class KarmicFormPicker<T> extends StatelessWidget {
     level: level,
     child: Row(
       children: [
-        ToneIcon(icon, tone: iconTone ?? level.color),
+        ToneIcon(icon, tone: iconTone ?? level.color(context)),
         const SizedBox(width: 10),
         Expanded(
           child: Text(
             title,
-            style: const TextStyle(color: AppColors.textPrimary, fontSize: 17),
+            style: TextStyle(
+              color: AppColors.of(context).textPrimary,
+              fontSize: 17,
+            ),
           ),
         ),
         PopupMenuButton<T>(
           onSelected: onSelected,
-          color: AppColors.backgroundSecondary,
+          color: AppColors.of(context).backgroundSecondary,
           itemBuilder: (context) => [
             for (final option in options)
               PopupMenuItem(value: option, child: Text(label(option))),
@@ -238,7 +244,7 @@ class KarmicFormPicker<T> extends StatelessWidget {
             children: [
               Text(
                 label(value),
-                style: TextStyle(color: level.color, fontSize: 17),
+                style: TextStyle(color: level.color(context), fontSize: 17),
               ),
               const SizedBox(width: 4),
               AuraIcon(SFSymbols.chevronUpChevronDown, level: level, size: 16),

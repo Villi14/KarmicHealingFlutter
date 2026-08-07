@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../constants/app_colors.dart';
 import '../constants/design_constants.dart';
@@ -70,7 +69,6 @@ class HelpScreen extends StatelessWidget {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
         title: const Text('Help'),
         automaticallyImplyLeading: false,
         actions: [
@@ -103,21 +101,21 @@ class HelpScreen extends StatelessWidget {
                       size: 60,
                     ),
                     const SizedBox(height: 12),
-                    const Text(
+                    Text(
                       'How to work with the Lords of Karma',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontFamily: 'Source Serif 4',
                         fontSize: 28,
-                        color: AppColors.textPrimary,
+                        color: AppColors.of(context).textPrimary,
                       ),
                     ),
                     const SizedBox(height: 12),
-                    const Text(
+                    Text(
                       'Step-by-step guide to effective communication',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: AppColors.textPrimary,
+                        color: AppColors.of(context).textPrimary,
                         fontSize: 17,
                         height: 1.35,
                       ),
@@ -173,14 +171,14 @@ class HelpStep extends StatelessWidget {
           alignment: Alignment.center,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: level.color, width: 2),
+            border: Border.all(color: level.color(context), width: 2),
           ),
           child: Text(
             '$number',
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Source Serif 4',
               fontSize: 20,
-              color: AppColors.textPrimary,
+              color: AppColors.of(context).textPrimary,
             ),
           ),
         ),
@@ -196,10 +194,10 @@ class HelpStep extends StatelessWidget {
                   Expanded(
                     child: Text(
                       step.$1,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Source Serif 4',
                         fontSize: 20,
-                        color: AppColors.textPrimary,
+                        color: AppColors.of(context).textPrimary,
                       ),
                     ),
                   ),
@@ -208,8 +206,8 @@ class HelpStep extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 step.$2,
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
+                style: TextStyle(
+                  color: AppColors.of(context).textSecondary,
                   fontSize: 17,
                   height: 1.35,
                 ),
@@ -243,10 +241,10 @@ class TipsCard extends StatelessWidget {
         Text(
           title,
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: 'Source Serif 4',
             fontSize: 20,
-            color: AppColors.textPrimary,
+            color: AppColors.of(context).textPrimary,
           ),
         ),
         const SizedBox(height: 12),
@@ -259,8 +257,8 @@ class TipsCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   tips[index],
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
+                  style: TextStyle(
+                    color: AppColors.of(context).textSecondary,
                     fontSize: 17,
                     height: 1.35,
                   ),

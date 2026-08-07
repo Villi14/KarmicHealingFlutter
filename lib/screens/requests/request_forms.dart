@@ -13,7 +13,7 @@ class SubrequestFormScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => KarmicFormShell(
     title: screenTitle,
-    tone: AppColors.friendly,
+    tone: AppColors.of(context).friendly,
     child: ListView(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
       children: const [
@@ -35,12 +35,17 @@ class RequestFormScreen extends StatefulWidget {
 }
 
 class _RequestFormScreenState extends State<RequestFormScreen> {
-  static const _palette = [
-    Color(0xFF4A99EF),
-    AppColors.friendly,
-    AppColors.health,
-    Color(0xFFB25DD3),
-  ];
+  /// The colours a topic can wear. The two in the middle come from the
+  /// spectrum, so they follow the appearance.
+  static List<Color> _palette(BuildContext context) {
+    final colors = AppColors.of(context);
+    return [
+      const Color(0xFF4A99EF),
+      colors.friendly,
+      colors.health,
+      const Color(0xFFB25DD3),
+    ];
+  }
 
   bool _hasDate = false;
   Color _color = const Color(0xFF4A99EF);
@@ -48,7 +53,7 @@ class _RequestFormScreenState extends State<RequestFormScreen> {
   @override
   Widget build(BuildContext context) => KarmicFormShell(
     title: widget.screenTitle,
-    tone: AppColors.friendly,
+    tone: AppColors.of(context).friendly,
     child: ListView(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
       children: [
@@ -70,13 +75,16 @@ class _RequestFormScreenState extends State<RequestFormScreen> {
           level: AuraLevel.sacral,
           child: Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Color',
-                  style: TextStyle(color: AppColors.textPrimary, fontSize: 17),
+                  style: TextStyle(
+                    color: AppColors.of(context).textPrimary,
+                    fontSize: 17,
+                  ),
                 ),
               ),
-              for (final color in _palette)
+              for (final color in _palette(context))
                 GestureDetector(
                   onTap: () => setState(() => _color = color),
                   child: Container(
@@ -88,7 +96,7 @@ class _RequestFormScreenState extends State<RequestFormScreen> {
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: color == _color
-                            ? AppColors.textPrimary
+                            ? AppColors.of(context).textPrimary
                             : Colors.white,
                         width: 3,
                       ),
@@ -114,14 +122,17 @@ class _RequestFormScreenState extends State<RequestFormScreen> {
         ),
         if (_hasDate) ...[
           const SizedBox(height: 12),
-          const KarmicFormCard(
+          KarmicFormCard(
             level: AuraLevel.sacral,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text(
                   'Aug 7, 2026 at 8:00 PM',
-                  style: TextStyle(color: AppColors.friendly, fontSize: 17),
+                  style: TextStyle(
+                    color: AppColors.of(context).friendly,
+                    fontSize: 17,
+                  ),
                 ),
               ],
             ),

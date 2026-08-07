@@ -61,12 +61,12 @@ class ListRow extends StatelessWidget {
               title,
               style: TextStyle(
                 color: isCompleted
-                    ? AppColors.textSecondary
-                    : AppColors.textPrimary,
+                    ? AppColors.of(context).textSecondary
+                    : AppColors.of(context).textPrimary,
                 fontSize: 17,
                 fontWeight: FontWeight.w500,
                 decoration: isCompleted ? TextDecoration.lineThrough : null,
-                decorationColor: AppColors.textSecondary,
+                decorationColor: AppColors.of(context).textSecondary,
               ),
             ),
           ),
@@ -81,8 +81,8 @@ class ListRow extends StatelessWidget {
           if (count != null && count! > 0) ...[
             Text(
               '$count',
-              style: const TextStyle(
-                color: AppColors.textSecondary,
+              style: TextStyle(
+                color: AppColors.of(context).textSecondary,
                 fontSize: 28,
                 fontWeight: FontWeight.w300,
               ),
@@ -114,7 +114,8 @@ class RowBadge extends StatelessWidget {
   Widget build(BuildContext context) => Row(
     mainAxisSize: MainAxisSize.min,
     children: [
-      Icon(icon, size: 11, color: Color.lerp(tone, Colors.black, .3)),
+      // Matched to the label beside it, which moves the tone away from the page.
+      Icon(icon, size: 11, color: AppColors.of(context).contrasting(tone)),
       const SizedBox(width: 4),
       Flexible(child: AuraLabel(title, tone: tone)),
     ],
@@ -136,7 +137,9 @@ class DueDateBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isPastDue ? level.color : AppColors.textSecondary;
+    final color = isPastDue
+        ? level.color(context)
+        : AppColors.of(context).textSecondary;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [

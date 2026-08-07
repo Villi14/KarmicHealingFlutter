@@ -13,9 +13,9 @@ class RequestsHelpScreen extends StatelessWidget {
       'A request can be broken into subrequests. While any subrequest is unfulfilled, the request itself stays locked \u2014 mark it yourself once they are all done.';
 
   @override
-  Widget build(BuildContext context) => const HelpScreen(
+  Widget build(BuildContext context) => HelpScreen(
     level: AuraLevel.sacral,
-    tone: AppColors.friendly,
+    tone: AppColors.of(context).friendly,
     extras: [
       _KarmaProcessCard(),
       TipsCard(
@@ -69,14 +69,14 @@ class _KarmaProcessCard extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Center(
+        Center(
           child: Text(
             'Detailed Process of Working with the Lords of Karma',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily: 'Source Serif 4',
               fontSize: 20,
-              color: AppColors.textPrimary,
+              color: AppColors.of(context).textPrimary,
             ),
           ),
         ),
@@ -115,14 +115,14 @@ class _KarmaStep extends StatelessWidget {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: AppColors.friendly, width: 2),
+          border: Border.all(color: AppColors.of(context).friendly, width: 2),
         ),
         child: Text(
           '$number',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: AppColors.of(context).textPrimary,
           ),
         ),
       ),
@@ -130,8 +130,8 @@ class _KarmaStep extends StatelessWidget {
       Expanded(
         child: Text(
           text,
-          style: const TextStyle(
-            color: AppColors.textSecondary,
+          style: TextStyle(
+            color: AppColors.of(context).textSecondary,
             fontSize: 17,
             height: 1.35,
           ),
@@ -163,7 +163,7 @@ class _QuoteCard extends StatelessWidget {
             Text(
               all[index],
               style: TextStyle(
-                color: AppColors.textSecondary,
+                color: AppColors.of(context).textSecondary,
                 fontSize: 17,
                 height: 1.35,
                 fontStyle: italic ? FontStyle.italic : FontStyle.normal,

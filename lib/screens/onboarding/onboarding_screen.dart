@@ -55,7 +55,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
     body: GradientBackground(
-      tone: _level.color,
+      tone: _level.color(context),
       child: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -69,9 +69,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: _current == 0
                         ? TextButton(
                             onPressed: _complete,
-                            child: const Text(
+                            child: Text(
                               'Skip',
-                              style: TextStyle(color: AppColors.textSecondary),
+                              style: TextStyle(
+                                color: AppColors.of(context).textSecondary,
+                              ),
                             ),
                           )
                         : const SizedBox(width: 64),
@@ -99,8 +101,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       margin: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
                         color: index == _current
-                            ? _level.color
-                            : AppColors.textSecondary.withValues(alpha: .25),
+                            ? _level.color(context)
+                            : AppColors.of(
+                                context,
+                              ).textSecondary.withValues(alpha: .25),
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
@@ -184,19 +188,19 @@ class _StepView extends StatelessWidget {
         Text(
           step.title,
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
             // Source Serif 4 is the bundled cross-platform counterpart to New York.
             fontFamily: 'Source Serif 4',
             fontSize: 28,
-            color: AppColors.textPrimary,
+            color: AppColors.of(context).textPrimary,
           ),
         ),
         const SizedBox(height: 16),
         Text(
           step.description,
           textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: AppColors.textSecondary,
+          style: TextStyle(
+            color: AppColors.of(context).textSecondary,
             fontSize: 17,
             height: 1.55,
           ),

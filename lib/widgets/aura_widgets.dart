@@ -5,26 +5,34 @@ import 'sf_symbols.dart';
 
 enum AuraLevel { root, sacral, solar, heart, throat, brow, crown }
 
+/// The spectrum shifts with the appearance — every level is a touch brighter on
+/// a dark page — so a level only becomes a colour once it knows where it is
+/// being painted.
 extension AuraLevelStyle on AuraLevel {
-  Color get color => switch (this) {
-    AuraLevel.root => AppColors.energy,
-    AuraLevel.sacral => AppColors.friendly,
-    AuraLevel.solar => AppColors.clarity,
-    AuraLevel.heart => AppColors.health,
-    AuraLevel.throat => AppColors.clam,
-    AuraLevel.brow => AppColors.peace,
-    AuraLevel.crown => AppColors.wisdom,
-  };
-
-  Color get nextColor {
-    final levels = AuraLevel.values;
-    return levels[index == levels.length - 1 ? index - 1 : index + 1].color;
+  Color color(BuildContext context) {
+    final colors = AppColors.of(context);
+    return switch (this) {
+      AuraLevel.root => colors.energy,
+      AuraLevel.sacral => colors.friendly,
+      AuraLevel.solar => colors.clarity,
+      AuraLevel.heart => colors.health,
+      AuraLevel.throat => colors.clam,
+      AuraLevel.brow => colors.peace,
+      AuraLevel.crown => colors.wisdom,
+    };
   }
 
-  LinearGradient get gradient => LinearGradient(
+  Color nextColor(BuildContext context) {
+    final levels = AuraLevel.values;
+    return levels[index == levels.length - 1 ? index - 1 : index + 1].color(
+      context,
+    );
+  }
+
+  LinearGradient gradient(BuildContext context) => LinearGradient(
     begin: Alignment.bottomLeft,
     end: Alignment.topRight,
-    colors: [color, nextColor],
+    colors: [color(context), nextColor(context)],
   );
 }
 
@@ -52,7 +60,7 @@ class AuraRings extends StatelessWidget {
     child: CustomPaint(
       painter: _RingsPainter(
         colors: tone == null
-            ? [level.color, level.nextColor]
+            ? [level.color(context), level.nextColor(context)]
             : [tone!, Color.lerp(tone!, Colors.white, .3)!],
         count: count,
         opacity: opacity,
@@ -136,12 +144,12 @@ class AuraCard extends StatelessWidget {
     final card = Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: AppColors.backgroundSecondary,
+        color: AppColors.of(context).backgroundSecondary,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color:
               (tone == null
-                      ? level.nextColor
+                      ? level.nextColor(context)
                       : Color.lerp(tone!, Colors.white, .3)!)
                   .withValues(alpha: .45),
           width: .5,
@@ -204,7 +212,7 @@ class AuraIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ShaderMask(
-    shaderCallback: level.gradient.createShader,
+    shaderCallback: level.gradient(context).createShader,
     child: _symbol != null
         ? Icon(_symbol, size: size, color: Colors.white)
         : SFIcon(_glyph!, size: size, color: Colors.white),
@@ -229,8 +237,9 @@ class ToneIcon extends StatelessWidget {
 
 /// The uppercase eyebrow above a step or a section: "STEP 4 OF 14".
 ///
-/// The spectrum is tuned to read on a dark surface, so as tiny uppercase text
-/// on a light one the tone comes down or the eyebrow washes out against the page.
+/// The spectrum sits in the middle of the range, so as tiny uppercase text it
+/// washes out against the page unless the tone moves away from it — down on a
+/// light page, up on a dark one.
 class AuraLabel extends StatelessWidget {
   const AuraLabel(this.text, {super.key, this.tone});
 
@@ -238,17 +247,18 @@ class AuraLabel extends StatelessWidget {
   final Color? tone;
 
   @override
-  Widget build(BuildContext context) => Text(
-    text.toUpperCase(),
-    style: TextStyle(
-      color: tone == null
-          ? AppColors.textSecondary
-          : Color.lerp(tone, Colors.black, .3),
-      fontSize: 11,
-      fontWeight: FontWeight.w600,
-      letterSpacing: 1.2,
-    ),
-  );
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    return Text(
+      text.toUpperCase(),
+      style: TextStyle(
+        color: tone == null ? colors.textSecondary : colors.contrasting(tone!),
+        fontSize: 11,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 1.2,
+      ),
+    );
+  }
 }
 
 /// How loudly a button asks to be pressed: filled with the tone for the one
@@ -275,13 +285,13 @@ class AuraButton extends StatelessWidget {
   Widget build(BuildContext context) => DecoratedBox(
     decoration: BoxDecoration(
       gradient: prominence == AuraProminence.filled
-          ? level.gradient
+          ? level.gradient(context)
           : LinearGradient(
               begin: Alignment.bottomLeft,
               end: Alignment.topRight,
               colors: [
-                level.color.withValues(alpha: .22),
-                level.nextColor.withValues(alpha: .16),
+                level.color(context).withValues(alpha: .22),
+                level.nextColor(context).withValues(alpha: .16),
               ],
             ),
       borderRadius: BorderRadius.circular(20),
@@ -293,7 +303,7 @@ class AuraButton extends StatelessWidget {
       style: TextButton.styleFrom(
         foregroundColor: prominence == AuraProminence.filled
             ? AppColors.onAccent
-            : level.color,
+            : level.color(context),
         minimumSize: const Size(80, 48),
         padding: const EdgeInsets.symmetric(horizontal: 24),
         textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),

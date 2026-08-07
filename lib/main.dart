@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'constants/app_colors.dart';
+import 'constants/app_theme.dart';
+import 'theme_controller.dart';
 import 'screens/balancing_energy/balancing_energy_list_screen.dart';
 import 'screens/balancing_energy/balancing_energy_screen.dart';
 import 'screens/balancing_energy/energy_settings_screen.dart';
@@ -25,68 +25,33 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark,
-      statusBarBrightness: Brightness.light,
-      systemNavigationBarColor: Colors.transparent,
-      systemNavigationBarDividerColor: Colors.transparent,
-      systemNavigationBarIconBrightness: Brightness.dark,
-      systemNavigationBarContrastEnforced: false,
-    ),
-  );
 
   // Initialize shared preferences
   await SharedPreferences.getInstance();
 
-  runApp(const KarmicHealingApp());
+  runApp(KarmicHealingApp(controller: await ThemeController.load()));
 }
 
 class KarmicHealingApp extends StatelessWidget {
-  const KarmicHealingApp({super.key});
+  const KarmicHealingApp({super.key, required this.controller});
+
+  final ThemeController controller;
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Karmic Healing',
-      theme: ThemeData(
-        useMaterial3: true,
-        scaffoldBackgroundColor: AppColors.backgroundPrimary,
-        fontFamily: 'Inter',
-        appBarTheme: const AppBarTheme(
-          backgroundColor: AppColors.backgroundPrimary,
-          foregroundColor: AppColors.textPrimary,
-          elevation: 0,
-          centerTitle: true,
-          scrolledUnderElevation: 0,
-          titleTextStyle: TextStyle(
-            color: AppColors.textPrimary,
-            fontFamily: 'Inter',
-            fontSize: 17,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.friendly,
-          brightness: Brightness.light,
-        ),
-        cupertinoOverrideTheme: const CupertinoThemeData(
-          primaryColor: AppColors.clam,
-          scaffoldBackgroundColor: AppColors.backgroundPrimary,
-        ),
-        cardTheme: CardThemeData(
-          color: AppColors.backgroundSecondary,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(20)),
-          ),
-        ),
+  Widget build(BuildContext context) => ValueListenableBuilder<ThemeMode>(
+    valueListenable: controller,
+    builder: (context, mode, _) => ThemeScope(
+      controller: controller,
+      child: MaterialApp(
+        title: 'Karmic Healing',
+        theme: appTheme(Brightness.light),
+        darkTheme: appTheme(Brightness.dark),
+        themeMode: mode,
+        home: const AppWrapper(),
+        debugShowCheckedModeBanner: false,
       ),
-      home: const AppWrapper(),
-      debugShowCheckedModeBanner: false,
-    );
-  }
+    ),
+  );
 }
 
 class AppWrapper extends StatefulWidget {

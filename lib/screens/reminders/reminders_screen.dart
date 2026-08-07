@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../constants/app_colors.dart';
 import '../../constants/design_constants.dart';
 import '../../widgets/aura_widgets.dart';
+import '../../widgets/bottom_bar.dart';
 import '../../widgets/gradient_background.dart';
 import '../../widgets/grid_cell.dart';
 import '../../widgets/karmic_empty_state.dart';
@@ -52,6 +52,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
   Widget build(BuildContext context) => ScrollBlur(
     child: Scaffold(
       extendBodyBehindAppBar: true,
+      extendBody: true,
       appBar: AppBar(
         flexibleSpace: const ScrollBlurBackdrop(),
         backgroundColor: Colors.transparent,
@@ -59,7 +60,6 @@ class _RemindersScreenState extends State<RemindersScreen> {
         shadowColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
         title: const Text('Reminders'),
         leading: IconButton(
           onPressed: () => Navigator.of(context).pop(),
@@ -73,49 +73,34 @@ class _RemindersScreenState extends State<RemindersScreen> {
             ),
         ],
       ),
-      bottomNavigationBar: DecoratedBox(
-        decoration: BoxDecoration(
-          color: AppColors.backgroundPrimary.withValues(alpha: .92),
-          border: Border(
-            top: BorderSide(
-              color: AppColors.textSecondary.withValues(alpha: .12),
-              width: .5,
-            ),
-          ),
-        ),
-        child: SafeArea(
-          top: false,
-          child: SizedBox(
-            height: 48,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                if (widget.showSamples)
-                  _BottomAction(
-                    label: 'Reminder',
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const ReminderFormScreen(),
-                      ),
-                    ),
-                  )
-                else
-                  const SizedBox.shrink(),
-                _BottomAction(
-                  label: 'Topic',
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => const TopicFormScreen(),
-                    ),
+      bottomNavigationBar: KarmicBottomBar(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            if (widget.showSamples)
+              _BottomAction(
+                label: 'Reminder',
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const ReminderFormScreen(),
                   ),
                 ),
-              ],
+              )
+            else
+              const SizedBox.shrink(),
+            _BottomAction(
+              label: 'Topic',
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const TopicFormScreen(),
+                ),
+              ),
             ),
-          ),
+          ],
         ),
       ),
       body: GradientBackground(
-        tone: AppColors.clarity,
+        tone: AppColors.of(context).clarity,
         child: SafeArea(
           top: false,
           bottom: false,
@@ -148,27 +133,30 @@ class _RemindersScreenState extends State<RemindersScreen> {
   );
 
   Widget _buildTopics() => ListView(
-    padding: const EdgeInsets.fromLTRB(
+    padding: EdgeInsets.fromLTRB(
       DesignConstants.padding,
       DesignConstants.padding,
       DesignConstants.padding,
-      DesignConstants.paddingXLarge,
+      DesignConstants.bottomBarInset(context) + DesignConstants.paddingXLarge,
     ),
     children: [
       const _StatsGrid(),
       const SizedBox(height: 20),
-      const Text(
+      Text(
         'Reminder topics',
         style: TextStyle(
           fontFamily: 'Source Serif 4',
           fontSize: 20,
-          color: AppColors.textPrimary,
+          color: AppColors.of(context).textPrimary,
         ),
       ),
       const SizedBox(height: 8),
-      const Text(
+      Text(
         'Every reminder belongs to a topic',
-        style: TextStyle(color: AppColors.textSecondary, fontSize: 15),
+        style: TextStyle(
+          color: AppColors.of(context).textSecondary,
+          fontSize: 15,
+        ),
       ),
       const SizedBox(height: 8),
       for (final topic in _filteredTopics) ...[
@@ -310,7 +298,7 @@ class _BottomAction extends StatelessWidget {
     icon: const AuraIcon(SFSymbols.plus, level: AuraLevel.solar, size: 20),
     label: Text(
       label,
-      style: const TextStyle(color: AppColors.clarity, fontSize: 17),
+      style: TextStyle(color: AppColors.of(context).clarity, fontSize: 17),
     ),
   );
 }

@@ -110,6 +110,19 @@ abstract final class DesignConstants {
   static double navigationBarInset(BuildContext context) =>
       MediaQuery.paddingOf(context).top + kToolbarHeight;
 
+  /// The toolbar of actions along the bottom of a list screen, above the home
+  /// indicator.
+  static const bottomBarHeight = 48.0;
+
+  /// Room that bar takes at the foot of a screen, for content that scrolls
+  /// behind it.
+  ///
+  /// Measured rather than read off the `MediaQuery` the Scaffold hands its
+  /// body, because the screens that need it build their lists from a method on
+  /// the State, whose context sits above the Scaffold.
+  static double bottomBarInset(BuildContext context) =>
+      MediaQuery.paddingOf(context).bottom + bottomBarHeight;
+
   /// The 4.7" phones — an iPhone SE is 667pt tall, some 150pt short of the phone
   /// the fixed screens are laid out for. Everything still fits there, but only
   /// once the vertical air between blocks comes down.

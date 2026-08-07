@@ -41,10 +41,10 @@ class GridCell extends StatelessWidget {
                 title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Source Serif 4',
                   fontSize: 15,
-                  color: AppColors.textPrimary,
+                  color: AppColors.of(context).textPrimary,
                 ),
               ),
             ],
@@ -53,8 +53,8 @@ class GridCell extends StatelessWidget {
         if (count != null)
           Text(
             '$count',
-            style: const TextStyle(
-              color: AppColors.textSecondary,
+            style: TextStyle(
+              color: AppColors.of(context).textSecondary,
               fontSize: 28,
               fontWeight: FontWeight.w300,
             ),

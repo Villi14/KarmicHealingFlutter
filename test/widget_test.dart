@@ -9,12 +9,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:karmic_healing_flutter/main.dart';
+import 'package:karmic_healing_flutter/theme_controller.dart';
 
 void main() {
   testWidgets('shows onboarding on first launch', (WidgetTester tester) async {
     SharedPreferences.setMockInitialValues({});
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const KarmicHealingApp());
+    await tester.pumpWidget(KarmicHealingApp(controller: ThemeController()));
 
     // Verify that our counter starts at 0.
     await tester.pump();

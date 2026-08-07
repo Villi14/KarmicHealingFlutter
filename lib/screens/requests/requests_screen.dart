@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../constants/app_colors.dart';
 import '../../constants/design_constants.dart';
 import '../../widgets/aura_widgets.dart';
+import '../../widgets/bottom_bar.dart';
 import '../../widgets/gradient_background.dart';
 import '../../widgets/karmic_empty_state.dart';
 import '../../widgets/karmic_search_bar.dart';
@@ -43,6 +43,7 @@ class _RequestsScreenState extends State<RequestsScreen> {
   Widget build(BuildContext context) => ScrollBlur(
     child: Scaffold(
       extendBodyBehindAppBar: true,
+      extendBody: true,
       appBar: AppBar(
         flexibleSpace: const ScrollBlurBackdrop(),
         backgroundColor: Colors.transparent,
@@ -50,7 +51,6 @@ class _RequestsScreenState extends State<RequestsScreen> {
         shadowColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
         title: const Text('Requests'),
         leading: IconButton(
           onPressed: () => Navigator.of(context).pop(),
@@ -76,44 +76,32 @@ class _RequestsScreenState extends State<RequestsScreen> {
             ),
         ],
       ),
-      bottomNavigationBar: DecoratedBox(
-        decoration: BoxDecoration(
-          color: AppColors.backgroundPrimary.withValues(alpha: .92),
-          border: Border(
-            top: BorderSide(
-              color: AppColors.textSecondary.withValues(alpha: .12),
-              width: .5,
+      bottomNavigationBar: KarmicBottomBar(
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const RequestFormScreen(),
+              ),
             ),
-          ),
-        ),
-        child: SafeArea(
-          top: false,
-          child: SizedBox(
-            height: 48,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const RequestFormScreen(),
-                  ),
-                ),
-                icon: const AuraIcon(
-                  SFSymbols.plus,
-                  level: AuraLevel.sacral,
-                  size: 20,
-                ),
-                label: const Text(
-                  'Request',
-                  style: TextStyle(color: AppColors.friendly, fontSize: 17),
-                ),
+            icon: const AuraIcon(
+              SFSymbols.plus,
+              level: AuraLevel.sacral,
+              size: 20,
+            ),
+            label: Text(
+              'Request',
+              style: TextStyle(
+                color: AppColors.of(context).friendly,
+                fontSize: 17,
               ),
             ),
           ),
         ),
       ),
       body: GradientBackground(
-        tone: AppColors.friendly,
+        tone: AppColors.of(context).friendly,
         child: SafeArea(
           top: false,
           bottom: false,
@@ -146,25 +134,28 @@ class _RequestsScreenState extends State<RequestsScreen> {
   );
 
   Widget _buildGroups() => ListView(
-    padding: const EdgeInsets.fromLTRB(
+    padding: EdgeInsets.fromLTRB(
       DesignConstants.padding,
       DesignConstants.padding,
       DesignConstants.padding,
-      DesignConstants.paddingXLarge,
+      DesignConstants.bottomBarInset(context) + DesignConstants.paddingXLarge,
     ),
     children: [
-      const Text(
+      Text(
         'My requests',
         style: TextStyle(
           fontFamily: 'Source Serif 4',
           fontSize: 20,
-          color: AppColors.textPrimary,
+          color: AppColors.of(context).textPrimary,
         ),
       ),
       const SizedBox(height: 8),
-      const Text(
+      Text(
         'Every subrequest belongs to a request',
-        style: TextStyle(color: AppColors.textSecondary, fontSize: 15),
+        style: TextStyle(
+          color: AppColors.of(context).textSecondary,
+          fontSize: 15,
+        ),
       ),
       const SizedBox(height: 8),
       for (final group in _filteredGroups) ...[

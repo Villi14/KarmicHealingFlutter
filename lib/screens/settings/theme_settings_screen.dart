@@ -1,31 +1,30 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/material.dart';
 
 import '../../constants/app_colors.dart';
+import '../../constants/app_theme.dart';
 import '../../widgets/aura_widgets.dart';
 import '../../widgets/gradient_background.dart';
+import '../../theme_controller.dart';
 import '../../widgets/sf_symbols.dart';
 
 /// Which appearance the app follows. A dialog rather than a page: three options
 /// on their own cards, and the one action that closes them.
-class ThemeSettingsScreen extends StatefulWidget {
+class ThemeSettingsScreen extends StatelessWidget {
   const ThemeSettingsScreen({super.key});
 
-  @override
-  State<ThemeSettingsScreen> createState() => _ThemeSettingsScreenState();
-}
-
-class _ThemeSettingsScreenState extends State<ThemeSettingsScreen> {
-  static const _themes = ['System', 'Light', 'Dark'];
-
-  String _theme = 'System';
+  static const _themes = {
+    ThemeMode.system: 'System',
+    ThemeMode.light: 'Light',
+    ThemeMode.dark: 'Dark',
+  };
 
   @override
   Widget build(BuildContext context) => AnnotatedRegion<SystemUiOverlayStyle>(
-    value: SystemUiOverlayStyle.dark,
+    value: statusBarStyle(Theme.of(context).brightness),
     child: Scaffold(
       body: GradientBackground(
-        tone: AppColors.peace,
+        tone: AppColors.of(context).peace,
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
@@ -35,20 +34,20 @@ class _ThemeSettingsScreenState extends State<ThemeSettingsScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
+                    Text(
                       'Theme',
                       style: TextStyle(
                         fontFamily: 'Source Serif 4',
                         fontSize: 28,
-                        color: AppColors.textPrimary,
+                        color: AppColors.of(context).textPrimary,
                       ),
                     ),
                     const SizedBox(height: 20),
-                    for (final theme in _themes) ...[
+                    for (final theme in _themes.entries) ...[
                       _ThemeOption(
-                        title: theme,
-                        isSelected: theme == _theme,
-                        onTap: () => setState(() => _theme = theme),
+                        title: theme.value,
+                        isSelected: theme.key == ThemeScope.of(context).value,
+                        onTap: () => ThemeScope.of(context).setMode(theme.key),
                       ),
                       const SizedBox(height: 12),
                     ],
@@ -96,8 +95,8 @@ class _ThemeOption extends StatelessWidget {
             title,
             style: TextStyle(
               color: isSelected
-                  ? AppColors.textPrimary
-                  : AppColors.textSecondary,
+                  ? AppColors.of(context).textPrimary
+                  : AppColors.of(context).textSecondary,
               fontSize: 17,
             ),
           ),

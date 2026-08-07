@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../constants/app_colors.dart';
 import '../../constants/design_constants.dart';
@@ -49,7 +48,6 @@ class PrivacyPolicyScreen extends StatelessWidget {
         shadowColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
@@ -59,7 +57,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
         ],
       ),
       body: GradientBackground(
-        tone: AppColors.wisdom,
+        tone: AppColors.of(context).wisdom,
         child: SafeArea(
           top: false,
           child: Align(
@@ -74,12 +72,12 @@ class PrivacyPolicyScreen extends StatelessWidget {
                   32,
                 ),
                 children: [
-                  const Text(
+                  Text(
                     'Privacy Policy',
                     style: TextStyle(
                       fontFamily: 'Source Serif 4',
                       fontSize: 28,
-                      color: AppColors.textPrimary,
+                      color: AppColors.of(context).textPrimary,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -88,17 +86,17 @@ class PrivacyPolicyScreen extends StatelessWidget {
                   for (final section in _sections) ...[
                     Text(
                       section.$1,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Source Serif 4',
                         fontSize: 20,
-                        color: AppColors.textPrimary,
+                        color: AppColors.of(context).textPrimary,
                       ),
                     ),
                     const SizedBox(height: 16),
                     Text(
                       section.$2,
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
+                      style: TextStyle(
+                        color: AppColors.of(context).textSecondary,
                         fontSize: 17,
                         height: 1.35,
                       ),
