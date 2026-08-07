@@ -37,7 +37,7 @@ migrate_working_dir/
 # project, are worth keeping in the repo.
 /outputs/screens/
 /outputs/qa/flutter/
-/outputs/sf_glyphs.png
+/outputs/*.png
 
 # Symbolication related
 app.*.symbols
