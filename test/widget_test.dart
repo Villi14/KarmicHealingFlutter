@@ -8,6 +8,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:karmic_healing_flutter/data/energy_settings.dart';
 import 'package:karmic_healing_flutter/main.dart';
 import 'package:karmic_healing_flutter/theme_controller.dart';
 
@@ -25,6 +26,7 @@ void main() {
     await tester.pumpWidget(
       KarmicHealingApp(
         controller: ThemeController(),
+        energySettings: await EnergySettings.load(),
         requests: repositories.requests,
         reminders: repositories.reminders,
       ),

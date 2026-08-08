@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../constants/app_colors.dart';
 import '../../constants/design_constants.dart';
+import '../../data/energy_settings.dart';
 import '../../l10n/app_localizations.dart';
 import '../../widgets/aura_widgets.dart';
 import '../../widgets/disclosure_cell.dart';
@@ -20,24 +20,10 @@ class BalancingEnergyListScreen extends StatefulWidget {
 }
 
 class _State extends State<BalancingEnergyListScreen> {
-  bool _initialProcessCompleted = false;
-
-  @override
-  void initState() {
-    super.initState();
-    SharedPreferences.getInstance().then((prefs) {
-      if (mounted) {
-        setState(
-          () => _initialProcessCompleted =
-              prefs.getBool('initial_process_completed') ?? false,
-        );
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final settings = EnergySettingsScope.of(context);
 
     return ScrollBlur(
       child: Scaffold(
@@ -84,7 +70,7 @@ class _State extends State<BalancingEnergyListScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        if (!_initialProcessCompleted)
+                        if (!settings.initialProcessCompleted)
                           DisclosureCell(
                             title: l10n.initialProcess,
                             onTap: () => _open(
@@ -127,11 +113,10 @@ class _State extends State<BalancingEnergyListScreen> {
         builder: (_) => BalancingEnergyScreen(
           title: title,
           steps: steps,
-          onCompleted: () async {
-            if (!isInitialProcess) return;
-            final prefs = await SharedPreferences.getInstance();
-            await prefs.setBool('initial_process_completed', true);
-            if (mounted) setState(() => _initialProcessCompleted = true);
+          onCompleted: () {
+            if (isInitialProcess) {
+              EnergySettingsScope.of(context).completeInitialProcess();
+            }
           },
         ),
       ),

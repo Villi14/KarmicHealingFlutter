@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../constants/app_colors.dart';
 import '../../constants/design_constants.dart';
+import '../../data/energy_settings.dart';
 import '../../l10n/app_localizations.dart';
 import '../../widgets/aura_widgets.dart';
 import '../../widgets/gradient_background.dart';
@@ -43,8 +43,20 @@ class _BalancingEnergyScreenState extends State<BalancingEnergyScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _pageController = PageController();
-    _loadTimerSettings();
     _startTicker();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // A session picks up a duration changed under it — the settings screen is
+    // reachable from this one's toolbar, so the change usually arrives mid-run.
+    final duration = EnergySettingsScope.of(context).stepDuration;
+    if (duration == _stepDuration) return;
+    setState(() {
+      _stepDuration = duration;
+      _restartStepTimer();
+    });
   }
 
   @override
@@ -64,16 +76,6 @@ class _BalancingEnergyScreenState extends State<BalancingEnergyScreen>
         state == AppLifecycleState.hidden) {
       _ticker?.cancel();
     }
-  }
-
-  Future<void> _loadTimerSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    final minutes = prefs.getInt('energy_step_duration_minutes') ?? 5;
-    if (!mounted) return;
-    setState(() {
-      _stepDuration = Duration(minutes: minutes > 0 ? minutes : 5);
-      _restartStepTimer();
-    });
   }
 
   void _startTicker() {

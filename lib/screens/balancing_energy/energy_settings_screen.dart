@@ -4,29 +4,22 @@ import 'package:flutter/material.dart';
 
 import '../../constants/app_colors.dart';
 import '../../constants/app_theme.dart';
+import '../../data/energy_settings.dart';
 import '../../l10n/app_localizations.dart';
 import '../../widgets/aura_widgets.dart';
 import '../../widgets/gradient_background.dart';
 import '../../widgets/sf_symbols.dart';
 
-class EnergySettingsScreen extends StatefulWidget {
+/// Every row here writes straight through to [EnergySettings]: there is no
+/// local copy of a setting to get out of step with what was stored, and no
+/// "save" for the user to forget.
+class EnergySettingsScreen extends StatelessWidget {
   const EnergySettingsScreen({super.key});
-
-  @override
-  State<EnergySettingsScreen> createState() => _EnergySettingsScreenState();
-}
-
-class _EnergySettingsScreenState extends State<EnergySettingsScreen> {
-  int _duration = 5;
-  bool _vibration = false;
-  bool _sound = false;
-  double _volume = .5;
-  bool _screenRest = true;
-  int _delay = 30;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final settings = EnergySettingsScope.of(context);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: statusBarStyle(Theme.of(context).brightness),
@@ -57,12 +50,11 @@ class _EnergySettingsScreenState extends State<EnergySettingsScreen> {
                           size: 20,
                         ),
                         title: l10n.sessionDuration,
-                        value: l10n.minutesCount(_duration),
-                        options: const [1, 3, 5, 10, 15],
-                        selected: _duration,
+                        value: l10n.minutesCount(settings.sessionDuration),
+                        options: EnergySettings.durationOptions,
+                        selected: settings.sessionDuration,
                         label: l10n.minutesCount,
-                        onSelected: (value) =>
-                            setState(() => _duration = value),
+                        onSelected: settings.setSessionDuration,
                       ),
                       const SizedBox(height: 20),
                       _SwitchRow(
@@ -72,9 +64,8 @@ class _EnergySettingsScreenState extends State<EnergySettingsScreen> {
                           size: 20,
                         ),
                         title: l10n.vibration,
-                        value: _vibration,
-                        onChanged: (value) =>
-                            setState(() => _vibration = value),
+                        value: settings.vibrationEnabled,
+                        onChanged: settings.setVibrationEnabled,
                       ),
                       const SizedBox(height: 12),
                       _SwitchRow(
@@ -84,8 +75,8 @@ class _EnergySettingsScreenState extends State<EnergySettingsScreen> {
                           size: 20,
                         ),
                         title: l10n.sound,
-                        value: _sound,
-                        onChanged: (value) => setState(() => _sound = value),
+                        value: settings.soundEnabled,
+                        onChanged: settings.setSoundEnabled,
                       ),
                       const SizedBox(height: 20),
                       _SettingsCard(
@@ -100,7 +91,7 @@ class _EnergySettingsScreenState extends State<EnergySettingsScreen> {
                             Text(
                               l10n.volume,
                               style: TextStyle(
-                                color: _sound
+                                color: settings.soundEnabled
                                     ? AppColors.of(context).textPrimary
                                     : AppColors.of(context).textSecondary,
                                 fontSize: 17,
@@ -108,7 +99,7 @@ class _EnergySettingsScreenState extends State<EnergySettingsScreen> {
                             ),
                             const Spacer(),
                             Text(
-                              '${(_volume * 100).round()}%',
+                              '${(settings.audioVolume * 100).round()}%',
                               style: TextStyle(
                                 color: AppColors.of(context).textSecondary,
                                 fontSize: 17,
@@ -126,10 +117,10 @@ class _EnergySettingsScreenState extends State<EnergySettingsScreen> {
                           ).health.withValues(alpha: .12),
                         ),
                         child: Slider(
-                          value: _volume,
+                          value: settings.audioVolume,
                           divisions: 10,
-                          onChanged: _sound
-                              ? (value) => setState(() => _volume = value)
+                          onChanged: settings.soundEnabled
+                              ? settings.setAudioVolume
                               : null,
                         ),
                       ),
@@ -141,11 +132,10 @@ class _EnergySettingsScreenState extends State<EnergySettingsScreen> {
                           size: 20,
                         ),
                         title: l10n.screenRest,
-                        value: _screenRest,
-                        onChanged: (value) =>
-                            setState(() => _screenRest = value),
+                        value: settings.screenRestEnabled,
+                        onChanged: settings.setScreenRestEnabled,
                       ),
-                      if (_screenRest) ...[
+                      if (settings.screenRestEnabled) ...[
                         const SizedBox(height: 12),
                         _MenuRow(
                           icon: const AuraIcon(
@@ -154,11 +144,11 @@ class _EnergySettingsScreenState extends State<EnergySettingsScreen> {
                             size: 20,
                           ),
                           title: l10n.delay,
-                          value: l10n.secondsCount(_delay),
-                          options: const [15, 30, 60, 120],
-                          selected: _delay,
+                          value: l10n.secondsCount(settings.screenRestDelay),
+                          options: EnergySettings.restDelayOptions,
+                          selected: settings.screenRestDelay,
                           label: l10n.secondsCount,
-                          onSelected: (value) => setState(() => _delay = value),
+                          onSelected: settings.setScreenRestDelay,
                         ),
                         const SizedBox(height: 12),
                         Text(

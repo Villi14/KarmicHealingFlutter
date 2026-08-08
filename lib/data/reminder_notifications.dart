@@ -196,7 +196,9 @@ class LocalReminderScheduler extends ReminderScheduler {
       // Android can refuse an exact alarm outright — the user may have turned
       // that permission down. One reminder going unscheduled must not stop the
       // rest, and it is offered again on the next sync.
-      debugPrint('Could not schedule reminder ${reminder.id}: ${error.message}');
+      debugPrint(
+        'Could not schedule reminder ${reminder.id}: ${error.message}',
+      );
     }
   }
 

@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'constants/app_theme.dart';
 import 'l10n/app_localizations.dart';
 import 'data/app_database.dart';
+import 'data/energy_settings.dart';
 import 'data/reminder_notifications.dart';
 import 'data/reminders_repository.dart';
 import 'data/repository_scope.dart';
@@ -111,6 +112,7 @@ void main() async {
   runApp(
     KarmicHealingApp(
       controller: await ThemeController.load(),
+      energySettings: await EnergySettings.load(),
       requests: repositories.requests,
       reminders: repositories.reminders,
     ),
@@ -134,11 +136,13 @@ class KarmicHealingApp extends StatelessWidget {
   const KarmicHealingApp({
     super.key,
     required this.controller,
+    required this.energySettings,
     required this.requests,
     required this.reminders,
   });
 
   final ThemeController controller;
+  final EnergySettings energySettings;
   final RequestsRepository requests;
   final RemindersRepository reminders;
 
@@ -150,17 +154,20 @@ class KarmicHealingApp extends StatelessWidget {
       child: RepositoryScope(
         requests: requests,
         reminders: reminders,
-        child: MaterialApp(
-          navigatorKey: _navigatorKey,
-          onGenerateTitle: (context) =>
-              AppLocalizations.of(context).karmicHealing,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          theme: appTheme(Brightness.light),
-          darkTheme: appTheme(Brightness.dark),
-          themeMode: mode,
-          home: const AppWrapper(),
-          debugShowCheckedModeBanner: false,
+        child: EnergySettingsScope(
+          settings: energySettings,
+          child: MaterialApp(
+            navigatorKey: _navigatorKey,
+            onGenerateTitle: (context) =>
+                AppLocalizations.of(context).karmicHealing,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            theme: appTheme(Brightness.light),
+            darkTheme: appTheme(Brightness.dark),
+            themeMode: mode,
+            home: const AppWrapper(),
+            debugShowCheckedModeBanner: false,
+          ),
         ),
       ),
     ),
