@@ -112,6 +112,7 @@ class KarmicFormField extends StatelessWidget {
     super.key,
     required this.hint,
     required this.level,
+    this.controller,
     this.minLines = 1,
     this.serif = false,
     this.centered = false,
@@ -120,6 +121,7 @@ class KarmicFormField extends StatelessWidget {
 
   final String hint;
   final AuraLevel level;
+  final TextEditingController? controller;
   final int minLines;
   final bool serif;
   final bool centered;
@@ -129,6 +131,7 @@ class KarmicFormField extends StatelessWidget {
   Widget build(BuildContext context) => KarmicFormCard(
     level: level,
     child: TextField(
+      controller: controller,
       minLines: minLines,
       maxLines: null,
       textAlign: centered ? TextAlign.center : TextAlign.start,

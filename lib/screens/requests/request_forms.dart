@@ -1,63 +1,118 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../constants/app_colors.dart';
+import '../../data/models.dart';
+import '../../data/repository_scope.dart';
 import '../../widgets/aura_widgets.dart';
+import '../../widgets/color_picker_row.dart';
 import '../../widgets/karmic_form.dart';
 import '../../widgets/sf_symbols.dart';
 
-class SubrequestFormScreen extends StatelessWidget {
-  const SubrequestFormScreen({super.key, this.screenTitle = 'New Subrequest'});
+/// The form behind a subrequest: what it says, and what is worth remembering
+/// about it.
+///
+/// No date and no priority here — a subrequest borrows both from the request it
+/// serves, and borrowing is not editing.
+class SubrequestFormScreen extends StatefulWidget {
+  const SubrequestFormScreen({
+    super.key,
+    required this.subrequest,
+    this.screenTitle = 'New Subrequest',
+  });
 
+  final Subrequest subrequest;
   final String screenTitle;
 
   @override
+  State<SubrequestFormScreen> createState() => _SubrequestFormScreenState();
+}
+
+class _SubrequestFormScreenState extends State<SubrequestFormScreen> {
+  late final _title = TextEditingController(text: widget.subrequest.title);
+  late final _notes = TextEditingController(text: widget.subrequest.notes);
+
+  @override
+  void dispose() {
+    _title.dispose();
+    _notes.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) => KarmicFormShell(
-    title: screenTitle,
+    title: widget.screenTitle,
     tone: AppColors.of(context).friendly,
+    onSave: _save,
     child: ListView(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
-      children: const [
-        KarmicFormField(hint: 'Title', level: AuraLevel.sacral, serif: true),
-        SizedBox(height: 20),
-        KarmicFormField(hint: 'Notes', level: AuraLevel.sacral, minLines: 4),
+      children: [
+        KarmicFormField(
+          controller: _title,
+          hint: 'Title',
+          level: AuraLevel.sacral,
+          serif: true,
+        ),
+        const SizedBox(height: 20),
+        KarmicFormField(
+          controller: _notes,
+          hint: 'Notes',
+          level: AuraLevel.sacral,
+          minLines: 4,
+        ),
       ],
     ),
   );
+
+  Future<void> _save() async {
+    final title = _title.text.trim();
+    if (title.isEmpty) return;
+
+    final navigator = Navigator.of(context);
+    await RepositoryScope.requestsOf(context).saveSubrequest(
+      widget.subrequest.copyWith(title: title, notes: _notes.text),
+    );
+    navigator.maybePop();
+  }
 }
 
+/// The form behind a request: what is being asked for, in what colour, and by
+/// when.
 class RequestFormScreen extends StatefulWidget {
-  const RequestFormScreen({super.key, this.screenTitle = 'Request'});
+  const RequestFormScreen({super.key, this.request, this.screenTitle});
 
-  final String screenTitle;
+  /// The request being edited, or `null` for one that does not exist yet.
+  final RequestsList? request;
+  final String? screenTitle;
 
   @override
   State<RequestFormScreen> createState() => _RequestFormScreenState();
 }
 
 class _RequestFormScreenState extends State<RequestFormScreen> {
-  /// The colours a topic can wear. The two in the middle come from the
-  /// spectrum, so they follow the appearance.
-  static List<Color> _palette(BuildContext context) {
-    final colors = AppColors.of(context);
-    return [
-      const Color(0xFF4A99EF),
-      colors.friendly,
-      colors.health,
-      const Color(0xFFB25DD3),
-    ];
-  }
+  late final _title = TextEditingController(text: widget.request?.title ?? '');
+  late final _notes = TextEditingController(text: widget.request?.notes ?? '');
 
-  bool _hasDate = false;
-  Color _color = const Color(0xFF4A99EF);
+  late Color _color = widget.request?.color ?? const Color(0xFF4A99EF);
+  late DateTime? _dueDate = widget.request?.dueDate;
+
+  @override
+  void dispose() {
+    _title.dispose();
+    _notes.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) => KarmicFormShell(
-    title: widget.screenTitle,
+    title: widget.screenTitle ?? (widget.request == null ? 'Request' : 'Edit'),
     tone: AppColors.of(context).friendly,
+    onSave: _save,
     child: ListView(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
       children: [
         KarmicFormField(
+          controller: _title,
           hint: 'Request',
           level: AuraLevel.sacral,
           serif: true,
@@ -65,73 +120,41 @@ class _RequestFormScreenState extends State<RequestFormScreen> {
           color: _color,
         ),
         const SizedBox(height: 20),
-        const KarmicFormField(
+        KarmicFormField(
+          controller: _notes,
           hint: 'Notes',
           level: AuraLevel.sacral,
           minLines: 4,
         ),
         const SizedBox(height: 20),
-        KarmicFormCard(
+        ColorPickerRow(
           level: AuraLevel.sacral,
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'Color',
-                  style: TextStyle(
-                    color: AppColors.of(context).textPrimary,
-                    fontSize: 17,
-                  ),
-                ),
-              ),
-              for (final color in _palette(context))
-                GestureDetector(
-                  onTap: () => setState(() => _color = color),
-                  child: Container(
-                    width: 28,
-                    height: 28,
-                    margin: const EdgeInsets.only(left: 8),
-                    decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: color == _color
-                            ? AppColors.of(context).textPrimary
-                            : Colors.white,
-                        width: 3,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: .2),
-                          blurRadius: 2,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-            ],
-          ),
+          color: _color,
+          onChanged: (color) => setState(() => _color = color),
         ),
         const SizedBox(height: 20),
         KarmicFormToggle(
           icon: SFSymbols.calendar,
           title: 'Date',
           level: AuraLevel.sacral,
-          value: _hasDate,
-          onChanged: (value) => setState(() => _hasDate = value),
+          value: _dueDate != null,
+          onChanged: _setDateEnabled,
         ),
-        if (_hasDate) ...[
+        if (_dueDate != null) ...[
           const SizedBox(height: 12),
           KarmicFormCard(
             level: AuraLevel.sacral,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text(
-                  'Aug 7, 2026 at 8:00 PM',
-                  style: TextStyle(
-                    color: AppColors.of(context).friendly,
-                    fontSize: 17,
+                TextButton(
+                  onPressed: _pickDate,
+                  child: Text(
+                    DateFormat.yMMMd().add_jm().format(_dueDate!),
+                    style: TextStyle(
+                      color: AppColors.of(context).friendly,
+                      fontSize: 17,
+                    ),
                   ),
                 ),
               ],
@@ -141,4 +164,55 @@ class _RequestFormScreenState extends State<RequestFormScreen> {
       ],
     ),
   );
+
+  void _setDateEnabled(bool isEnabled) => setState(
+    () => _dueDate = isEnabled ? (_dueDate ?? DateTime.now()) : null,
+  );
+
+  Future<void> _pickDate() async {
+    final current = _dueDate ?? DateTime.now();
+    final date = await showDatePicker(
+      context: context,
+      initialDate: current,
+      firstDate: DateTime(current.year - 5),
+      lastDate: DateTime(current.year + 5),
+    );
+    if (date == null || !mounted) return;
+
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(current),
+    );
+    if (!mounted) return;
+
+    setState(
+      () => _dueDate = DateTime(
+        date.year,
+        date.month,
+        date.day,
+        time?.hour ?? current.hour,
+        time?.minute ?? current.minute,
+      ),
+    );
+  }
+
+  Future<void> _save() async {
+    final title = _title.text.trim();
+    if (title.isEmpty) return;
+
+    final navigator = Navigator.of(context);
+    final repository = RepositoryScope.requestsOf(context);
+    final request = widget.request ?? repository.draftRequest(_color);
+
+    await repository.saveRequest(
+      request.copyWith(
+        title: title,
+        notes: _notes.text,
+        color: _color,
+        dueDate: _dueDate,
+        clearDueDate: _dueDate == null,
+      ),
+    );
+    navigator.maybePop();
+  }
 }

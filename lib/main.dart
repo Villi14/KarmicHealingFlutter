@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'constants/app_theme.dart';
+import 'data/app_database.dart';
+import 'data/reminders_repository.dart';
+import 'data/repository_scope.dart';
+import 'data/requests_repository.dart';
+import 'data/seed_sample_data.dart';
 import 'theme_controller.dart';
 import 'screens/balancing_energy/balancing_energy_list_screen.dart';
 import 'screens/balancing_energy/balancing_energy_screen.dart';
@@ -21,6 +26,19 @@ import 'screens/settings/theme_settings_screen.dart';
 
 const _qaScreen = String.fromEnvironment('QA_SCREEN');
 
+/// The QA screens that want a store with something in it. The rest are shot
+/// against an empty one, which is the whole point of the empty states.
+const _seededQaScreens = {
+  'requests_list',
+  'request_detail',
+  'request_form',
+  'subrequest_form',
+  'reminders_list',
+  'reminders_detail',
+  'reminder_form',
+  'topic_form',
+};
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -29,26 +47,52 @@ void main() async {
   // Initialize shared preferences
   await SharedPreferences.getInstance();
 
-  runApp(KarmicHealingApp(controller: await ThemeController.load()));
+  // A QA run must not touch the store the user keeps, so it gets one that lives
+  // only as long as the process.
+  final repositories = await loadRepositories(
+    database: _qaScreen.isEmpty ? null : await AppDatabase.openInMemory(),
+  );
+  if (_seededQaScreens.contains(_qaScreen)) {
+    await seedSampleData(repositories.requests, repositories.reminders);
+  }
+
+  runApp(
+    KarmicHealingApp(
+      controller: await ThemeController.load(),
+      requests: repositories.requests,
+      reminders: repositories.reminders,
+    ),
+  );
 }
 
 class KarmicHealingApp extends StatelessWidget {
-  const KarmicHealingApp({super.key, required this.controller});
+  const KarmicHealingApp({
+    super.key,
+    required this.controller,
+    required this.requests,
+    required this.reminders,
+  });
 
   final ThemeController controller;
+  final RequestsRepository requests;
+  final RemindersRepository reminders;
 
   @override
   Widget build(BuildContext context) => ValueListenableBuilder<ThemeMode>(
     valueListenable: controller,
     builder: (context, mode, _) => ThemeScope(
       controller: controller,
-      child: MaterialApp(
-        title: 'Karmic Healing',
-        theme: appTheme(Brightness.light),
-        darkTheme: appTheme(Brightness.dark),
-        themeMode: mode,
-        home: const AppWrapper(),
-        debugShowCheckedModeBanner: false,
+      child: RepositoryScope(
+        requests: requests,
+        reminders: reminders,
+        child: MaterialApp(
+          title: 'Karmic Healing',
+          theme: appTheme(Brightness.light),
+          darkTheme: appTheme(Brightness.dark),
+          themeMode: mode,
+          home: const AppWrapper(),
+          debugShowCheckedModeBanner: false,
+        ),
       ),
     ),
   );
@@ -83,46 +127,10 @@ class _AppWrapperState extends State<AppWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    if (_qaScreen == 'home') return const HomeScreen();
-    if (_qaScreen == 'energy_list') {
-      return const BalancingEnergyListScreen();
+    if (_qaScreen.isNotEmpty) {
+      final screen = _qaBuild(context);
+      if (screen != null) return screen;
     }
-    if (_qaScreen == 'energy_help') {
-      return const BalancingEnergyHelpScreen();
-    }
-    if (_qaScreen == 'energy_session') {
-      return const BalancingEnergyScreen(
-        title: 'Initial Process',
-        steps: EnergySteps.part1,
-      );
-    }
-    if (_qaScreen == 'energy_settings') {
-      return const EnergySettingsScreen();
-    }
-    if (_qaScreen == 'requests_empty') return const RequestsScreen();
-    if (_qaScreen == 'requests_list') {
-      return const RequestsScreen(showSamples: true);
-    }
-    if (_qaScreen == 'request_detail') {
-      return const RequestDetailScreen();
-    }
-    if (_qaScreen == 'subrequest_form') {
-      return const SubrequestFormScreen();
-    }
-    if (_qaScreen == 'request_form') return const RequestFormScreen();
-    if (_qaScreen == 'requests_help') return const RequestsHelpScreen();
-    if (_qaScreen == 'reminders_empty') return const RemindersScreen();
-    if (_qaScreen == 'reminders_list') {
-      return const RemindersScreen(showSamples: true);
-    }
-    if (_qaScreen == 'reminders_detail') {
-      return const RemindersDetailScreen();
-    }
-    if (_qaScreen == 'reminder_form') return const ReminderFormScreen();
-    if (_qaScreen == 'topic_form') return const TopicFormScreen();
-    if (_qaScreen == 'settings') return const SettingsScreen();
-    if (_qaScreen == 'theme_settings') return const ThemeSettingsScreen();
-    if (_qaScreen == 'privacy_policy') return const PrivacyPolicyScreen();
 
     if (_isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -131,5 +139,58 @@ class _AppWrapperState extends State<AppWrapper> {
     return _hasCompletedOnboarding
         ? const HomeScreen()
         : const OnboardingScreen();
+  }
+
+  /// The screen a QA run was launched to photograph, wired to the seeded store
+  /// so the shot shows the app rather than a mock of it.
+  Widget? _qaBuild(BuildContext context) {
+    final requests = RepositoryScope.requestsOf(context);
+    final reminders = RepositoryScope.remindersOf(context);
+
+    switch (_qaScreen) {
+      case 'home':
+        return const HomeScreen();
+      case 'energy_list':
+        return const BalancingEnergyListScreen();
+      case 'energy_help':
+        return const BalancingEnergyHelpScreen();
+      case 'energy_session':
+        return const BalancingEnergyScreen(
+          title: 'Initial Process',
+          steps: EnergySteps.part1,
+        );
+      case 'energy_settings':
+        return const EnergySettingsScreen();
+      case 'requests_empty':
+      case 'requests_list':
+        return const RequestsScreen();
+      case 'request_detail':
+        return RequestDetailScreen(requestId: requests.requests.first.id);
+      case 'subrequest_form':
+        return SubrequestFormScreen(
+          subrequest: requests.draftSubrequest(requests.requests.first.id),
+        );
+      case 'request_form':
+        return const RequestFormScreen();
+      case 'requests_help':
+        return const RequestsHelpScreen();
+      case 'reminders_empty':
+      case 'reminders_list':
+        return const RemindersScreen();
+      case 'reminders_detail':
+        return RemindersDetailScreen(topicId: reminders.topics.first.id);
+      case 'reminder_form':
+        return ReminderFormScreen(topicId: reminders.topics.first.id);
+      case 'topic_form':
+        return const TopicFormScreen();
+      case 'settings':
+        return const SettingsScreen();
+      case 'theme_settings':
+        return const ThemeSettingsScreen();
+      case 'privacy_policy':
+        return const PrivacyPolicyScreen();
+      default:
+        return null;
+    }
   }
 }

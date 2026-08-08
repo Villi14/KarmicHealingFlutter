@@ -21,6 +21,8 @@ class ListRow extends StatelessWidget {
     this.showsCompletion = false,
     this.onTap,
     this.onInfo,
+    this.onToggle,
+    this.canToggle = true,
     this.watermark = true,
   });
 
@@ -32,6 +34,13 @@ class ListRow extends StatelessWidget {
   final bool showsCompletion;
   final VoidCallback? onTap;
   final VoidCallback? onInfo;
+
+  /// What a tap on the radio button does. A row without one ignores it.
+  final VoidCallback? onToggle;
+
+  /// Whether the radio button may be tapped at all. A request waits for its
+  /// subrequests, and says so by dimming.
+  final bool canToggle;
   final bool watermark;
 
   @override
@@ -48,11 +57,19 @@ class ListRow extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.only(left: 16),
-            child: ToneIcon(
-              showsCompletion
-                  ? (isCompleted ? SFSymbols.checkmarkCircle : SFSymbols.circle)
-                  : icon,
-              tone: tone,
+            child: GestureDetector(
+              onTap: showsCompletion && canToggle ? onToggle : null,
+              child: Opacity(
+                opacity: !showsCompletion || canToggle ? 1 : .4,
+                child: ToneIcon(
+                  showsCompletion
+                      ? (isCompleted
+                            ? SFSymbols.checkmarkCircle
+                            : SFSymbols.circle)
+                      : icon,
+                  tone: tone,
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 12),
@@ -92,6 +109,42 @@ class ListRow extends StatelessWidget {
         ],
       ),
     ),
+  );
+}
+
+/// The gesture that takes a row away.
+///
+/// Topics, requests, subrequests and reminders are the same kind of thing to
+/// the user, so they all go the same way: a swipe from the trailing edge, and
+/// the row leaves. Undoing it means writing it again, which is what the Swift
+/// app asks of the user too.
+class SwipeToDelete extends StatelessWidget {
+  const SwipeToDelete({
+    super.key,
+    required this.id,
+    required this.onDelete,
+    required this.child,
+  });
+
+  final String id;
+  final VoidCallback onDelete;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Dismissible(
+    key: ValueKey(id),
+    direction: DismissDirection.endToStart,
+    onDismissed: (_) => onDelete(),
+    background: Container(
+      alignment: Alignment.centerRight,
+      padding: const EdgeInsets.only(right: 24),
+      decoration: BoxDecoration(
+        color: AppColors.of(context).energy.withValues(alpha: .2),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Icon(SFSymbols.trash, color: AppColors.of(context).energy),
+    ),
+    child: child,
   );
 }
 

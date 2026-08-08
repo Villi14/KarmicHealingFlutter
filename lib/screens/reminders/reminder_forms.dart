@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../constants/app_colors.dart';
+import '../../data/models.dart';
+import '../../data/repository_scope.dart';
+import '../../widgets/aura_alert.dart';
 import '../../widgets/aura_widgets.dart';
+import '../../widgets/color_picker_row.dart';
 import '../../widgets/karmic_form.dart';
 import '../../widgets/sf_symbols.dart';
 
@@ -10,137 +15,233 @@ import '../../widgets/sf_symbols.dart';
 class ReminderFormScreen extends StatefulWidget {
   const ReminderFormScreen({
     super.key,
-    this.screenTitle = 'New',
-    this.topicColor = const Color(0xFF4A99EF),
+    required this.topicId,
+    this.reminder,
+    this.screenTitle,
   });
 
-  final String screenTitle;
-  final Color topicColor;
+  /// The topic the form opens on. An edited reminder may be moved to another.
+  final String topicId;
+
+  /// The reminder being edited, or `null` for one that does not exist yet.
+  final Reminder? reminder;
+  final String? screenTitle;
 
   @override
   State<ReminderFormScreen> createState() => _ReminderFormScreenState();
 }
 
 class _ReminderFormScreenState extends State<ReminderFormScreen> {
-  static const _priorities = ['None', 'High', 'Medium', 'Low'];
-  static const _topics = ['Personal', 'Family', 'Practice'];
+  late final _title = TextEditingController(text: widget.reminder?.title ?? '');
+  late final _notes = TextEditingController(text: widget.reminder?.notes ?? '');
 
-  bool _hasDate = false;
-  bool _isFlagged = false;
-  String _priority = 'None';
-  String _topic = 'Personal';
+  late DateTime? _dueDate = widget.reminder?.dueDate;
+  late bool _isFlagged = widget.reminder?.isFlagged ?? false;
+  late Priority? _priority = widget.reminder?.priority;
+  late String _topicId = widget.reminder?.remindersListId ?? widget.topicId;
 
   @override
-  Widget build(BuildContext context) => KarmicFormShell(
-    title: widget.screenTitle,
-    tone: AppColors.of(context).clarity,
-    child: ListView(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
-      children: [
-        const KarmicFormField(
-          hint: 'Title',
-          level: AuraLevel.solar,
-          serif: true,
-        ),
-        const SizedBox(height: 20),
-        const KarmicFormField(
-          hint: 'Notes',
-          level: AuraLevel.solar,
-          minLines: 4,
-        ),
-        const SizedBox(height: 20),
-        KarmicFormToggle(
-          icon: SFSymbols.calendar,
-          title: 'Date',
-          level: AuraLevel.solar,
-          value: _hasDate,
-          onChanged: (value) => setState(() => _hasDate = value),
-        ),
-        if (_hasDate) ...[
-          const SizedBox(height: 12),
-          KarmicFormCard(
+  void dispose() {
+    _title.dispose();
+    _notes.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final repository = RepositoryScope.remindersOf(context);
+    final topic = repository.topicById(_topicId);
+
+    return KarmicFormShell(
+      title: widget.screenTitle ?? (widget.reminder == null ? 'New' : 'Edit'),
+      tone: AppColors.of(context).clarity,
+      onSave: _save,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+        children: [
+          KarmicFormField(
+            controller: _title,
+            hint: 'Title',
             level: AuraLevel.solar,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(
-                  'Aug 7, 2026 at 8:00 PM',
-                  style: TextStyle(
-                    color: AppColors.of(context).clarity,
-                    fontSize: 17,
-                  ),
-                ),
-              ],
+            serif: true,
+          ),
+          const SizedBox(height: 20),
+          KarmicFormField(
+            controller: _notes,
+            hint: 'Notes',
+            level: AuraLevel.solar,
+            minLines: 4,
+          ),
+          const SizedBox(height: 20),
+          KarmicFormToggle(
+            icon: SFSymbols.calendar,
+            title: 'Date',
+            level: AuraLevel.solar,
+            value: _dueDate != null,
+            onChanged: (isEnabled) => setState(
+              () => _dueDate = isEnabled ? (_dueDate ?? DateTime.now()) : null,
             ),
           ),
+          if (_dueDate != null) ...[
+            const SizedBox(height: 12),
+            KarmicFormCard(
+              level: AuraLevel.solar,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: _pickDate,
+                    child: Text(
+                      DateFormat.yMMMd().add_jm().format(_dueDate!),
+                      style: TextStyle(
+                        color: AppColors.of(context).clarity,
+                        fontSize: 17,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          const SizedBox(height: 20),
+          KarmicFormToggle(
+            icon: SFSymbols.flag,
+            title: 'Flag',
+            level: AuraLevel.solar,
+            value: _isFlagged,
+            onChanged: (value) => setState(() => _isFlagged = value),
+          ),
+          const SizedBox(height: 12),
+          // A menu entry has to carry a value to be picked at all, so "None" is
+          // a choice of its own rather than a null.
+          KarmicFormPicker<_PriorityChoice>(
+            icon: SFSymbols.exclamationmark,
+            title: 'Priority',
+            level: AuraLevel.solar,
+            value: _PriorityChoice.of(_priority),
+            options: _PriorityChoice.values,
+            label: (choice) => choice.label,
+            onSelected: (choice) => setState(() => _priority = choice.priority),
+          ),
+          const SizedBox(height: 12),
+          KarmicFormPicker<String>(
+            icon: SFSymbols.tag,
+            title: 'Topic',
+            level: AuraLevel.solar,
+            iconTone: topic?.color,
+            value: _topicId,
+            options: repository.topics.map((topic) => topic.id).toList(),
+            label: (id) => repository.topicById(id)?.title ?? '',
+            onSelected: (value) => setState(() => _topicId = value),
+          ),
         ],
-        const SizedBox(height: 20),
-        KarmicFormToggle(
-          icon: SFSymbols.flag,
-          title: 'Flag',
-          level: AuraLevel.solar,
-          value: _isFlagged,
-          onChanged: (value) => setState(() => _isFlagged = value),
-        ),
-        const SizedBox(height: 12),
-        KarmicFormPicker<String>(
-          icon: SFSymbols.exclamationmark,
-          title: 'Priority',
-          level: AuraLevel.solar,
-          value: _priority,
-          options: _priorities,
-          label: (value) => value,
-          onSelected: (value) => setState(() => _priority = value),
-        ),
-        const SizedBox(height: 12),
-        KarmicFormPicker<String>(
-          icon: SFSymbols.tag,
-          title: 'Topic',
-          level: AuraLevel.solar,
-          iconTone: widget.topicColor,
-          value: _topic,
-          options: _topics,
-          label: (value) => value,
-          onSelected: (value) => setState(() => _topic = value),
-        ),
-      ],
-    ),
-  );
+      ),
+    );
+  }
+
+  Future<void> _pickDate() async {
+    final current = _dueDate ?? DateTime.now();
+    final date = await showDatePicker(
+      context: context,
+      initialDate: current,
+      firstDate: DateTime(current.year - 5),
+      lastDate: DateTime(current.year + 5),
+    );
+    if (date == null || !mounted) return;
+
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(current),
+    );
+    if (!mounted) return;
+
+    setState(
+      () => _dueDate = DateTime(
+        date.year,
+        date.month,
+        date.day,
+        time?.hour ?? current.hour,
+        time?.minute ?? current.minute,
+      ),
+    );
+  }
+
+  Future<void> _save() async {
+    final title = _title.text.trim();
+    if (title.isEmpty) return;
+
+    // A reminder set for a moment already gone would never be able to remind
+    // anyone of anything, so it is refused rather than quietly saved.
+    final dueDate = _dueDate;
+    if (dueDate != null && !dueDate.isAfter(DateTime.now())) {
+      await showAuraAlert(
+        context,
+        title: 'That moment has passed',
+        message: 'Pick a date and time still ahead of you.',
+        level: AuraLevel.root,
+      );
+      return;
+    }
+
+    if (!mounted) return;
+    final navigator = Navigator.of(context);
+    final repository = RepositoryScope.remindersOf(context);
+    final reminder = widget.reminder ?? repository.draftReminder(_topicId);
+
+    await repository.saveReminder(
+      reminder.copyWith(
+        title: title,
+        notes: _notes.text,
+        dueDate: dueDate,
+        clearDueDate: dueDate == null,
+        isFlagged: _isFlagged,
+        priority: _priority,
+        clearPriority: _priority == null,
+        remindersListId: _topicId,
+      ),
+    );
+    navigator.maybePop();
+  }
+}
+
+/// The four things the priority menu offers, "None" among them.
+enum _PriorityChoice {
+  none('None', null),
+  high('High', Priority.high),
+  medium('Medium', Priority.medium),
+  low('Low', Priority.low);
+
+  const _PriorityChoice(this.label, this.priority);
+
+  final String label;
+  final Priority? priority;
+
+  static _PriorityChoice of(Priority? priority) {
+    for (final choice in _PriorityChoice.values) {
+      if (choice.priority == priority) return choice;
+    }
+    return _PriorityChoice.none;
+  }
 }
 
 /// The form behind a topic: a name, wearing the colour being picked below it,
 /// so the picker shows its effect where the user is looking.
 class TopicFormScreen extends StatefulWidget {
-  const TopicFormScreen({
-    super.key,
-    this.screenTitle = 'New',
-    this.title = '',
-    this.color = const Color(0xFF4A99EF),
-  });
+  const TopicFormScreen({super.key, this.topic, this.screenTitle});
 
-  final String screenTitle;
-  final String title;
-  final Color color;
+  /// The topic being edited, or `null` for one that does not exist yet.
+  final RemindersList? topic;
+  final String? screenTitle;
 
   @override
   State<TopicFormScreen> createState() => _TopicFormScreenState();
 }
 
 class _TopicFormScreenState extends State<TopicFormScreen> {
-  /// The colours a topic can wear. The two in the middle come from the
-  /// spectrum, so they follow the appearance.
-  static List<Color> _palette(BuildContext context) {
-    final colors = AppColors.of(context);
-    return [
-      const Color(0xFF4A99EF),
-      colors.friendly,
-      colors.health,
-      const Color(0xFFB25DD3),
-    ];
-  }
-
-  late Color _color = widget.color;
-  late final _controller = TextEditingController(text: widget.title);
+  late Color _color = widget.topic?.color ?? const Color(0xFF4A99EF);
+  late final _controller = TextEditingController(
+    text: widget.topic?.title ?? '',
+  );
 
   @override
   void dispose() {
@@ -150,8 +251,9 @@ class _TopicFormScreenState extends State<TopicFormScreen> {
 
   @override
   Widget build(BuildContext context) => KarmicFormShell(
-    title: widget.screenTitle,
+    title: widget.screenTitle ?? (widget.topic == null ? 'New' : 'Edit'),
     tone: AppColors.of(context).clarity,
+    onSave: _save,
     child: ListView(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
       children: [
@@ -178,48 +280,24 @@ class _TopicFormScreenState extends State<TopicFormScreen> {
           ),
         ),
         const SizedBox(height: 20),
-        KarmicFormCard(
+        ColorPickerRow(
           level: AuraLevel.solar,
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'Color',
-                  style: TextStyle(
-                    color: AppColors.of(context).textPrimary,
-                    fontSize: 17,
-                  ),
-                ),
-              ),
-              for (final color in _palette(context))
-                GestureDetector(
-                  onTap: () => setState(() => _color = color),
-                  child: Container(
-                    width: 28,
-                    height: 28,
-                    margin: const EdgeInsets.only(left: 8),
-                    decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: color == _color
-                            ? AppColors.of(context).textPrimary
-                            : Colors.white,
-                        width: 3,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: .2),
-                          blurRadius: 2,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-            ],
-          ),
+          color: _color,
+          onChanged: (color) => setState(() => _color = color),
         ),
       ],
     ),
   );
+
+  Future<void> _save() async {
+    final title = _controller.text.trim();
+    if (title.isEmpty) return;
+
+    final navigator = Navigator.of(context);
+    final repository = RepositoryScope.remindersOf(context);
+    final topic = widget.topic ?? repository.draftTopic(_color);
+
+    await repository.saveTopic(topic.copyWith(title: title, color: _color));
+    navigator.maybePop();
+  }
 }

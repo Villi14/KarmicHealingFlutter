@@ -6,7 +6,14 @@ import 'package:karmic_healing_flutter/screens/settings/theme_settings_screen.da
 import 'package:karmic_healing_flutter/theme_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'support/test_repositories.dart';
+
 void main() {
+  setUpAll(useTestDatabaseFactory);
+
+  late TestRepositories repositories;
+  setUp(() async => repositories = await emptyRepositories());
+
   testWidgets('picking Dark repaints the app and is remembered', (
     tester,
   ) async {
@@ -35,10 +42,18 @@ void main() {
   });
 
   testWidgets('a stored choice is what the app launches in', (tester) async {
-    SharedPreferences.setMockInitialValues({ThemeController.storageKey: 'dark'});
+    SharedPreferences.setMockInitialValues({
+      ThemeController.storageKey: 'dark',
+    });
 
     final controller = await ThemeController.load();
-    await tester.pumpWidget(KarmicHealingApp(controller: controller));
+    await tester.pumpWidget(
+      KarmicHealingApp(
+        controller: controller,
+        requests: repositories.requests,
+        reminders: repositories.reminders,
+      ),
+    );
     await tester.pumpAndSettle();
 
     final context = tester.element(find.byType(Scaffold).first);

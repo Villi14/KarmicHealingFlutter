@@ -1,206 +1,255 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../constants/app_colors.dart';
 import '../../constants/design_constants.dart';
+import '../../data/models.dart';
+import '../../data/repository_scope.dart';
+import '../../data/requests_repository.dart';
 import '../../widgets/aura_widgets.dart';
 import '../../widgets/bottom_bar.dart';
 import '../../widgets/gradient_background.dart';
+import '../../widgets/karmic_empty_state.dart';
 import '../../widgets/scroll_blur.dart';
 import '../../widgets/sf_symbols.dart';
 import 'request_forms.dart';
+import 'subrequest_row.dart';
 
+/// Everything hanging under one request.
+///
+/// Subrequests keep the order they were written in, and none of them is hidden:
+/// a request's own screen is where its whole shape is meant to be visible.
 class RequestDetailScreen extends StatelessWidget {
-  const RequestDetailScreen({
-    super.key,
-    this.title = 'Personal Request',
-    this.color = const Color(0xFF4A99EF),
-  });
+  const RequestDetailScreen({super.key, required this.requestId});
 
-  final String title;
-  final Color color;
-
-  static const _items = [
-    _Subrequest('Groceries', notes: 'Milk\nEggs\nApples\nOatmeal\nSpinach'),
-    _Subrequest('Haircut'),
-    _Subrequest('Doctor appointment', notes: 'Ask about diet'),
-    _Subrequest('Take a walk', completed: true),
-    _Subrequest('Buy concert tickets'),
-  ];
+  final String requestId;
 
   @override
-  Widget build(BuildContext context) => ScrollBlur(
-    child: Scaffold(
-      extendBodyBehindAppBar: true,
-      extendBody: true,
-      appBar: AppBar(
-        flexibleSpace: const ScrollBlurBackdrop(),
-        backgroundColor: Colors.transparent,
-        surfaceTintColor: Colors.transparent,
-        shadowColor: Colors.transparent,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        leading: IconButton(
-          onPressed: () => Navigator.of(context).pop(),
-          icon: const AuraIcon(SFSymbols.chevronLeft, level: AuraLevel.sacral),
-        ),
-      ),
-      bottomNavigationBar: KarmicBottomBar(
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: TextButton.icon(
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => const SubrequestFormScreen(),
-              ),
-            ),
-            icon: ToneIcon(SFSymbols.plus, tone: color),
-            label: Text(
-              'Add Subrequest',
-              style: TextStyle(color: color, fontSize: 17),
+  Widget build(BuildContext context) {
+    final repository = RepositoryScope.requestsOf(context);
+
+    return ListenableBuilder(
+      listenable: repository,
+      builder: (context, _) {
+        final request = repository.requestById(requestId);
+        // The request can be deleted from a search while its screen is open.
+        if (request == null) return const SizedBox.shrink();
+        return _build(context, repository, request);
+      },
+    );
+  }
+
+  Widget _build(
+    BuildContext context,
+    RequestsRepository repository,
+    RequestsList request,
+  ) {
+    final subrequests = repository.subrequestsOf(request.id);
+
+    return ScrollBlur(
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        extendBody: true,
+        appBar: AppBar(
+          flexibleSpace: const ScrollBlurBackdrop(),
+          backgroundColor: Colors.transparent,
+          surfaceTintColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          leading: IconButton(
+            onPressed: () => Navigator.of(context).pop(),
+            icon: const AuraIcon(
+              SFSymbols.chevronLeft,
+              level: AuraLevel.sacral,
             ),
           ),
-        ),
-      ),
-      body: GradientBackground(
-        tone: AppColors.of(context).friendly,
-        child: SafeArea(
-          top: false,
-          bottom: false,
-          child: Align(
-            alignment: Alignment.topCenter,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 700),
-              child: ListView(
-                padding: EdgeInsets.fromLTRB(
-                  20,
-                  DesignConstants.navigationBarInset(context) + 8,
-                  20,
-                  DesignConstants.bottomBarInset(context) +
-                      DesignConstants.paddingXLarge,
+          actions: [
+            IconButton(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => RequestFormScreen(request: request),
                 ),
-                children: [
-                  _RequestHeader(title: title, color: color),
-                  const SizedBox(height: 20),
-                  for (final item in _items) ...[
-                    _SubrequestRow(item: item, color: color),
-                    const SizedBox(height: 8),
-                  ],
-                ],
+              ),
+              icon: ToneIcon(SFSymbols.infoCircle, tone: request.color),
+            ),
+          ],
+        ),
+        bottomNavigationBar: KarmicBottomBar(
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: () => _addSubrequest(context, repository, request),
+              icon: ToneIcon(SFSymbols.plus, tone: request.color),
+              label: Text(
+                'Add Subrequest',
+                style: TextStyle(color: request.color, fontSize: 17),
               ),
             ),
           ),
         ),
+        body: GradientBackground(
+          tone: AppColors.of(context).friendly,
+          child: SafeArea(
+            top: false,
+            bottom: false,
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 700),
+                child: ListView(
+                  padding: EdgeInsets.fromLTRB(
+                    20,
+                    DesignConstants.navigationBarInset(context) + 8,
+                    20,
+                    DesignConstants.bottomBarInset(context) +
+                        DesignConstants.paddingXLarge,
+                  ),
+                  children: [
+                    _RequestHeader(
+                      request: request,
+                      progress: repository.progressOf(request.id),
+                    ),
+                    const SizedBox(height: 20),
+                    if (subrequests.isEmpty)
+                      KarmicEmptyState(
+                        icon: const AuraIcon.drawn(
+                          SFGlyph.leaf,
+                          level: AuraLevel.sacral,
+                          size: 33,
+                        ),
+                        title: 'Nothing under it yet',
+                        message:
+                            'A request that cannot be fulfilled right away is broken into subrequests — the steps that pave the way to it.',
+                        level: AuraLevel.sacral,
+                        actionTitle: 'Add Subrequest',
+                        onAction: () =>
+                            _addSubrequest(context, repository, request),
+                      )
+                    else
+                      for (final subrequest in subrequests) ...[
+                        SubrequestRow(subrequest: subrequest, request: request),
+                        const SizedBox(height: 8),
+                      ],
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _addSubrequest(
+    BuildContext context,
+    RequestsRepository repository,
+    RequestsList request,
+  ) => Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => SubrequestFormScreen(
+        subrequest: repository.draftSubrequest(request.id),
       ),
     ),
   );
 }
 
 class _RequestHeader extends StatelessWidget {
-  const _RequestHeader({required this.title, required this.color});
+  const _RequestHeader({required this.request, required this.progress});
 
-  final String title;
-  final Color color;
+  final RequestsList request;
+  final SubrequestProgress progress;
 
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      AuraLabel('Request', tone: color),
-      const SizedBox(height: 4),
-      Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Opacity(opacity: .5, child: ToneIcon(SFSymbols.circle, tone: color)),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              title,
-              style: TextStyle(
-                fontFamily: 'Source Serif 4',
-                fontSize: 20,
-                color: color,
+  Widget build(BuildContext context) {
+    final repository = RepositoryScope.requestsOf(context);
+    final canToggle = repository.canToggleCompletion(request);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AuraLabel('Request', tone: request.color),
+        const SizedBox(height: 4),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            GestureDetector(
+              onTap: canToggle
+                  ? () => repository.toggleRequestCompletion(request.id)
+                  : null,
+              child: Opacity(
+                opacity: canToggle ? 1 : .5,
+                child: ToneIcon(
+                  request.isCompleted
+                      ? SFSymbols.checkmarkCircle
+                      : SFSymbols.circle,
+                  tone: request.color,
+                ),
               ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                request.title,
+                style: TextStyle(
+                  fontFamily: 'Source Serif 4',
+                  fontSize: 20,
+                  color: request.color,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          _hint,
+          style: TextStyle(
+            color: AppColors.of(context).textSecondary,
+            fontSize: 15,
+          ),
+        ),
+        if (request.notes.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Text(
+            request.notes,
+            style: TextStyle(
+              color: AppColors.of(context).textSecondary,
+              fontSize: 15,
+              height: 1.3,
             ),
           ),
         ],
-      ),
-      const SizedBox(height: 4),
-      Text(
-        'Fulfil every subrequest first',
-        style: TextStyle(
-          color: AppColors.of(context).textSecondary,
-          fontSize: 15,
-        ),
-      ),
-    ],
-  );
-}
-
-class _SubrequestRow extends StatelessWidget {
-  const _SubrequestRow({required this.item, required this.color});
-
-  final _Subrequest item;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) => AuraCard(
-    level: AuraLevel.sacral,
-    tone: color,
-    watermark: false,
-    elevated: false,
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ToneIcon(
-          item.completed ? SFSymbols.checkmarkCircle : SFSymbols.circle,
-          tone: color,
-        ),
-        const SizedBox(width: 4),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        if (request.dueDate != null) ...[
+          const SizedBox(height: 8),
+          Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
+              Icon(
+                SFSymbols.calendar,
+                size: 12,
+                color: AppColors.of(context).textSecondary,
+              ),
+              const SizedBox(width: 4),
               Text(
-                item.title,
+                DateFormat.yMMMd().add_jm().format(request.dueDate!),
                 style: TextStyle(
-                  color: item.completed
-                      ? AppColors.of(context).textSecondary
-                      : AppColors.of(context).textPrimary,
-                  fontSize: 17,
-                  fontWeight: FontWeight.w500,
-                  decoration: item.completed
-                      ? TextDecoration.lineThrough
-                      : null,
+                  color: AppColors.of(context).textSecondary,
+                  fontSize: 12,
                 ),
               ),
-              if (item.notes.isNotEmpty) ...[
-                const SizedBox(height: 2),
-                Text(
-                  item.notes,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: AppColors.of(context).textSecondary,
-                    fontSize: 15,
-                    height: 1.25,
-                  ),
-                ),
-              ],
             ],
           ),
-        ),
-        const SizedBox(width: 8),
-        ToneIcon(SFSymbols.infoCircle, tone: color),
+        ],
       ],
-    ),
-  );
-}
+    );
+  }
 
-class _Subrequest {
-  const _Subrequest(this.title, {this.notes = '', this.completed = false});
-
-  final String title;
-  final String notes;
-  final bool completed;
+  /// What the request is waiting for, said plainly, so a radio button that will
+  /// not move explains itself.
+  String get _hint {
+    if (!progress.hasSubrequests) return 'Ready to be fulfilled';
+    if (progress.allCompleted) return 'Every subrequest is fulfilled';
+    return 'Fulfil every subrequest first '
+        '(${progress.completed} of ${progress.total})';
+  }
 }
