@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The lamp on the 288dp canvas Android 12+ hands the system splash, kept
+     inside the 192dp circle the platform is free to mask down to. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:width="288dp"
+        android:height="288dp"
+        android:gravity="center"
+        android:drawable="@android:color/transparent" />
+
+    <item
+        android:width="176dp"
+        android:height="176dp"
+        android:gravity="center">
+        <bitmap
+            android:gravity="fill"
+            android:src="@drawable/launch_icon" />
+    </item>
+</layer-list>
