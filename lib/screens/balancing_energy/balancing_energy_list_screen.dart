@@ -72,24 +72,16 @@ class _State extends State<BalancingEnergyListScreen> {
                       children: [
                         if (!settings.initialProcessCompleted)
                           DisclosureCell(
-                            title: l10n.initialProcess,
-                            onTap: () => _open(
-                              l10n.initialProcess,
-                              EnergySteps.part1(l10n),
-                              isInitialProcess: true,
-                            ),
+                            title: SessionKind.initialProcess.title(l10n),
+                            onTap: () => _open(SessionKind.initialProcess),
                           ),
                         DisclosureCell(
-                          title: l10n.essentialSelf,
-                          onTap: () => _open(
-                            l10n.essentialSelf,
-                            EnergySteps.part2(l10n),
-                          ),
+                          title: SessionKind.essentialSelf.title(l10n),
+                          onTap: () => _open(SessionKind.essentialSelf),
                         ),
                         DisclosureCell(
-                          title: l10n.divineSelf,
-                          onTap: () =>
-                              _open(l10n.divineSelf, EnergySteps.part3(l10n)),
+                          title: SessionKind.divineSelf.title(l10n),
+                          onTap: () => _open(SessionKind.divineSelf),
                         ),
                       ],
                     ),
@@ -103,18 +95,16 @@ class _State extends State<BalancingEnergyListScreen> {
     );
   }
 
-  void _open(
-    String title,
-    List<EnergyStep> steps, {
-    bool isInitialProcess = false,
-  }) {
+  void _open(SessionKind kind) {
+    final l10n = AppLocalizations.of(context);
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => BalancingEnergyScreen(
-          title: title,
-          steps: steps,
+          kind: kind,
+          title: kind.title(l10n),
+          steps: kind.steps(l10n),
           onCompleted: () {
-            if (isInitialProcess) {
+            if (kind == SessionKind.initialProcess) {
               EnergySettingsScope.of(context).completeInitialProcess();
             }
           },

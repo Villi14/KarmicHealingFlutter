@@ -12,6 +12,7 @@ import 'data/reminders_repository.dart';
 import 'data/repository_scope.dart';
 import 'data/requests_repository.dart';
 import 'data/seed_sample_data.dart';
+import 'data/session_effects.dart';
 import 'theme_controller.dart';
 import 'screens/balancing_energy/balancing_energy_list_screen.dart';
 import 'screens/balancing_energy/balancing_energy_screen.dart';
@@ -233,8 +234,12 @@ class _AppWrapperState extends State<AppWrapper> {
       case 'energy_session':
         final l10n = AppLocalizations.of(context);
         return BalancingEnergyScreen(
-          title: l10n.initialProcess,
-          steps: EnergySteps.part1(l10n),
+          kind: SessionKind.initialProcess,
+          title: SessionKind.initialProcess.title(l10n),
+          steps: SessionKind.initialProcess.steps(l10n),
+          // A run that is only here to take a photograph must not dim the
+          // screen out from under the camera, nor chime at whoever is watching.
+          effects: const NoSessionEffects(),
         );
       case 'energy_settings':
         return const EnergySettingsScreen();

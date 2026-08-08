@@ -16,12 +16,16 @@ import 'energy_settings_screen.dart';
 class BalancingEnergyScreen extends StatefulWidget {
   const BalancingEnergyScreen({
     super.key,
+    required this.kind,
     required this.title,
     required this.steps,
     this.onCompleted,
     this.effects,
     this.now = DateTime.now,
   });
+
+  /// Which meditation this is — what a session in progress is recorded as.
+  final SessionKind kind;
 
   final String title;
   final List<EnergyStep> steps;
@@ -93,6 +97,10 @@ class _BalancingEnergyScreenState extends State<BalancingEnergyScreen>
     WidgetsBinding.instance.removeObserver(this);
     _ticker?.cancel();
     _effects.end();
+    // Leaving ends the session outright, walked to the end or not, so it leaves
+    // nothing of itself behind. Only a session the app was killed in the middle
+    // of gets to outlive the screen it ran on.
+    _settings.clearActiveSession();
     _pageController.dispose();
     super.dispose();
   }
@@ -296,6 +304,10 @@ class _BalancingEnergyScreenState extends State<BalancingEnergyScreen>
                               _restartStepTimer();
                               _feedback();
                               _wake();
+                              _settings.setActiveSession(
+                                widget.kind.name,
+                                index,
+                              );
                             }),
                             itemBuilder: (context, index) => Padding(
                               padding: const EdgeInsets.fromLTRB(8, 12, 16, 50),
@@ -410,9 +422,7 @@ class _BalancingEnergyScreenState extends State<BalancingEnergyScreen>
     // Either way the user is looking at the screen again.
     _wake();
     if (_isPaused) {
-      _stepStartedAt = widget.now().subtract(
-        _stepDuration - _pausedRemaining,
-      );
+      _stepStartedAt = widget.now().subtract(_stepDuration - _pausedRemaining);
     } else {
       _pausedRemaining = _remaining;
     }
@@ -545,6 +555,28 @@ class _StepLadder extends StatelessWidget {
         ),
     ],
   );
+}
+
+/// Which of the three meditations is running.
+///
+/// The names are the ones the SwiftUI app writes to `active_session_kind`, so a
+/// session recorded by one app says the same thing to the other.
+enum SessionKind {
+  initialProcess,
+  essentialSelf,
+  divineSelf;
+
+  String title(AppLocalizations l10n) => switch (this) {
+    SessionKind.initialProcess => l10n.initialProcess,
+    SessionKind.essentialSelf => l10n.essentialSelf,
+    SessionKind.divineSelf => l10n.divineSelf,
+  };
+
+  List<EnergyStep> steps(AppLocalizations l10n) => switch (this) {
+    SessionKind.initialProcess => EnergySteps.part1(l10n),
+    SessionKind.essentialSelf => EnergySteps.part2(l10n),
+    SessionKind.divineSelf => EnergySteps.part3(l10n),
+  };
 }
 
 class EnergyStep {

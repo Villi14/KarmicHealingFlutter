@@ -51,6 +51,7 @@ void main() {
       testApp(
         energySettings: settings,
         home: BalancingEnergyScreen(
+          kind: SessionKind.essentialSelf,
           title: 'Session',
           steps: const [
             EnergyStep('One'),
@@ -123,9 +124,7 @@ void main() {
   });
 
   testWidgets('the sound can be had without the vibration', (tester) async {
-    final settings = await settingsFrom({
-      EnergySettings.soundEnabledKey: true,
-    });
+    final settings = await settingsFrom({EnergySettings.soundEnabledKey: true});
     final effects = await openSession(
       tester,
       settings: settings,
@@ -142,9 +141,7 @@ void main() {
   testWidgets('a volume never chosen still rings at half, not in silence', (
     tester,
   ) async {
-    final settings = await settingsFrom({
-      EnergySettings.soundEnabledKey: true,
-    });
+    final settings = await settingsFrom({EnergySettings.soundEnabledKey: true});
     final effects = await openSession(
       tester,
       settings: settings,
