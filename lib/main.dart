@@ -1,9 +1,12 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'constants/app_theme.dart';
 import 'l10n/app_localizations.dart';
 import 'data/app_database.dart';
+import 'data/reminder_notifications.dart';
 import 'data/reminders_repository.dart';
 import 'data/repository_scope.dart';
 import 'data/requests_repository.dart';
@@ -40,6 +43,41 @@ const _seededQaScreens = {
   'topic_form',
 };
 
+/// The navigator a tapped notification reaches for, since it arrives from
+/// outside the tree and has no context of its own.
+final _navigatorKey = GlobalKey<NavigatorState>();
+
+/// The same reason: the store has to be reachable from outside the tree to find
+/// out which topic a tapped reminder belongs to.
+RemindersRepository? _reminders;
+
+/// Opens the topic a notification's reminder lives in.
+///
+/// The reminder may be gone by the time its notification is tapped — deleted on
+/// another device, say — in which case nothing happens, which is the honest
+/// answer to a tap on something that is no longer there.
+void _openReminder(String reminderId) {
+  final topicId = _reminders?.reminderById(reminderId)?.remindersListId;
+  if (topicId == null) return;
+
+  _navigatorKey.currentState?.push(
+    MaterialPageRoute<void>(
+      builder: (_) => RemindersDetailScreen(topicId: topicId),
+    ),
+  );
+}
+
+/// The locale the notification channel is named in — the app itself has not
+/// been built yet when the channel is created, so the device is asked directly.
+Locale _deviceLocale() {
+  for (final locale in PlatformDispatcher.instance.locales) {
+    for (final supported in AppLocalizations.supportedLocales) {
+      if (supported.languageCode == locale.languageCode) return supported;
+    }
+  }
+  return AppLocalizations.supportedLocales.first;
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -48,14 +86,27 @@ void main() async {
   // Initialize shared preferences
   await SharedPreferences.getInstance();
 
-  // A QA run must not touch the store the user keeps, so it gets one that lives
-  // only as long as the process.
+  // A QA run must not touch the store the user keeps, nor put anything in the
+  // notification tray, so it gets a store that lives only as long as the
+  // process and no scheduler at all.
+  final scheduler = _qaScreen.isEmpty
+      ? await LocalReminderScheduler.start(
+          channelName: (await AppLocalizations.delegate.load(
+            _deviceLocale(),
+          )).reminders,
+          onOpened: _openReminder,
+        )
+      : const NoReminderScheduler();
+
   final repositories = await loadRepositories(
     database: _qaScreen.isEmpty ? null : await AppDatabase.openInMemory(),
+    scheduler: scheduler,
   );
   if (_seededQaScreens.contains(_qaScreen)) {
     await seedSampleData(repositories.requests, repositories.reminders);
   }
+
+  _reminders = repositories.reminders;
 
   runApp(
     KarmicHealingApp(
@@ -64,6 +115,19 @@ void main() async {
       reminders: repositories.reminders,
     ),
   );
+
+  if (scheduler is! LocalReminderScheduler) return;
+
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    // Both of these wait for the first frame: the permission sheet so it opens
+    // over the app rather than over an empty window, and a notification tapped
+    // while the app was closed because until now there was no navigator to
+    // carry it anywhere.
+    scheduler.requestPermission();
+
+    final launched = scheduler.launchReminderId;
+    if (launched != null) _openReminder(launched);
+  });
 }
 
 class KarmicHealingApp extends StatelessWidget {
@@ -87,6 +151,7 @@ class KarmicHealingApp extends StatelessWidget {
         requests: requests,
         reminders: reminders,
         child: MaterialApp(
+          navigatorKey: _navigatorKey,
           onGenerateTitle: (context) =>
               AppLocalizations.of(context).karmicHealing,
           localizationsDelegates: AppLocalizations.localizationsDelegates,

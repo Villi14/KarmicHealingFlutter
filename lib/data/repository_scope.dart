@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app_database.dart';
+import 'reminder_notifications.dart';
 import 'reminders_repository.dart';
 import 'requests_repository.dart';
 
@@ -38,11 +39,17 @@ class RepositoryScope extends InheritedWidget {
 }
 
 /// Opens the store and loads both repositories once, at launch.
+///
+/// Without a [scheduler] nothing is put in the notification tray — which is
+/// what a test and a QA run both want.
 Future<({RequestsRepository requests, RemindersRepository reminders})>
-loadRepositories({AppDatabase? database}) async {
+loadRepositories({
+  AppDatabase? database,
+  ReminderScheduler scheduler = const NoReminderScheduler(),
+}) async {
   final store = database ?? await AppDatabase.open();
   final requests = RequestsRepository(store);
-  final reminders = RemindersRepository(store);
+  final reminders = RemindersRepository(store, scheduler: scheduler);
   await requests.load();
   await reminders.load();
   return (requests: requests, reminders: reminders);

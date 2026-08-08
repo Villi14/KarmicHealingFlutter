@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 
 import 'app_database.dart';
 import 'models.dart';
+import 'reminder_notifications.dart';
 
 /// The tallies the grid of cells on the reminders screen shows.
 @immutable
@@ -29,9 +30,13 @@ enum RemindersOrdering { dueDate, priority, title }
 /// Topics and the reminders in them, held in memory and written through to
 /// SQLite. See [RequestsRepository] for why the read model lives in Dart.
 class RemindersRepository extends ChangeNotifier {
-  RemindersRepository(this._database);
+  RemindersRepository(
+    this._database, {
+    ReminderScheduler scheduler = const NoReminderScheduler(),
+  }) : _scheduler = scheduler; // ignore: prefer_initializing_formals
 
   final AppDatabase _database;
+  final ReminderScheduler _scheduler;
   static const _uuid = Uuid();
 
   List<RemindersList> _topics = const [];
@@ -42,6 +47,11 @@ class RemindersRepository extends ChangeNotifier {
 
   bool get isEmpty => _topics.isEmpty;
 
+  /// Reads the store back into memory, and lets the notifications follow.
+  ///
+  /// Every write ends here, so scheduling hangs off this one call rather than
+  /// off each of them: whatever a reminder has just become — fulfilled, moved,
+  /// deleted along with its topic — the tray is told the same way.
   Future<void> load() async {
     final topicRows = await _database.db.query('remindersLists');
     final reminderRows = await _database.db.query('reminders');
@@ -50,6 +60,7 @@ class RemindersRepository extends ChangeNotifier {
     _reminders = reminderRows.map(Reminder.fromRow).toList()
       ..sort((a, b) => a.position.compareTo(b.position));
     notifyListeners();
+    await _scheduler.sync(_reminders);
   }
 
   RemindersList? topicById(String id) {
