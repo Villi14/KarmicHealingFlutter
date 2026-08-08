@@ -64,5 +64,18 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+
+        <!-- Settings sends the reader to the author's site and hands the
+             contact address to a mail app. Android 11 and up hides apps that
+             are not asked about here, and a hidden mail app looks to us exactly
+             like a phone that has none. -->
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.SENDTO"/>
+            <data android:scheme="mailto"/>
+        </intent>
     </queries>
 </manifest>
