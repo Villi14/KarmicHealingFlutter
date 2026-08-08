@@ -48,6 +48,9 @@ dependencies:
   url_launcher: ^6.3.2
   package_info_plus: ^10.2.1
   app_settings: ^8.0.3
+  audioplayers: ^6.8.1
+  wakelock_plus: ^1.7.0
+  screen_brightness: ^2.1.11
 
 dev_dependencies:
   flutter_test:
