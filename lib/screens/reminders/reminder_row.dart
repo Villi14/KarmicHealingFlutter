@@ -4,6 +4,7 @@ import '../../constants/app_colors.dart';
 import '../../data/models.dart';
 import '../../data/reminders_repository.dart';
 import '../../data/repository_scope.dart';
+import '../../l10n/app_localizations.dart';
 import '../../widgets/aura_widgets.dart';
 import '../../widgets/list_row.dart';
 import '../../widgets/sf_symbols.dart';
@@ -160,7 +161,7 @@ class ReminderRow extends StatelessWidget {
       builder: (_) => ReminderFormScreen(
         topicId: reminder.remindersListId,
         reminder: reminder,
-        screenTitle: 'Details',
+        screenTitle: AppLocalizations.of(context).details,
       ),
     ),
   );

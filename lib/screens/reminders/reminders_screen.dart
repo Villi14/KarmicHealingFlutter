@@ -6,6 +6,7 @@ import '../../constants/design_constants.dart';
 import '../../data/models.dart';
 import '../../data/reminders_repository.dart';
 import '../../data/repository_scope.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/seed_sample_data.dart';
 import '../../widgets/aura_widgets.dart';
 import '../../widgets/bottom_bar.dart';
@@ -55,7 +56,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
           shadowColor: Colors.transparent,
           elevation: 0,
           scrolledUnderElevation: 0,
-          title: const Text('Reminders'),
+          title: Text(AppLocalizations.of(context).reminders),
           leading: IconButton(
             onPressed: () => Navigator.of(context).pop(),
             icon: const AuraIcon(SFSymbols.chevronLeft, level: AuraLevel.solar),
@@ -84,7 +85,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
                 // there is one to land in.
                 if (!repository.isEmpty)
                   _BottomAction(
-                    label: 'Reminder',
+                    label: AppLocalizations.of(context).reminder,
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(
                         builder: (_) => ReminderFormScreen(
@@ -96,7 +97,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
                 else
                   const SizedBox.shrink(),
                 _BottomAction(
-                  label: 'Topic',
+                  label: AppLocalizations.of(context).list,
                   onPressed: () => _openTopicForm(context),
                 ),
               ],
@@ -162,11 +163,10 @@ class _RemindersScreenState extends State<RemindersScreen> {
           level: AuraLevel.solar,
           size: 33,
         ),
-        title: 'Create your first topic',
-        message:
-            'Reminders live in topics. Create one, and small reminders will turn the practice into a steady ritual.',
+        title: AppLocalizations.of(context).remindersEmptyTitle,
+        message: AppLocalizations.of(context).remindersEmptyMessage,
         level: AuraLevel.solar,
-        actionTitle: 'Add Topic',
+        actionTitle: AppLocalizations.of(context).addList,
         onAction: () => _openTopicForm(context),
       ),
     ],
@@ -179,7 +179,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
           _StatsGrid(stats: repository.stats),
           const SizedBox(height: 20),
           Text(
-            'Reminder topics',
+            AppLocalizations.of(context).myReminders,
             style: TextStyle(
               fontFamily: 'Source Serif 4',
               fontSize: 20,
@@ -190,7 +190,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
           // A list here is a topic, so the header says out loud what the rows
           // below are.
           Text(
-            'Every reminder belongs to a topic',
+            AppLocalizations.of(context).topicsHint,
             style: TextStyle(
               color: AppColors.of(context).textSecondary,
               fontSize: 15,
@@ -244,8 +244,8 @@ class _RemindersScreenState extends State<RemindersScreen> {
               level: AuraLevel.solar,
               size: 33,
             ),
-            title: 'No results',
-            message: 'Try another search.',
+            title: AppLocalizations.of(context).noResults,
+            message: AppLocalizations.of(context).tryAnotherSearch,
             level: AuraLevel.solar,
           )
         else
@@ -279,14 +279,14 @@ class _StatsGrid extends StatelessWidget {
     children: [
       _row(
         GridCell(
-          title: 'Today',
+          title: AppLocalizations.of(context).today,
           icon: SFSymbols.calendar,
           level: AuraLevel.solar,
           count: stats.todayCount,
           onTap: () => _open(context, RemindersDetailType.today),
         ),
         GridCell(
-          title: 'Scheduled',
+          title: AppLocalizations.of(context).scheduled,
           icon: SFSymbols.calendar,
           level: AuraLevel.root,
           count: stats.scheduledCount,
@@ -296,14 +296,14 @@ class _StatsGrid extends StatelessWidget {
       const SizedBox(height: 8),
       _row(
         GridCell(
-          title: 'All',
+          title: AppLocalizations.of(context).all,
           icon: SFSymbols.tray,
           level: AuraLevel.throat,
           count: stats.allCount,
           onTap: () => _open(context, RemindersDetailType.all),
         ),
         GridCell(
-          title: 'Flagged',
+          title: AppLocalizations.of(context).flagged,
           icon: SFSymbols.flag,
           level: AuraLevel.sacral,
           count: stats.flaggedCount,
@@ -313,7 +313,7 @@ class _StatsGrid extends StatelessWidget {
       const SizedBox(height: 8),
       _row(
         GridCell(
-          title: 'Completed',
+          title: AppLocalizations.of(context).completed,
           icon: SFSymbols.checkmark,
           level: AuraLevel.heart,
           onTap: () => _open(context, RemindersDetailType.completed),
@@ -364,7 +364,7 @@ class _SearchTally extends StatelessWidget {
   Widget build(BuildContext context) => Row(
     children: [
       Text(
-        '$completedCount completed',
+        AppLocalizations.of(context).completedTally(completedCount),
         style: TextStyle(
           color: AppColors.of(context).textSecondary,
           fontSize: 15,
@@ -375,22 +375,39 @@ class _SearchTally extends StatelessWidget {
         PopupMenuButton<int?>(
           onSelected: (months) => onClear(months == 0 ? null : months),
           color: AppColors.of(context).backgroundSecondary,
-          itemBuilder: (context) => const [
-            PopupMenuItem(value: 1, child: Text('Older than 1 month')),
-            PopupMenuItem(value: 6, child: Text('Older than 6 months')),
-            PopupMenuItem(value: 12, child: Text('Older than 1 year')),
-            PopupMenuItem(value: 0, child: Text('All completed')),
+          itemBuilder: (context) => [
+            PopupMenuItem(
+              value: 1,
+              child: Text(AppLocalizations.of(context).olderThan1Month),
+            ),
+            PopupMenuItem(
+              value: 6,
+              child: Text(AppLocalizations.of(context).olderThan6Months),
+            ),
+            PopupMenuItem(
+              value: 12,
+              child: Text(AppLocalizations.of(context).olderThan1Year),
+            ),
+            PopupMenuItem(
+              value: 0,
+              child: Text(AppLocalizations.of(context).allCompleted),
+            ),
           ],
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            child: Text('Clear', style: TextStyle(color: tone)),
+            child: Text(
+              AppLocalizations.of(context).clear,
+              style: TextStyle(color: tone),
+            ),
           ),
         ),
         const Spacer(),
         TextButton(
           onPressed: onToggleCompleted,
           child: Text(
-            showsCompleted ? 'Hide' : 'Show',
+            showsCompleted
+                ? AppLocalizations.of(context).hide
+                : AppLocalizations.of(context).show,
             style: TextStyle(color: tone),
           ),
         ),

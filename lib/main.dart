@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'constants/app_theme.dart';
+import 'l10n/app_localizations.dart';
 import 'data/app_database.dart';
 import 'data/reminders_repository.dart';
 import 'data/repository_scope.dart';
@@ -86,7 +87,10 @@ class KarmicHealingApp extends StatelessWidget {
         requests: requests,
         reminders: reminders,
         child: MaterialApp(
-          title: 'Karmic Healing',
+          onGenerateTitle: (context) =>
+              AppLocalizations.of(context).karmicHealing,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           theme: appTheme(Brightness.light),
           darkTheme: appTheme(Brightness.dark),
           themeMode: mode,
@@ -155,9 +159,10 @@ class _AppWrapperState extends State<AppWrapper> {
       case 'energy_help':
         return const BalancingEnergyHelpScreen();
       case 'energy_session':
-        return const BalancingEnergyScreen(
-          title: 'Initial Process',
-          steps: EnergySteps.part1,
+        final l10n = AppLocalizations.of(context);
+        return BalancingEnergyScreen(
+          title: l10n.initialProcess,
+          steps: EnergySteps.part1(l10n),
         );
       case 'energy_settings':
         return const EnergySettingsScreen();

@@ -6,6 +6,7 @@ import 'package:karmic_healing_flutter/screens/settings/theme_settings_screen.da
 import 'package:karmic_healing_flutter/theme_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'support/test_app.dart';
 import 'support/test_repositories.dart';
 
 void main() {
@@ -23,7 +24,7 @@ void main() {
     await tester.pumpWidget(
       ThemeScope(
         controller: controller,
-        child: MaterialApp(
+        child: testApp(
           theme: ThemeData(brightness: Brightness.light),
           darkTheme: ThemeData(brightness: Brightness.dark),
           themeMode: ThemeMode.light,

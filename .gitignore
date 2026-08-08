@@ -39,6 +39,10 @@ migrate_working_dir/
 /outputs/qa/flutter/
 /outputs/*.png
 
+# The localizations are generated from lib/l10n/*.arb, which are the files
+# worth reviewing. `flutter pub get` writes these back on any checkout.
+/lib/l10n/app_localizations*.dart
+
 # Symbolication related
 app.*.symbols
 

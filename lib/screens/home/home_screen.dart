@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../constants/app_colors.dart';
 import '../../constants/design_constants.dart';
+import '../../l10n/app_localizations.dart';
 import '../../widgets/aura_widgets.dart';
 import '../../widgets/gradient_background.dart';
 import '../../widgets/scroll_blur.dart';
@@ -25,8 +26,8 @@ class HomeScreen extends StatelessWidget {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: const Text(
-          'Karmic Healing',
+        title: Text(
+          AppLocalizations.of(context).karmicHealing,
           style: TextStyle(
             fontFamily: 'Source Serif 4',
             fontWeight: FontWeight.w600,
@@ -73,7 +74,7 @@ class HomeScreen extends StatelessWidget {
                           ),
                     ),
                     Text(
-                      'Your tools',
+                      AppLocalizations.of(context).homeTools,
                       style: TextStyle(
                         fontFamily: 'Source Serif 4',
                         fontSize: 20,
@@ -94,7 +95,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                       children: [
                         _ToolCard(
-                          title: 'Requests',
+                          title: AppLocalizations.of(context).requests,
                           icon: const AuraIcon(
                             SFSymbols.staroflife,
                             level: AuraLevel.sacral,
@@ -107,7 +108,7 @@ class HomeScreen extends StatelessWidget {
                           ),
                         ),
                         _ToolCard(
-                          title: 'Reminders',
+                          title: AppLocalizations.of(context).reminders,
                           icon: const AuraIcon.drawn(
                             SFGlyph.pencilAndListClipboard,
                             level: AuraLevel.solar,
@@ -120,7 +121,7 @@ class HomeScreen extends StatelessWidget {
                           ),
                         ),
                         _ToolCard(
-                          title: 'Settings',
+                          title: AppLocalizations.of(context).settings,
                           icon: const AuraIcon.drawn(
                             SFGlyph.gearshape,
                             level: AuraLevel.brow,
@@ -189,7 +190,7 @@ class _HeroCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'TODAY',
+                AppLocalizations.of(context).homeDailyEyebrow.toUpperCase(),
                 style: TextStyle(
                   color: AppColors.of(context).health,
                   fontSize: 11,
@@ -199,7 +200,7 @@ class _HeroCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'A moment to return to yourself',
+                AppLocalizations.of(context).homeDailyTitle,
                 style: TextStyle(
                   fontFamily: 'Source Serif 4',
                   color: AppColors.of(context).textPrimary,
@@ -208,7 +209,7 @@ class _HeroCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Take a few quiet minutes to balance your energy and continue your practice.',
+                AppLocalizations.of(context).homeDailySubtitle,
                 style: TextStyle(
                   color: AppColors.of(context).textSecondary,
                   fontSize: 15,
@@ -222,7 +223,7 @@ class _HeroCard extends StatelessWidget {
               Align(
                 alignment: Alignment.centerLeft,
                 child: AuraButton(
-                  label: 'Start session',
+                  label: AppLocalizations.of(context).startSession,
                   icon: SFSymbols.arrowRight,
                   level: AuraLevel.heart,
                   onPressed: onTap,

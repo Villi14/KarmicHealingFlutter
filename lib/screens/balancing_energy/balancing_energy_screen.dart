@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../constants/app_colors.dart';
 import '../../constants/design_constants.dart';
+import '../../l10n/app_localizations.dart';
 import '../../widgets/aura_widgets.dart';
 import '../../widgets/gradient_background.dart';
 import '../../widgets/scroll_blur.dart';
@@ -158,7 +159,9 @@ class _BalancingEnergyScreenState extends State<BalancingEnergyScreen>
               Padding(
                 padding: EdgeInsets.fromLTRB(24, 16, 24, 0),
                 child: Text(
-                  'COMPLETE THE PREVIOUS STEP BEFORE MOVING ON TO THE NEXT ONE. EACH STEP TAKES ABOUT FIVE MINUTES.',
+                  AppLocalizations.of(
+                    context,
+                  ).attentionBeforeProceeding.toUpperCase(),
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   style: TextStyle(
@@ -223,6 +226,7 @@ class _BalancingEnergyScreenState extends State<BalancingEnergyScreen>
   );
 
   Widget _buildTimerBadge() {
+    final l10n = AppLocalizations.of(context);
     final total = _remaining.inSeconds;
     final time = '${total ~/ 60}:${(total % 60).toString().padLeft(2, '0')}';
     return Padding(
@@ -243,7 +247,9 @@ class _BalancingEnergyScreenState extends State<BalancingEnergyScreen>
           ),
           const SizedBox(width: 8),
           Text(
-            _isPaused ? 'PAUSED' : 'NEXT STEP IN $time',
+            _isPaused
+                ? l10n.paused.toUpperCase()
+                : l10n.nextStepIn(time).toUpperCase(),
             style: TextStyle(
               color: _sessionTone,
               fontSize: 11,
@@ -254,7 +260,7 @@ class _BalancingEnergyScreenState extends State<BalancingEnergyScreen>
           IconButton(
             onPressed: _togglePause,
             visualDensity: VisualDensity.compact,
-            tooltip: _isPaused ? 'Resume' : 'Pause',
+            tooltip: _isPaused ? l10n.resume : l10n.pause,
             icon: AuraIcon(
               _isPaused ? SFSymbols.play : SFSymbols.pause,
               level: _sessionLevel,
@@ -275,13 +281,15 @@ class _BalancingEnergyScreenState extends State<BalancingEnergyScreen>
           children: [
             if (_currentStep > 0)
               AuraButton(
-                label: 'Back',
+                label: AppLocalizations.of(context).back,
                 level: _sessionLevel,
                 onPressed: _previousStep,
               ),
             const Spacer(),
             AuraButton(
-              label: _isLastStep ? 'Done' : 'Next',
+              label: _isLastStep
+                  ? AppLocalizations.of(context).done
+                  : AppLocalizations.of(context).next,
               level: _sessionLevel,
               onPressed: _nextStep,
             ),
@@ -352,7 +360,9 @@ class _StepCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'STEP $number OF $count',
+            AppLocalizations.of(
+              context,
+            ).stepCounter(number, count).toUpperCase(),
             style: TextStyle(
               color: level.color(context),
               fontSize: 11,
@@ -441,141 +451,59 @@ class EnergyStep {
 }
 
 class EnergySteps {
-  static const _step1 = EnergyStep(
-    'Ask permission to speak with the Lords of Karma.',
-  );
-  static const _step2 = EnergyStep(
-    'Ask them to align your energy bodies and set up contacts between them.',
-  );
-  static const _step3 = EnergyStep(
-    'Ask to clear, heal, activate and open:',
-    'a) Ka Matrix;\nb) Etheric Matrix;\nc) Ketheric Matrix;\nd) Celestial Matrix;\nd) I-Am Matrix.\n\nDo this in order. Move on to the next request, having finished with the previous one.',
-  );
-  static const _part1Step4 = EnergyStep(
-    'Ask to restore, heal and activate your twelve strand DNA.',
-  );
-  static const _part1Step5 = EnergyStep(
-    'Ask for the healing of the central soul to be completed.',
-  );
-  static const _part1Step6 = EnergyStep(
-    'Optional process',
-    'Ask the Lords of Karma to cleanse, release, and heal the Kundalini chakras from all negative connections',
-  );
-  static const _part1Step7 = EnergyStep(
-    'Optional process',
-    'Ask the Lords of Karma to cleanse, release, and heal the Kundalini chakras from all negative hooks.',
-  );
-  static const _part1Step8 = EnergyStep(
-    'Optional process',
-    'Ask the Lords of Karma to cleanse, release, and heal the chakras of the Hara line from all negative hooks.',
-  );
-  static const _part1Step9 = EnergyStep(
-    'Optional process',
-    'Ask the Lords of Karma to free, heal, and cleanse your energy from all heart wounds.',
-  );
-  static const _part1Step10 = EnergyStep(
-    'Ask your Higher Self to come to you, and then:',
-    'a) ask his name;\nb) ask him for a gift;\nc) listen to his request for a return gift;\nd) ask that it remain with you always.',
-  );
-  static const _part1Step11 = EnergyStep(
-    'Ask your Higher Self to clear, align, open, activate and fill the Hara line channels and chakras.',
-  );
-  static const _part1Step12 = EnergyStep(
-    'Ask your Higher Self to clear, align, open, activate and fill the Kundalini channels and chakras.',
-  );
-  static const _part1Step13 = EnergyStep(
-    'Ask that the process that has just been completed become permanent.',
-  );
-  static const _part1Step14 = EnergyStep('Come back to today.');
-  static const _part2Step4 = EnergyStep(
-    'Ask to restore, heal and activate your Silver Cord.',
-  );
-  static const _part2Step5 = EnergyStep('Ask your Higher Self to come to you.');
-  static const _part2Step8 = EnergyStep(
-    'Ask to clear, heal, align, open and activate the three Galactic Matrices.',
-  );
-  static const _part2Step9 = EnergyStep(
-    'Ask to clear, heal, align, open and activate the five Galactic Chakras.',
-  );
-  static const _part2Step10 = EnergyStep(
-    'Ask your Essence Self/Star Self to come forth and merge with your Higher Self.',
-  );
-  static const _part2Step11 = EnergyStep(
-    'Talk to him a little and ask him to connect with you forever.',
-  );
-  static const _part3Step11 = EnergyStep(
-    'Ask to clear, heal, align, open and activate the three Matrices of the causal body.',
-  );
-  static const _part3Step12 = EnergyStep(
-    'Ask to clear, heal, align, open and activate the five chakras of the causal body.',
-  );
-  static const _part3Step13 = EnergyStep(
-    'Ask your Divine Self/OverSoul to come and merge with your Higher Self and Essential Self.',
-  );
-  static const _part3Step14 = EnergyStep('Ask his name, talk to him.');
-  static const _part3Step15 = EnergyStep(
-    'Ask your Divine Self to stay with you forever (the process may take several days).',
-  );
-  static const _part3Step16 = EnergyStep(
-    'Invite your Goddess to come into you and merge with your Divine Self, and also connect your energy with the energy of all your bodies. Talk to her, ask her name.',
-  );
-  static const _part3Step17 = EnergyStep(
-    'Ask that the process just completed become permanent.',
-  );
-  static const _last = EnergyStep(
-    'Return to today, but continue to lie down for at least two hours.',
-  );
-
-  static const part1 = [
-    _step1,
-    _step2,
-    _step3,
-    _part1Step4,
-    _part1Step5,
-    _part1Step6,
-    _part1Step7,
-    _part1Step8,
-    _part1Step9,
-    _part1Step10,
-    _part1Step11,
-    _part1Step12,
-    _part1Step13,
-    _part1Step14,
+  /// The steps of a part, in the order they are walked. They read their text
+  /// from [AppLocalizations], so a part is built where a [BuildContext] is at
+  /// hand rather than held as a constant.
+  static List<EnergyStep> part1(AppLocalizations l10n) => [
+    ..._opening(l10n),
+    EnergyStep(l10n.part1Step4),
+    EnergyStep(l10n.part1Step5),
+    EnergyStep(l10n.part1Step6, l10n.part1Step6Text),
+    EnergyStep(l10n.part1Step6, l10n.part1Step7Text),
+    EnergyStep(l10n.part1Step6, l10n.part1Step8Text),
+    EnergyStep(l10n.part1Step6, l10n.part1Step9Text),
+    EnergyStep(l10n.part1Step10, l10n.part1Step10Text),
+    EnergyStep(l10n.part1Step11),
+    EnergyStep(l10n.part1Step12),
+    EnergyStep(l10n.part1Step13),
+    EnergyStep(l10n.part1Step14),
   ];
 
-  static const part2 = [
-    _step1,
-    _step2,
-    _step3,
-    _part2Step4,
-    _part2Step5,
-    _part1Step11,
-    _part1Step12,
-    _part2Step8,
-    _part2Step9,
-    _part2Step10,
-    _part2Step11,
-    _last,
+  static List<EnergyStep> part2(AppLocalizations l10n) => [
+    ..._ascent(l10n),
+    EnergyStep(l10n.part2Step10),
+    EnergyStep(l10n.part2Step11),
+    EnergyStep(l10n.stepLast),
   ];
 
-  static const part3 = [
-    _step1,
-    _step2,
-    _step3,
-    _part2Step4,
-    _part2Step5,
-    _part1Step11,
-    _part1Step12,
-    _part2Step8,
-    _part2Step9,
-    _part2Step10,
-    _part3Step11,
-    _part3Step12,
-    _part3Step13,
-    _part3Step14,
-    _part3Step15,
-    _part3Step16,
-    _part3Step17,
-    _last,
+  static List<EnergyStep> part3(AppLocalizations l10n) => [
+    ..._ascent(l10n),
+    EnergyStep(l10n.part2Step10),
+    EnergyStep(l10n.part3Step11),
+    EnergyStep(l10n.part3Step12),
+    EnergyStep(l10n.part3Step13),
+    EnergyStep(l10n.part3Step14),
+    EnergyStep(l10n.part3Step15),
+    EnergyStep(l10n.part3Step16),
+    EnergyStep(l10n.part3Step17),
+    EnergyStep(l10n.stepLast),
+  ];
+
+  /// The three steps every part opens with.
+  static List<EnergyStep> _opening(AppLocalizations l10n) => [
+    EnergyStep(l10n.step1),
+    EnergyStep(l10n.step2),
+    EnergyStep(l10n.step3, l10n.step3Text),
+  ];
+
+  /// What parts two and three share before they part ways.
+  static List<EnergyStep> _ascent(AppLocalizations l10n) => [
+    ..._opening(l10n),
+    EnergyStep(l10n.part2Step4),
+    EnergyStep(l10n.part2Step5),
+    EnergyStep(l10n.part1Step11),
+    EnergyStep(l10n.part1Step12),
+    EnergyStep(l10n.part2Step8),
+    EnergyStep(l10n.part2Step9),
   ];
 }

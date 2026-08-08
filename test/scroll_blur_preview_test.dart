@@ -6,6 +6,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:karmic_healing_flutter/screens/requests/requests_help_screen.dart';
 
+import 'support/test_app.dart';
+
 /// Captures a screen at rest and scrolled, so the navigation bar's frosting can
 /// be eyeballed. Not an assertion — a QA aid.
 void main() {
@@ -18,12 +20,9 @@ void main() {
 
     const boundaryKey = Key('screen');
     await tester.pumpWidget(
-      const RepaintBoundary(
+      RepaintBoundary(
         key: boundaryKey,
-        child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          home: RequestsHelpScreen(),
-        ),
+        child: testApp(home: const RequestsHelpScreen()),
       ),
     );
     await tester.pumpAndSettle();

@@ -5,6 +5,7 @@ import '../../constants/app_colors.dart';
 import '../../constants/design_constants.dart';
 import '../../data/models.dart';
 import '../../data/repository_scope.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/requests_repository.dart';
 import '../../widgets/aura_widgets.dart';
 import '../../widgets/bottom_bar.dart';
@@ -82,7 +83,7 @@ class RequestDetailScreen extends StatelessWidget {
               onPressed: () => _addSubrequest(context, repository, request),
               icon: ToneIcon(SFSymbols.plus, tone: request.color),
               label: Text(
-                'Add Subrequest',
+                AppLocalizations.of(context).addSubRequest,
                 style: TextStyle(color: request.color, fontSize: 17),
               ),
             ),
@@ -118,11 +119,14 @@ class RequestDetailScreen extends StatelessWidget {
                           level: AuraLevel.sacral,
                           size: 33,
                         ),
-                        title: 'Nothing under it yet',
-                        message:
-                            'A request that cannot be fulfilled right away is broken into subrequests — the steps that pave the way to it.',
+                        title: AppLocalizations.of(
+                          context,
+                        ).subrequestsEmptyTitle,
+                        message: AppLocalizations.of(
+                          context,
+                        ).subrequestsEmptyMessage,
                         level: AuraLevel.sacral,
-                        actionTitle: 'Add Subrequest',
+                        actionTitle: AppLocalizations.of(context).addSubRequest,
                         onAction: () =>
                             _addSubrequest(context, repository, request),
                       )
@@ -168,7 +172,7 @@ class _RequestHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AuraLabel('Request', tone: request.color),
+        AuraLabel(AppLocalizations.of(context).request, tone: request.color),
         const SizedBox(height: 4),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -202,7 +206,7 @@ class _RequestHeader extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          _hint,
+          _hint(AppLocalizations.of(context)),
           style: TextStyle(
             color: AppColors.of(context).textSecondary,
             fontSize: 15,
@@ -246,10 +250,10 @@ class _RequestHeader extends StatelessWidget {
 
   /// What the request is waiting for, said plainly, so a radio button that will
   /// not move explains itself.
-  String get _hint {
-    if (!progress.hasSubrequests) return 'Ready to be fulfilled';
-    if (progress.allCompleted) return 'Every subrequest is fulfilled';
-    return 'Fulfil every subrequest first '
-        '(${progress.completed} of ${progress.total})';
+  String _hint(AppLocalizations l10n) {
+    if (!progress.hasSubrequests) return l10n.requestReadyToBeFulfilled;
+    if (progress.allCompleted) return l10n.requestEverySubrequestFulfilled;
+    return '${l10n.requestLockedHint} '
+        '${l10n.subrequestProgress(progress.completed, progress.total)}';
   }
 }

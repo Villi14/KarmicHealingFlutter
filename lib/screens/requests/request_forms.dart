@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../constants/app_colors.dart';
 import '../../data/models.dart';
 import '../../data/repository_scope.dart';
+import '../../l10n/app_localizations.dart';
 import '../../widgets/aura_widgets.dart';
 import '../../widgets/color_picker_row.dart';
 import '../../widgets/karmic_form.dart';
@@ -18,11 +19,11 @@ class SubrequestFormScreen extends StatefulWidget {
   const SubrequestFormScreen({
     super.key,
     required this.subrequest,
-    this.screenTitle = 'New Subrequest',
+    this.screenTitle,
   });
 
   final Subrequest subrequest;
-  final String screenTitle;
+  final String? screenTitle;
 
   @override
   State<SubrequestFormScreen> createState() => _SubrequestFormScreenState();
@@ -41,7 +42,7 @@ class _SubrequestFormScreenState extends State<SubrequestFormScreen> {
 
   @override
   Widget build(BuildContext context) => KarmicFormShell(
-    title: widget.screenTitle,
+    title: widget.screenTitle ?? AppLocalizations.of(context).newSubRequest,
     tone: AppColors.of(context).friendly,
     onSave: _save,
     child: ListView(
@@ -49,14 +50,14 @@ class _SubrequestFormScreenState extends State<SubrequestFormScreen> {
       children: [
         KarmicFormField(
           controller: _title,
-          hint: 'Title',
+          hint: AppLocalizations.of(context).title,
           level: AuraLevel.sacral,
           serif: true,
         ),
         const SizedBox(height: 20),
         KarmicFormField(
           controller: _notes,
-          hint: 'Notes',
+          hint: AppLocalizations.of(context).notes,
           level: AuraLevel.sacral,
           minLines: 4,
         ),
@@ -105,7 +106,11 @@ class _RequestFormScreenState extends State<RequestFormScreen> {
 
   @override
   Widget build(BuildContext context) => KarmicFormShell(
-    title: widget.screenTitle ?? (widget.request == null ? 'Request' : 'Edit'),
+    title:
+        widget.screenTitle ??
+        (widget.request == null
+            ? AppLocalizations.of(context).request
+            : AppLocalizations.of(context).editList),
     tone: AppColors.of(context).friendly,
     onSave: _save,
     child: ListView(
@@ -113,7 +118,7 @@ class _RequestFormScreenState extends State<RequestFormScreen> {
       children: [
         KarmicFormField(
           controller: _title,
-          hint: 'Request',
+          hint: AppLocalizations.of(context).request,
           level: AuraLevel.sacral,
           serif: true,
           centered: true,
@@ -122,7 +127,7 @@ class _RequestFormScreenState extends State<RequestFormScreen> {
         const SizedBox(height: 20),
         KarmicFormField(
           controller: _notes,
-          hint: 'Notes',
+          hint: AppLocalizations.of(context).notes,
           level: AuraLevel.sacral,
           minLines: 4,
         ),
@@ -135,7 +140,7 @@ class _RequestFormScreenState extends State<RequestFormScreen> {
         const SizedBox(height: 20),
         KarmicFormToggle(
           icon: SFSymbols.calendar,
-          title: 'Date',
+          title: AppLocalizations.of(context).date,
           level: AuraLevel.sacral,
           value: _dueDate != null,
           onChanged: _setDateEnabled,

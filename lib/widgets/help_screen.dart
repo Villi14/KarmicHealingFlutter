@@ -2,44 +2,25 @@ import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
 import '../constants/design_constants.dart';
+import '../l10n/app_localizations.dart';
 import 'aura_widgets.dart';
 import 'gradient_background.dart';
 import 'scroll_blur.dart';
 import 'sf_symbols.dart';
 
 /// The five steps of the guide, shared by every help screen that shows it.
-const helpSteps = <(String, String, IconData)>[
-  (
-    'Prepare your space',
-    "Find a quiet place where you won't be disturbed. Sit or lie down comfortably, close your eyes, and take several deep breaths to relax.",
-    SFSymbols.heart,
-  ),
-  (
-    'Ask for permission',
-    'Mentally or aloud, ask the Lords of Karma for permission to speak with them. Wait for their response - you may feel a sense of permission or guidance.',
-    SFSymbols.moonStars,
-  ),
-  (
-    'Formulate your request',
-    'Clearly and respectfully state your request. Be specific about what you need help with. Speak from your heart with sincerity and humility.',
-    SFSymbols.sunMax,
-  ),
-  (
-    'Listen and observe',
-    'After making your request, remain quiet and attentive. You may receive guidance through thoughts, feelings, images, or inner knowing. Trust your intuition.',
-    SFSymbols.handRaised,
-  ),
-  (
-    'Express gratitude',
-    'Thank the Lords of Karma for their time and assistance. Express your gratitude sincerely, regardless of whether you received immediate help or not.',
-    SFSymbols.checkmarkCircle,
-  ),
+List<(String, String, IconData)> helpSteps(AppLocalizations l10n) => [
+  (l10n.helpStep1Title, l10n.helpStep1Description, SFSymbols.heart),
+  (l10n.helpStep2Title, l10n.helpStep2Description, SFSymbols.moonStars),
+  (l10n.helpStep3Title, l10n.helpStep3Description, SFSymbols.sunMax),
+  (l10n.helpStep4Title, l10n.helpStep4Description, SFSymbols.handRaised),
+  (l10n.helpStep5Title, l10n.helpStep5Description, SFSymbols.checkmarkCircle),
 ];
 
-const importantTips = [
-  'Practice regularly - the more you communicate, the stronger your connection becomes',
-  'Be patient - answers may not come immediately, but they will come at the right time',
-  "Trust the process - even if you don't see immediate results, trust that healing is happening",
+List<String> importantTips(AppLocalizations l10n) => [
+  l10n.helpTip1,
+  l10n.helpTip2,
+  l10n.helpTip3,
 ];
 
 /// "How to work with the Lords of Karma" — the same guide wherever it appears,
@@ -60,89 +41,94 @@ class HelpScreen extends StatelessWidget {
   final List<Widget> extras;
 
   @override
-  Widget build(BuildContext context) => ScrollBlur(
-    child: Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        flexibleSpace: const ScrollBlurBackdrop(),
-        backgroundColor: Colors.transparent,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        title: const Text('Help'),
-        automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            onPressed: () => Navigator.of(context).pop(),
-            icon: AuraIcon(SFSymbols.xmark, level: level),
-          ),
-        ],
-      ),
-      body: GradientBackground(
-        tone: tone,
-        child: SafeArea(
-          top: false,
-          child: Align(
-            alignment: Alignment.topCenter,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 700),
-              child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(
-                  16,
-                  DesignConstants.navigationBarInset(context) + 24,
-                  16,
-                  32,
-                ),
-                child: Column(
-                  children: [
-                    AuraIcon(
-                      SFSymbols.questionmarkCircle,
-                      level: level,
-                      size: 60,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'How to work with the Lords of Karma',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: 'Source Serif 4',
-                        fontSize: 28,
-                        color: AppColors.of(context).textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Step-by-step guide to effective communication',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: AppColors.of(context).textPrimary,
-                        fontSize: 17,
-                        height: 1.35,
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    for (var index = 0; index < helpSteps.length; index++) ...[
-                      HelpStep(
-                        number: index + 1,
-                        step: helpSteps[index],
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final steps = helpSteps(l10n);
+
+    return ScrollBlur(
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+          flexibleSpace: const ScrollBlurBackdrop(),
+          backgroundColor: Colors.transparent,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          title: Text(l10n.help),
+          automaticallyImplyLeading: false,
+          actions: [
+            IconButton(
+              onPressed: () => Navigator.of(context).pop(),
+              icon: AuraIcon(SFSymbols.xmark, level: level),
+            ),
+          ],
+        ),
+        body: GradientBackground(
+          tone: tone,
+          child: SafeArea(
+            top: false,
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 700),
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.fromLTRB(
+                    16,
+                    DesignConstants.navigationBarInset(context) + 24,
+                    16,
+                    32,
+                  ),
+                  child: Column(
+                    children: [
+                      AuraIcon(
+                        SFSymbols.questionmarkCircle,
                         level: level,
+                        size: 60,
                       ),
-                      if (index != helpSteps.length - 1)
-                        const SizedBox(height: 20),
-                    ],
-                    for (final extra in extras) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        l10n.helpTitle,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: 'Source Serif 4',
+                          fontSize: 28,
+                          color: AppColors.of(context).textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        l10n.helpSubtitle,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: AppColors.of(context).textPrimary,
+                          fontSize: 17,
+                          height: 1.35,
+                        ),
+                      ),
                       const SizedBox(height: 32),
-                      extra,
+                      for (var index = 0; index < steps.length; index++) ...[
+                        HelpStep(
+                          number: index + 1,
+                          step: steps[index],
+                          level: level,
+                        ),
+                        if (index != steps.length - 1)
+                          const SizedBox(height: 20),
+                      ],
+                      for (final extra in extras) ...[
+                        const SizedBox(height: 32),
+                        extra,
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
             ),
           ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class HelpStep extends StatelessWidget {

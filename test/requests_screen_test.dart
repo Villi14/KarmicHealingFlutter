@@ -5,6 +5,7 @@ import 'package:karmic_healing_flutter/screens/requests/request_detail_screen.da
 import 'package:karmic_healing_flutter/screens/requests/requests_screen.dart';
 import 'package:karmic_healing_flutter/widgets/list_row.dart';
 
+import 'support/test_app.dart';
 import 'support/test_repositories.dart';
 
 /// The requests screen against a real store: what it draws comes from the
@@ -28,10 +29,7 @@ void main() {
       RepositoryScope(
         requests: repositories.requests,
         reminders: repositories.reminders,
-        child: const MaterialApp(
-          debugShowCheckedModeBanner: false,
-          home: RequestsScreen(),
-        ),
+        child: testApp(home: const RequestsScreen()),
       ),
     );
     await tester.pumpAndSettle();

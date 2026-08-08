@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 import '../../data/models.dart';
 import '../../data/repository_scope.dart';
+import '../../l10n/app_localizations.dart';
 import '../../widgets/aura_widgets.dart';
 import '../../widgets/list_row.dart';
 import '../../widgets/sf_symbols.dart';
@@ -116,8 +117,10 @@ class SubrequestRow extends StatelessWidget {
 
   Future<void> _openForm(BuildContext context) => Navigator.of(context).push(
     MaterialPageRoute<void>(
-      builder: (_) =>
-          SubrequestFormScreen(subrequest: subrequest, screenTitle: 'Details'),
+      builder: (_) => SubrequestFormScreen(
+        subrequest: subrequest,
+        screenTitle: AppLocalizations.of(context).details,
+      ),
     ),
   );
 }

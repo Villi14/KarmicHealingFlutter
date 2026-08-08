@@ -5,6 +5,7 @@ import '../../constants/app_colors.dart';
 import '../../constants/design_constants.dart';
 import '../../data/models.dart';
 import '../../data/repository_scope.dart';
+import '../../l10n/app_localizations.dart';
 import '../../data/requests_repository.dart';
 import '../../data/seed_sample_data.dart';
 import '../../widgets/aura_widgets.dart';
@@ -57,7 +58,7 @@ class _RequestsScreenState extends State<RequestsScreen> {
           shadowColor: Colors.transparent,
           elevation: 0,
           scrolledUnderElevation: 0,
-          title: const Text('Requests'),
+          title: Text(AppLocalizations.of(context).requests),
           leading: IconButton(
             onPressed: () => Navigator.of(context).pop(),
             icon: const AuraIcon(
@@ -102,7 +103,7 @@ class _RequestsScreenState extends State<RequestsScreen> {
                 size: 20,
               ),
               label: Text(
-                'Request',
+                AppLocalizations.of(context).request,
                 style: TextStyle(
                   color: AppColors.of(context).friendly,
                   fontSize: 17,
@@ -170,11 +171,10 @@ class _RequestsScreenState extends State<RequestsScreen> {
           level: AuraLevel.sacral,
           size: 33,
         ),
-        title: 'Start with a request',
-        message:
-            'Write down what you are asking for. If it cannot be fulfilled right away, break it into subrequests.',
+        title: AppLocalizations.of(context).requestsEmptyTitle,
+        message: AppLocalizations.of(context).requestsEmptyMessage,
         level: AuraLevel.sacral,
-        actionTitle: 'Add Request',
+        actionTitle: AppLocalizations.of(context).addRequest,
         onAction: () => _openRequestForm(context),
       ),
     ],
@@ -185,7 +185,7 @@ class _RequestsScreenState extends State<RequestsScreen> {
         padding: _listPadding,
         children: [
           Text(
-            'My requests',
+            AppLocalizations.of(context).myRequests,
             style: TextStyle(
               fontFamily: 'Source Serif 4',
               fontSize: 20,
@@ -195,7 +195,7 @@ class _RequestsScreenState extends State<RequestsScreen> {
           const SizedBox(height: 8),
           // The rows are requests; what hangs under them is the second level.
           Text(
-            'Every subrequest belongs to a request',
+            AppLocalizations.of(context).subrequestsHint,
             style: TextStyle(
               color: AppColors.of(context).textSecondary,
               fontSize: 15,
@@ -258,20 +258,20 @@ class _RequestsScreenState extends State<RequestsScreen> {
               level: AuraLevel.sacral,
               size: 33,
             ),
-            title: 'No results',
-            message: 'Try another search.',
+            title: AppLocalizations.of(context).noResults,
+            message: AppLocalizations.of(context).tryAnotherSearch,
             level: AuraLevel.sacral,
           )
         else ...[
           if (results.requests.isNotEmpty) ...[
-            _sectionHeader(context, 'Request'),
+            _sectionHeader(context, AppLocalizations.of(context).request),
             for (final request in results.requests) ...[
               _requestRow(context, repository, request),
               const SizedBox(height: 8),
             ],
           ],
           if (results.subrequests.isNotEmpty) ...[
-            _sectionHeader(context, 'Subrequest'),
+            _sectionHeader(context, AppLocalizations.of(context).subRequest),
             for (final subrequest in results.subrequests) ...[
               SubrequestRow(
                 subrequest: subrequest,
@@ -330,7 +330,7 @@ class _SearchTally extends StatelessWidget {
   Widget build(BuildContext context) => Row(
     children: [
       Text(
-        '$completedCount completed',
+        AppLocalizations.of(context).completedTally(completedCount),
         style: TextStyle(
           color: AppColors.of(context).textSecondary,
           fontSize: 15,
@@ -340,13 +340,18 @@ class _SearchTally extends StatelessWidget {
         const SizedBox(width: 8),
         TextButton(
           onPressed: onClear,
-          child: Text('Clear', style: TextStyle(color: tone)),
+          child: Text(
+            AppLocalizations.of(context).clear,
+            style: TextStyle(color: tone),
+          ),
         ),
         const Spacer(),
         TextButton(
           onPressed: onToggleCompleted,
           child: Text(
-            showsCompleted ? 'Hide' : 'Show',
+            showsCompleted
+                ? AppLocalizations.of(context).hide
+                : AppLocalizations.of(context).show,
             style: TextStyle(color: tone),
           ),
         ),

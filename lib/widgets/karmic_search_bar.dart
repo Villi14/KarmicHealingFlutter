@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
 import '../constants/design_constants.dart';
+import '../l10n/app_localizations.dart';
 import 'aura_widgets.dart';
 import 'sf_symbols.dart';
 
@@ -12,12 +13,10 @@ class KarmicSearchBar extends StatelessWidget {
     super.key,
     required this.controller,
     required this.onChanged,
-    this.hint = 'Search',
   });
 
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
-  final String hint;
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -42,7 +41,7 @@ class KarmicSearchBar extends StatelessWidget {
               onChanged: onChanged,
               cursorColor: AppColors.of(context).clam,
               decoration: InputDecoration(
-                hintText: hint,
+                hintText: AppLocalizations.of(context).search,
                 hintStyle: TextStyle(
                   color: AppColors.of(context).textSecondary,
                 ),

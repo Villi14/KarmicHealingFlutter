@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../constants/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 import '../../widgets/aura_widgets.dart';
 import '../../widgets/help_screen.dart';
 
@@ -9,94 +10,90 @@ import '../../widgets/help_screen.dart';
 class RequestsHelpScreen extends StatelessWidget {
   const RequestsHelpScreen({super.key});
 
-  static const _structureTip =
-      'A request can be broken into subrequests. While any subrequest is unfulfilled, the request itself stays locked \u2014 mark it yourself once they are all done.';
-
   @override
-  Widget build(BuildContext context) => HelpScreen(
-    level: AuraLevel.sacral,
-    tone: AppColors.of(context).friendly,
-    extras: [
-      _KarmaProcessCard(),
-      TipsCard(
-        title: 'Request Structure',
-        tips: [_structureTip],
-        level: AuraLevel.sacral,
-      ),
-      TipsCard(
-        title: 'Important Tips',
-        tips: importantTips,
-        level: AuraLevel.sacral,
-      ),
-    ],
-  );
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
+    return HelpScreen(
+      level: AuraLevel.sacral,
+      tone: AppColors.of(context).friendly,
+      extras: [
+        _KarmaProcessCard(),
+        TipsCard(
+          title: l10n.requestsStructureTitle,
+          tips: [l10n.requestsStructureExplanation],
+          level: AuraLevel.sacral,
+        ),
+        TipsCard(
+          title: l10n.helpTipsTitle,
+          tips: importantTips(l10n),
+          level: AuraLevel.sacral,
+        ),
+      ],
+    );
+  }
 }
 
 class _KarmaProcessCard extends StatelessWidget {
   const _KarmaProcessCard();
 
-  static const _karmaSteps = [
-    'Ask permission to speak with the Lords of Karma - you will feel their presence.',
-    'Ask for the karmic liberation you wish to receive.',
-    'You will receive an answer "yes" or "no".',
-    'If the answer is "yes", ask for liberation:',
-  ];
-
-  static const _prayer =
-      'Let this healing pass through all levels and all bodies, through all my lives, including this present life, let all harm (caused by connections or situations) be removed, and let healing come to today - to NOW!';
-
-  static const _karmaStepsAfterPrayer = [
-    'If the answer is "no", ask what you should do to achieve liberation. Wait for the answer. If you receive information about a past life that you don\'t fully understand, ask for clarification.',
-    'If you receive "no" in step 4, repeat questions requiring yes-no answers at each stage. Each time you receive a negative answer, do what is written in step 5.',
-    'You can ask as many times as you want and about anything. But your requests should be simple and stated separately.',
-    'Use this process for four categories of karmic healing:',
-  ];
-
-  static const _categories = [
-    'a) for healing from diseases or correcting physical condition;',
-    'b) for healing conflict relationships;',
-    'c) for getting rid of negative character traits and bad habits;',
-    'd) for correcting negative life situations.',
-  ];
-
-  static const _lastKarmaStep =
-      "Treat these Beings with great respect. Never argue with them and don't forget to thank them.";
-
   @override
-  Widget build(BuildContext context) => AuraCard(
-    level: AuraLevel.sacral,
-    watermark: false,
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Center(
-          child: Text(
-            'Detailed Process of Working with the Lords of Karma',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Source Serif 4',
-              fontSize: 20,
-              color: AppColors.of(context).textPrimary,
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final steps = [
+      l10n.karmaStep1,
+      l10n.karmaStep2,
+      l10n.karmaStep3,
+      l10n.karmaStep4,
+    ];
+    final stepsAfterPrayer = [
+      l10n.karmaStep5,
+      l10n.karmaStep6,
+      l10n.karmaStep7,
+      l10n.karmaStep8,
+    ];
+    final categories = [
+      l10n.karmaCategoryA,
+      l10n.karmaCategoryB,
+      l10n.karmaCategoryC,
+      l10n.karmaCategoryD,
+    ];
+
+    return AuraCard(
+      level: AuraLevel.sacral,
+      watermark: false,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Text(
+              l10n.karmaHelpTitle,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'Source Serif 4',
+                fontSize: 20,
+                color: AppColors.of(context).textPrimary,
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 20),
-        for (var index = 0; index < _karmaSteps.length; index++) ...[
-          _KarmaStep(number: index + 1, text: _karmaSteps[index]),
+          const SizedBox(height: 20),
+          for (var index = 0; index < steps.length; index++) ...[
+            _KarmaStep(number: index + 1, text: steps[index]),
+            const SizedBox(height: 16),
+          ],
+          _QuoteCard(text: l10n.karmaLiberationPrayer, italic: true),
           const SizedBox(height: 16),
-        ],
-        const _QuoteCard(text: _prayer, italic: true),
-        const SizedBox(height: 16),
-        for (var index = 0; index < _karmaStepsAfterPrayer.length; index++) ...[
-          _KarmaStep(number: index + 5, text: _karmaStepsAfterPrayer[index]),
+          for (var index = 0; index < stepsAfterPrayer.length; index++) ...[
+            _KarmaStep(number: index + 5, text: stepsAfterPrayer[index]),
+            const SizedBox(height: 16),
+          ],
+          _QuoteCard(lines: categories),
           const SizedBox(height: 16),
+          _KarmaStep(number: 9, text: l10n.karmaStep9),
         ],
-        const _QuoteCard(lines: _categories),
-        const SizedBox(height: 16),
-        const _KarmaStep(number: 9, text: _lastKarmaStep),
-      ],
-    ),
-  );
+      ),
+    );
+  }
 }
 
 class _KarmaStep extends StatelessWidget {

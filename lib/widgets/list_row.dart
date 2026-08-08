@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../constants/app_colors.dart';
+import '../l10n/app_localizations.dart';
 import 'aura_widgets.dart';
 import 'sf_symbols.dart';
 
@@ -207,7 +208,10 @@ class DueDateBadge extends StatelessWidget {
           style: TextStyle(color: color, fontSize: 12),
         ),
         if (isPastDue)
-          Text('  Overdue', style: TextStyle(color: color, fontSize: 12)),
+          Text(
+            '  ${AppLocalizations.of(context).overdue}',
+            style: TextStyle(color: color, fontSize: 12),
+          ),
       ],
     );
   }

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../constants/app_colors.dart';
 import '../../data/models.dart';
 import '../../data/repository_scope.dart';
+import '../../l10n/app_localizations.dart';
 import '../../widgets/aura_alert.dart';
 import '../../widgets/aura_widgets.dart';
 import '../../widgets/color_picker_row.dart';
@@ -49,11 +50,14 @@ class _ReminderFormScreenState extends State<ReminderFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final repository = RepositoryScope.remindersOf(context);
     final topic = repository.topicById(_topicId);
 
     return KarmicFormShell(
-      title: widget.screenTitle ?? (widget.reminder == null ? 'New' : 'Edit'),
+      title:
+          widget.screenTitle ??
+          (widget.reminder == null ? l10n.newList : l10n.editList),
       tone: AppColors.of(context).clarity,
       onSave: _save,
       child: ListView(
@@ -61,21 +65,21 @@ class _ReminderFormScreenState extends State<ReminderFormScreen> {
         children: [
           KarmicFormField(
             controller: _title,
-            hint: 'Title',
+            hint: l10n.title,
             level: AuraLevel.solar,
             serif: true,
           ),
           const SizedBox(height: 20),
           KarmicFormField(
             controller: _notes,
-            hint: 'Notes',
+            hint: l10n.notes,
             level: AuraLevel.solar,
             minLines: 4,
           ),
           const SizedBox(height: 20),
           KarmicFormToggle(
             icon: SFSymbols.calendar,
-            title: 'Date',
+            title: l10n.date,
             level: AuraLevel.solar,
             value: _dueDate != null,
             onChanged: (isEnabled) => setState(
@@ -106,7 +110,7 @@ class _ReminderFormScreenState extends State<ReminderFormScreen> {
           const SizedBox(height: 20),
           KarmicFormToggle(
             icon: SFSymbols.flag,
-            title: 'Flag',
+            title: l10n.flag,
             level: AuraLevel.solar,
             value: _isFlagged,
             onChanged: (value) => setState(() => _isFlagged = value),
@@ -116,17 +120,17 @@ class _ReminderFormScreenState extends State<ReminderFormScreen> {
           // a choice of its own rather than a null.
           KarmicFormPicker<_PriorityChoice>(
             icon: SFSymbols.exclamationmark,
-            title: 'Priority',
+            title: l10n.priority,
             level: AuraLevel.solar,
             value: _PriorityChoice.of(_priority),
             options: _PriorityChoice.values,
-            label: (choice) => choice.label,
+            label: (choice) => choice.label(l10n),
             onSelected: (choice) => setState(() => _priority = choice.priority),
           ),
           const SizedBox(height: 12),
           KarmicFormPicker<String>(
             icon: SFSymbols.tag,
-            title: 'Topic',
+            title: l10n.list,
             level: AuraLevel.solar,
             iconTone: topic?.color,
             value: _topicId,
@@ -176,8 +180,8 @@ class _ReminderFormScreenState extends State<ReminderFormScreen> {
     if (dueDate != null && !dueDate.isAfter(DateTime.now())) {
       await showAuraAlert(
         context,
-        title: 'That moment has passed',
-        message: 'Pick a date and time still ahead of you.',
+        title: AppLocalizations.of(context).reminderDateInPastTitle,
+        message: AppLocalizations.of(context).reminderDateInPastMessage,
         level: AuraLevel.root,
       );
       return;
@@ -206,15 +210,21 @@ class _ReminderFormScreenState extends State<ReminderFormScreen> {
 
 /// The four things the priority menu offers, "None" among them.
 enum _PriorityChoice {
-  none('None', null),
-  high('High', Priority.high),
-  medium('Medium', Priority.medium),
-  low('Low', Priority.low);
+  none(null),
+  high(Priority.high),
+  medium(Priority.medium),
+  low(Priority.low);
 
-  const _PriorityChoice(this.label, this.priority);
+  const _PriorityChoice(this.priority);
 
-  final String label;
   final Priority? priority;
+
+  String label(AppLocalizations l10n) => switch (this) {
+    _PriorityChoice.none => l10n.none,
+    _PriorityChoice.high => l10n.high,
+    _PriorityChoice.medium => l10n.medium,
+    _PriorityChoice.low => l10n.low,
+  };
 
   static _PriorityChoice of(Priority? priority) {
     for (final choice in _PriorityChoice.values) {
@@ -251,7 +261,11 @@ class _TopicFormScreenState extends State<TopicFormScreen> {
 
   @override
   Widget build(BuildContext context) => KarmicFormShell(
-    title: widget.screenTitle ?? (widget.topic == null ? 'New' : 'Edit'),
+    title:
+        widget.screenTitle ??
+        (widget.topic == null
+            ? AppLocalizations.of(context).newList
+            : AppLocalizations.of(context).editList),
     tone: AppColors.of(context).clarity,
     onSave: _save,
     child: ListView(
@@ -270,7 +284,7 @@ class _TopicFormScreenState extends State<TopicFormScreen> {
               color: _color,
             ),
             decoration: InputDecoration(
-              hintText: 'New topic',
+              hintText: AppLocalizations.of(context).reminderPlaceholder,
               hintStyle: TextStyle(
                 fontFamily: 'Source Serif 4',
                 color: AppColors.of(context).textSecondary,

@@ -4,6 +4,7 @@ import '../../constants/app_colors.dart';
 import '../../constants/design_constants.dart';
 import '../../data/reminders_repository.dart';
 import '../../data/repository_scope.dart';
+import '../../l10n/app_localizations.dart';
 import '../../widgets/aura_widgets.dart';
 import '../../widgets/bottom_bar.dart';
 import '../../widgets/gradient_background.dart';
@@ -95,7 +96,7 @@ class _RemindersDetailScreenState extends State<RemindersDetailScreen> {
                         ),
                         icon: ToneIcon(SFSymbols.plus, tone: tone),
                         label: Text(
-                          'Reminder',
+                          AppLocalizations.of(context).reminder,
                           style: TextStyle(color: tone, fontSize: 17),
                         ),
                       ),
@@ -120,10 +121,17 @@ class _RemindersDetailScreenState extends State<RemindersDetailScreen> {
                       ),
                       children: [
                         _Header(
-                          title: topic?.title ?? _titleOf(widget.type),
+                          title:
+                              topic?.title ??
+                              _titleOf(
+                                AppLocalizations.of(context),
+                                widget.type,
+                              ),
                           // A topic's screen names itself as one; the mixed
                           // screens leave the eyebrow off.
-                          eyebrow: topic == null ? null : 'Topic',
+                          eyebrow: topic == null
+                              ? null
+                              : AppLocalizations.of(context).list,
                           color: tone,
                         ),
                         const SizedBox(height: 20),
@@ -134,10 +142,16 @@ class _RemindersDetailScreenState extends State<RemindersDetailScreen> {
                               level: AuraLevel.solar,
                               size: 33,
                             ),
-                            title: 'Nothing here yet',
+                            title: AppLocalizations.of(
+                              context,
+                            ).remindersNothingHereTitle,
                             message: topic == null
-                                ? 'Reminders that match will show up here.'
-                                : 'Small reminders turn the practice into a steady ritual.',
+                                ? AppLocalizations.of(
+                                    context,
+                                  ).remindersNoMatchesMessage
+                                : AppLocalizations.of(
+                                    context,
+                                  ).remindersTopicEmptyMessage,
                             level: AuraLevel.solar,
                           )
                         else
@@ -183,7 +197,7 @@ class _RemindersDetailScreenState extends State<RemindersDetailScreen> {
             children: [
               Icon(_orderingIcon(ordering), size: 18),
               const SizedBox(width: 8),
-              Text(_orderingLabel(ordering)),
+              Text(_orderingLabel(AppLocalizations.of(context), ordering)),
               if (ordering == _ordering) ...[
                 const Spacer(),
                 const Icon(SFSymbols.checkmark, size: 16),
@@ -198,19 +212,25 @@ class _RemindersDetailScreenState extends State<RemindersDetailScreen> {
           children: [
             const Icon(SFSymbols.eye, size: 18),
             const SizedBox(width: 8),
-            Text(_showCompleted ? 'Hide Completed' : 'Show Completed'),
+            Text(
+              _showCompleted
+                  ? AppLocalizations.of(context).hideCompleted
+                  : AppLocalizations.of(context).showCompleted,
+            ),
           ],
         ),
       ),
     ],
   );
 
-  static String _orderingLabel(RemindersOrdering ordering) =>
-      switch (ordering) {
-        RemindersOrdering.dueDate => 'Due Date',
-        RemindersOrdering.priority => 'Priority',
-        RemindersOrdering.title => 'Title',
-      };
+  static String _orderingLabel(
+    AppLocalizations l10n,
+    RemindersOrdering ordering,
+  ) => switch (ordering) {
+    RemindersOrdering.dueDate => l10n.dueDate,
+    RemindersOrdering.priority => l10n.priority,
+    RemindersOrdering.title => l10n.title,
+  };
 
   static IconData _orderingIcon(RemindersOrdering ordering) =>
       switch (ordering) {
@@ -219,14 +239,15 @@ class _RemindersDetailScreenState extends State<RemindersDetailScreen> {
         RemindersOrdering.title => SFSymbols.textformatCharacters,
       };
 
-  static String _titleOf(RemindersDetailType type) => switch (type) {
-    RemindersDetailType.all => 'All',
-    RemindersDetailType.completed => 'Completed',
-    RemindersDetailType.flagged => 'Flagged',
-    RemindersDetailType.scheduled => 'Scheduled',
-    RemindersDetailType.today => 'Today',
-    RemindersDetailType.topic => '',
-  };
+  static String _titleOf(AppLocalizations l10n, RemindersDetailType type) =>
+      switch (type) {
+        RemindersDetailType.all => l10n.all,
+        RemindersDetailType.completed => l10n.completed,
+        RemindersDetailType.flagged => l10n.flagged,
+        RemindersDetailType.scheduled => l10n.scheduled,
+        RemindersDetailType.today => l10n.today,
+        RemindersDetailType.topic => '',
+      };
 
   /// Each cut wears the colour of the cell it was opened from.
   static Color _toneOf(BuildContext context, RemindersDetailType type) {

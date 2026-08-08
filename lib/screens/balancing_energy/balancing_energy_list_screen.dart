@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../constants/app_colors.dart';
 import '../../constants/design_constants.dart';
+import '../../l10n/app_localizations.dart';
 import '../../widgets/aura_widgets.dart';
 import '../../widgets/disclosure_cell.dart';
 import '../../widgets/gradient_background.dart';
@@ -35,66 +36,77 @@ class _State extends State<BalancingEnergyListScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => ScrollBlur(
-    child: Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        flexibleSpace: const ScrollBlurBackdrop(),
-        backgroundColor: Colors.transparent,
-        shadowColor: Colors.transparent,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        title: const Text('Energy Balancing'),
-        leading: IconButton(
-          onPressed: () => Navigator.of(context).pop(),
-          icon: const AuraIcon(SFSymbols.chevronLeft, level: AuraLevel.heart),
-        ),
-        actions: [
-          IconButton(
-            onPressed: _showHelp,
-            icon: const AuraIcon(
-              SFSymbols.questionmarkCircle,
-              level: AuraLevel.heart,
-            ),
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
+    return ScrollBlur(
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+          flexibleSpace: const ScrollBlurBackdrop(),
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          title: Text(l10n.energyBalancing),
+          leading: IconButton(
+            onPressed: () => Navigator.of(context).pop(),
+            icon: const AuraIcon(SFSymbols.chevronLeft, level: AuraLevel.heart),
           ),
-        ],
-      ),
-      body: GradientBackground(
-        tone: AppColors.of(context).health,
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 700),
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                  16,
-                  DesignConstants.navigationBarInset(context) + 16,
-                  16,
-                  16,
-                ),
-                child: AuraCard(
-                  level: AuraLevel.heart,
-                  padding: EdgeInsets.zero,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (!_initialProcessCompleted)
+          actions: [
+            IconButton(
+              onPressed: _showHelp,
+              icon: const AuraIcon(
+                SFSymbols.questionmarkCircle,
+                level: AuraLevel.heart,
+              ),
+            ),
+          ],
+        ),
+        body: GradientBackground(
+          tone: AppColors.of(context).health,
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 700),
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    16,
+                    DesignConstants.navigationBarInset(context) + 16,
+                    16,
+                    16,
+                  ),
+                  child: AuraCard(
+                    level: AuraLevel.heart,
+                    padding: EdgeInsets.zero,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (!_initialProcessCompleted)
+                          DisclosureCell(
+                            title: l10n.initialProcess,
+                            onTap: () => _open(
+                              l10n.initialProcess,
+                              EnergySteps.part1(l10n),
+                              isInitialProcess: true,
+                            ),
+                          ),
                         DisclosureCell(
-                          title: 'Initial Process',
-                          onTap: () =>
-                              _open('Initial Process', EnergySteps.part1),
+                          title: l10n.essentialSelf,
+                          onTap: () => _open(
+                            l10n.essentialSelf,
+                            EnergySteps.part2(l10n),
+                          ),
                         ),
-                      DisclosureCell(
-                        title: 'Essential Self',
-                        onTap: () => _open('Essential Self', EnergySteps.part2),
-                      ),
-                      DisclosureCell(
-                        title: 'Divine Self',
-                        onTap: () => _open('Divine Self', EnergySteps.part3),
-                      ),
-                    ],
+                        DisclosureCell(
+                          title: l10n.divineSelf,
+                          onTap: () =>
+                              _open(l10n.divineSelf, EnergySteps.part3(l10n)),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -102,17 +114,21 @@ class _State extends State<BalancingEnergyListScreen> {
           ),
         ),
       ),
-    ),
-  );
+    );
+  }
 
-  void _open(String title, List<EnergyStep> steps) {
+  void _open(
+    String title,
+    List<EnergyStep> steps, {
+    bool isInitialProcess = false,
+  }) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => BalancingEnergyScreen(
           title: title,
           steps: steps,
           onCompleted: () async {
-            if (title != 'Initial Process') return;
+            if (!isInitialProcess) return;
             final prefs = await SharedPreferences.getInstance();
             await prefs.setBool('initial_process_completed', true);
             if (mounted) setState(() => _initialProcessCompleted = true);
@@ -139,29 +155,33 @@ class _State extends State<BalancingEnergyListScreen> {
 class BalancingEnergyHelpScreen extends StatelessWidget {
   const BalancingEnergyHelpScreen({super.key});
 
-  static const _settingsTips = [
-    'Meditation steps scroll automatically according to the set time interval.',
-    'You can customize the time interval for transitioning to the next step in meditation.',
-    'You can enable or disable vibration when transitioning to the next step.',
-    'You can enable or disable sound playback when transitioning to the next step.',
-    'You can adjust the volume of this sound.',
+  static List<String> _settingsTips(AppLocalizations l10n) => [
+    l10n.meditationAutoScroll,
+    l10n.meditationStepTiming,
+    l10n.meditationVibrationSetting,
+    l10n.meditationSoundSetting,
+    l10n.meditationVolumeSetting,
   ];
 
   @override
-  Widget build(BuildContext context) => HelpScreen(
-    level: AuraLevel.heart,
-    tone: AppColors.of(context).health,
-    extras: [
-      TipsCard(
-        title: 'Meditation Step Settings',
-        tips: _settingsTips,
-        level: AuraLevel.heart,
-      ),
-      TipsCard(
-        title: 'Important Tips',
-        tips: importantTips,
-        level: AuraLevel.heart,
-      ),
-    ],
-  );
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
+    return HelpScreen(
+      level: AuraLevel.heart,
+      tone: AppColors.of(context).health,
+      extras: [
+        TipsCard(
+          title: l10n.meditationSettingsTitle,
+          tips: _settingsTips(l10n),
+          level: AuraLevel.heart,
+        ),
+        TipsCard(
+          title: l10n.helpTipsTitle,
+          tips: importantTips(l10n),
+          level: AuraLevel.heart,
+        ),
+      ],
+    );
+  }
 }

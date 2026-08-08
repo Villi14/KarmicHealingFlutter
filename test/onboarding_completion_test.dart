@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:karmic_healing_flutter/screens/home/home_screen.dart';
 import 'package:karmic_healing_flutter/screens/onboarding/onboarding_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'support/test_app.dart';
 
 void main() {
   testWidgets('skipping onboarding lands on home and cannot be popped back', (
@@ -10,12 +11,7 @@ void main() {
   ) async {
     SharedPreferences.setMockInitialValues({});
 
-    await tester.pumpWidget(
-      const MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: OnboardingScreen(),
-      ),
-    );
+    await tester.pumpWidget(testApp(home: const OnboardingScreen()));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Skip'));

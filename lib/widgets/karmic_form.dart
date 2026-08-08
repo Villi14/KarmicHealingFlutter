@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_theme.dart';
 import '../constants/design_constants.dart';
+import '../l10n/app_localizations.dart';
 import 'aura_widgets.dart';
 import 'gradient_background.dart';
 import 'scroll_blur.dart';
@@ -44,12 +45,18 @@ class KarmicFormShell extends StatelessWidget {
           leadingWidth: 90,
           leading: TextButton(
             onPressed: () => Navigator.of(context).maybePop(),
-            child: Text('Cancel', style: TextStyle(color: tone, fontSize: 17)),
+            child: Text(
+              AppLocalizations.of(context).cancel,
+              style: TextStyle(color: tone, fontSize: 17),
+            ),
           ),
           actions: [
             TextButton(
               onPressed: onSave ?? () => Navigator.of(context).maybePop(),
-              child: Text('Save', style: TextStyle(color: tone, fontSize: 17)),
+              child: Text(
+                AppLocalizations.of(context).save,
+                style: TextStyle(color: tone, fontSize: 17),
+              ),
             ),
           ],
         ),

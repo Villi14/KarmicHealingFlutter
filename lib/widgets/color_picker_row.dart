@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
+import '../l10n/app_localizations.dart';
 import 'aura_widgets.dart';
 import 'karmic_form.dart';
 
@@ -15,13 +16,11 @@ class ColorPickerRow extends StatelessWidget {
     required this.level,
     required this.color,
     required this.onChanged,
-    this.title = 'Color',
   });
 
   final AuraLevel level;
   final Color color;
   final ValueChanged<Color> onChanged;
-  final String title;
 
   /// The two in the middle come from the spectrum, so they follow the
   /// appearance.
@@ -42,7 +41,7 @@ class ColorPickerRow extends StatelessWidget {
       children: [
         Expanded(
           child: Text(
-            title,
+            AppLocalizations.of(context).color,
             style: TextStyle(
               color: AppColors.of(context).textPrimary,
               fontSize: 17,
