@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/design_constants.dart';
 import '../../data/energy_settings.dart';
+import '../../data/session_effects.dart';
 import '../../l10n/app_localizations.dart';
 import '../../widgets/aura_widgets.dart';
 import '../../widgets/gradient_background.dart';
@@ -15,14 +16,29 @@ import 'energy_settings_screen.dart';
 class BalancingEnergyScreen extends StatefulWidget {
   const BalancingEnergyScreen({
     super.key,
+    required this.kind,
     required this.title,
     required this.steps,
     this.onCompleted,
+    this.effects,
+    this.now = DateTime.now,
   });
+
+  /// Which meditation this is — what a session in progress is recorded as.
+  final SessionKind kind;
 
   final String title;
   final List<EnergyStep> steps;
   final VoidCallback? onCompleted;
+
+  /// What the session reaches the device with — the chime, the haptics and the
+  /// screen's darkness. Left out, it takes the real device; a test hands one
+  /// that only remembers what it was asked for.
+  final SessionEffects? effects;
+
+  /// The wall clock a session keeps its schedule by. A test hands one it can
+  /// wind forward, so a step that takes five minutes need not take five.
+  final DateTime Function() now;
 
   @override
   State<BalancingEnergyScreen> createState() => _BalancingEnergyScreenState();
@@ -31,30 +47,47 @@ class BalancingEnergyScreen extends StatefulWidget {
 class _BalancingEnergyScreenState extends State<BalancingEnergyScreen>
     with WidgetsBindingObserver {
   late final PageController _pageController;
+  late final SessionEffects _effects;
+  late EnergySettings _settings;
   int _currentStep = 0;
   Timer? _ticker;
-  DateTime _stepStartedAt = DateTime.now();
+  late DateTime _stepStartedAt = widget.now();
   Duration _stepDuration = const Duration(minutes: 5);
   Duration _pausedRemaining = Duration.zero;
   bool _isPaused = false;
+
+  /// The screen has gone dark to let the user sit with the step.
+  bool _isResting = false;
+
+  /// When the screen last lit up — a step change or a touch.
+  late DateTime _lastWokeAt = widget.now();
+
+  /// The session was paused because the app left the screen, not because the
+  /// user asked. Only such a pause is lifted again on the way back.
+  bool _pausedByBackground = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _pageController = PageController();
+    _effects = widget.effects ?? DeviceSessionEffects();
+    _effects.begin();
     _startTicker();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // A session picks up a duration changed under it — the settings screen is
+    _settings = EnergySettingsScope.of(context);
+    // A session picks up settings changed under it — the settings screen is
     // reachable from this one's toolbar, so the change usually arrives mid-run.
-    final duration = EnergySettingsScope.of(context).stepDuration;
-    if (duration == _stepDuration) return;
+    // A rest the user has just switched off has to lift at once, so any change
+    // brings the screen back and starts the delay again.
+    _wake();
+    if (_settings.stepDuration == _stepDuration) return;
     setState(() {
-      _stepDuration = duration;
+      _stepDuration = _settings.stepDuration;
       _restartStepTimer();
     });
   }
@@ -63,6 +96,11 @@ class _BalancingEnergyScreenState extends State<BalancingEnergyScreen>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _ticker?.cancel();
+    _effects.end();
+    // Leaving ends the session outright, walked to the end or not, so it leaves
+    // nothing of itself behind. Only a session the app was killed in the middle
+    // of gets to outlive the screen it ran on.
+    _settings.clearActiveSession();
     _pageController.dispose();
     super.dispose();
   }
@@ -70,11 +108,26 @@ class _BalancingEnergyScreenState extends State<BalancingEnergyScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      // Only a pause this screen put on is lifted: one the user chose stays.
+      if (_pausedByBackground) {
+        _pausedByBackground = false;
+        _togglePause();
+      }
+      _effects.begin();
+      _wake();
       _startTicker();
     } else if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached ||
         state == AppLifecycleState.hidden) {
+      // A session only runs while the user is with it. Nothing carries it once
+      // the app is out of sight, so it holds its place rather than racing
+      // ahead unwatched and chiming its way through a dozen steps on return.
       _ticker?.cancel();
+      if (!_isPaused) {
+        _pausedByBackground = true;
+        _togglePause();
+      }
+      _wake();
     }
   }
 
@@ -83,13 +136,43 @@ class _BalancingEnergyScreenState extends State<BalancingEnergyScreen>
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!mounted || _isPaused) return;
       if (_remaining == Duration.zero && !_isLastStep) _nextStep();
-      if (mounted) setState(() {});
+      if (!mounted) return;
+      if (_shouldRest) _rest();
+      setState(() {});
     });
+  }
+
+  /// A rest is due only once the screen has been left alone for the chosen
+  /// delay, and never while the session is paused — a paused session is one the
+  /// user is looking at.
+  bool get _shouldRest {
+    if (!_settings.screenRestEnabled || _isResting || _isPaused) return false;
+    return widget.now().difference(_lastWokeAt).inSeconds >=
+        _settings.screenRestDelay;
+  }
+
+  void _rest() {
+    _isResting = true;
+    _effects.setDimmed(true);
+  }
+
+  /// Brings the screen back and restarts the countdown to the next rest.
+  void _wake() {
+    _lastWokeAt = widget.now();
+    if (!_isResting) return;
+    _isResting = false;
+    _effects.setDimmed(false);
+  }
+
+  /// The chime and the tap a step change makes, each only if it was asked for.
+  void _feedback() {
+    if (_settings.soundEnabled) _effects.chime(_settings.audioVolume);
+    if (_settings.vibrationEnabled) _effects.vibrate();
   }
 
   Duration get _remaining {
     if (_isPaused) return _pausedRemaining;
-    final remaining = _stepDuration - DateTime.now().difference(_stepStartedAt);
+    final remaining = _stepDuration - widget.now().difference(_stepStartedAt);
     return remaining.isNegative ? Duration.zero : remaining;
   }
 
@@ -122,7 +205,26 @@ class _BalancingEnergyScreenState extends State<BalancingEnergyScreen>
   }
 
   @override
-  Widget build(BuildContext context) => ScrollBlur(
+  Widget build(BuildContext context) => Stack(
+    fit: StackFit.expand,
+    children: [_buildSession(context), if (_isResting) _buildScreenRest()],
+  );
+
+  /// The darkness the screen rests in.
+  ///
+  /// The display underneath is really taken to black; this covers what it still
+  /// leaks, and gives the touch that brings the step back somewhere to land.
+  Widget _buildScreenRest() => Semantics(
+    label: AppLocalizations.of(context).screenRest,
+    button: true,
+    child: GestureDetector(
+      onTap: () => setState(_wake),
+      behavior: HitTestBehavior.opaque,
+      child: const ColoredBox(color: Colors.black),
+    ),
+  );
+
+  Widget _buildSession(BuildContext context) => ScrollBlur(
     child: Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -193,9 +295,19 @@ class _BalancingEnergyScreenState extends State<BalancingEnergyScreen>
                           child: PageView.builder(
                             controller: _pageController,
                             itemCount: widget.steps.length,
+                            // Every way a step can change comes through here —
+                            // the buttons, a swipe, and the timer running out —
+                            // so this is the one place the chime is rung and
+                            // the screen brought back from its rest.
                             onPageChanged: (index) => setState(() {
                               _currentStep = index;
                               _restartStepTimer();
+                              _feedback();
+                              _wake();
+                              _settings.setActiveSession(
+                                widget.kind.name,
+                                index,
+                              );
                             }),
                             itemBuilder: (context, index) => Padding(
                               padding: const EdgeInsets.fromLTRB(8, 12, 16, 50),
@@ -302,15 +414,15 @@ class _BalancingEnergyScreenState extends State<BalancingEnergyScreen>
   );
 
   void _restartStepTimer() {
-    _stepStartedAt = DateTime.now();
+    _stepStartedAt = widget.now();
     _pausedRemaining = _stepDuration;
   }
 
   void _togglePause() => setState(() {
+    // Either way the user is looking at the screen again.
+    _wake();
     if (_isPaused) {
-      _stepStartedAt = DateTime.now().subtract(
-        _stepDuration - _pausedRemaining,
-      );
+      _stepStartedAt = widget.now().subtract(_stepDuration - _pausedRemaining);
     } else {
       _pausedRemaining = _remaining;
     }
@@ -443,6 +555,28 @@ class _StepLadder extends StatelessWidget {
         ),
     ],
   );
+}
+
+/// Which of the three meditations is running.
+///
+/// The names are the ones the SwiftUI app writes to `active_session_kind`, so a
+/// session recorded by one app says the same thing to the other.
+enum SessionKind {
+  initialProcess,
+  essentialSelf,
+  divineSelf;
+
+  String title(AppLocalizations l10n) => switch (this) {
+    SessionKind.initialProcess => l10n.initialProcess,
+    SessionKind.essentialSelf => l10n.essentialSelf,
+    SessionKind.divineSelf => l10n.divineSelf,
+  };
+
+  List<EnergyStep> steps(AppLocalizations l10n) => switch (this) {
+    SessionKind.initialProcess => EnergySteps.part1(l10n),
+    SessionKind.essentialSelf => EnergySteps.part2(l10n),
+    SessionKind.divineSelf => EnergySteps.part3(l10n),
+  };
 }
 
 class EnergyStep {

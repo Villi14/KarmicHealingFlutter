@@ -28,6 +28,8 @@ class EnergySettings extends ChangeNotifier {
   static const screenRestEnabledKey = 'screen_rest_enabled';
   static const screenRestDelayKey = 'screen_rest_delay';
   static const initialProcessCompletedKey = 'initial_process_completed';
+  static const activeSessionKindKey = 'active_session_kind';
+  static const activeSessionStepKey = 'active_session_step';
 
   static Future<EnergySettings> load() async =>
       EnergySettings._(await SharedPreferences.getInstance());
@@ -84,6 +86,33 @@ class EnergySettings extends ChangeNotifier {
 
   Future<void> completeInitialProcess() =>
       _write(() => _prefs.setBool(initialProcessCompletedKey, true));
+
+  /// Which meditation is running, and the step it has reached.
+  ///
+  /// Written as a session moves and cleared the moment it ends, whether it was
+  /// walked to the end or left partway — so what is found here on a later
+  /// launch is a session the app was killed in the middle of.
+  ///
+  /// Nothing reads it back into a session yet, here or in the SwiftUI app: an
+  /// interrupted meditation is begun again rather than picked up halfway, and
+  /// an interruption short enough to pick up from is a pause, not a kill. It is
+  /// recorded because it is the one thing a session leaves behind about itself.
+  String? get activeSessionKind => _prefs.getString(activeSessionKindKey);
+
+  int get activeSessionStep => _prefs.getInt(activeSessionStepKey) ?? 0;
+
+  /// Written without telling anyone, unlike every setting above it: a session
+  /// records its own progress, and a screen rebuilt on each step it takes would
+  /// be a screen that never gets to rest.
+  Future<void> setActiveSession(String kind, int step) async {
+    await _prefs.setString(activeSessionKindKey, kind);
+    await _prefs.setInt(activeSessionStepKey, step);
+  }
+
+  Future<void> clearActiveSession() async {
+    await _prefs.remove(activeSessionKindKey);
+    await _prefs.remove(activeSessionStepKey);
+  }
 
   /// Every setter takes the same shape: store it, then tell whoever is
   /// watching. Listeners hear about it before the write has landed on disk, so
