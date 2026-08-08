@@ -7,7 +7,7 @@ import 'package:flutter/cupertino.dart';
 /// Cupertino Icons is a port of the SF Symbols glyphs, so nearly every symbol
 /// the iOS app uses has an exact counterpart there — reaching for a Material
 /// icon instead is what put the port's glyphs out of step with the original.
-/// The five symbols Cupertino Icons has no counterpart for are drawn by hand
+/// The four symbols Cupertino Icons has no counterpart for are drawn by hand
 /// as [SFIcon] instead.
 abstract final class SFSymbols {
   static const chevronLeft = CupertinoIcons.chevron_left;
@@ -63,13 +63,7 @@ abstract final class SFSymbols {
 
 /// An SF Symbol with no Cupertino Icons counterpart, drawn to match the weight
 /// and proportions of the font glyphs it sits beside.
-enum SFGlyph {
-  meditate,
-  leaf,
-  gearshape,
-  pencilAndListClipboard,
-  iphoneRadiowaves,
-}
+enum SFGlyph { meditate, gearshape, pencilAndListClipboard, iphoneRadiowaves }
 
 /// Renders an [SFGlyph]. Sizes and tints itself from the ambient [IconTheme]
 /// exactly as [Icon] does, so it drops into any slot a font glyph would fill.
@@ -129,8 +123,6 @@ class _SFGlyphPainter extends CustomPainter {
     switch (glyph) {
       case SFGlyph.meditate:
         _paintMeditate(canvas, paint);
-      case SFGlyph.leaf:
-        _paintLeaf(canvas, paint);
       case SFGlyph.gearshape:
         _paintGearshape(canvas, paint);
       case SFGlyph.pencilAndListClipboard:
@@ -141,44 +133,62 @@ class _SFGlyphPainter extends CustomPainter {
     canvas.restore();
   }
 
-  /// `apple.meditate` — a figure seated cross-legged, hands resting on the knees.
+  /// `apple.meditate` — a sprout of two leaves on a stem over a scatter of soil,
+  /// traced off the symbol itself: the stem sits left of centre and the right
+  /// leaf is the taller of the two, as Apple draws them.
   void _paintMeditate(Canvas canvas, Paint paint) {
-    canvas.drawCircle(const Offset(50, 15), 9.5, paint);
-    // Torso and arms as one silhouette, kept narrow so the crossed legs below
-    // read as legs rather than as the base of a bell.
-    canvas.drawPath(
-      Path()
-        ..moveTo(29, 79)
-        ..cubicTo(28, 52, 37, 33, 50, 33)
-        ..cubicTo(63, 33, 72, 52, 71, 79),
+    const stemX = 46.4;
+    canvas.drawLine(const Offset(stemX, 50), const Offset(stemX, 79.6), paint);
+    _paintLens(
+      canvas,
       paint,
+      const Offset(stemX, 53.5),
+      const Offset(94.5, 4.5),
     );
-    // Crossed legs, reaching well past the body on both sides.
-    canvas.drawPath(
-      Path()
-        ..moveTo(8, 80)
-        ..quadraticBezierTo(50, 68, 92, 80)
-        ..quadraticBezierTo(50, 94, 8, 80)
-        ..close(),
-      paint,
-    );
+    _paintLens(canvas, paint, const Offset(stemX, 55), const Offset(7.5, 16));
+
+    final soil = Paint()
+      ..color = paint.color
+      ..style = PaintingStyle.fill
+      ..isAntiAlias = true;
+    for (final dot in const [
+      Offset(31.5, 81.5),
+      Offset(61.3, 81.5),
+      Offset(17, 86.6),
+      Offset(75.8, 86.6),
+      Offset(4.3, 95.7),
+      Offset(88.5, 95.7),
+    ]) {
+      canvas.drawCircle(dot, 4.2, soil);
+    }
   }
 
-  /// `leaf` — a pointed tip up to the right over a rounded base, with its midrib.
-  void _paintLeaf(Canvas canvas, Paint paint) {
+  /// One leaf: the lens between two arcs that bow out either side of the line
+  /// from where it joins the stem to its tip.
+  void _paintLens(Canvas canvas, Paint paint, Offset base, Offset tip) {
+    final axis = tip - base;
+    final length = axis.distance;
+    final normal = Offset(-axis.dy, axis.dx) / length;
+    final middle = (base + tip) / 2;
+    // Twice the sagitta, since a quadratic reaches half way to its control
+    // point. A sixth of the leaf's length is how far the symbol's arcs bow.
+    final bow = normal * (length / 3);
     canvas.drawPath(
       Path()
-        ..moveTo(87, 13)
-        ..cubicTo(48, 13, 17, 40, 17, 71)
-        ..cubicTo(17, 83, 27, 89, 41, 86)
-        ..cubicTo(71, 80, 87, 52, 87, 13)
+        ..moveTo(base.dx, base.dy)
+        ..quadraticBezierTo(
+          middle.dx + bow.dx,
+          middle.dy + bow.dy,
+          tip.dx,
+          tip.dy,
+        )
+        ..quadraticBezierTo(
+          middle.dx - bow.dx,
+          middle.dy - bow.dy,
+          base.dx,
+          base.dy,
+        )
         ..close(),
-      paint,
-    );
-    canvas.drawPath(
-      Path()
-        ..moveTo(24, 84)
-        ..cubicTo(44, 62, 62, 44, 82, 20),
       paint,
     );
   }

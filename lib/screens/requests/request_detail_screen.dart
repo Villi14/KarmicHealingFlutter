@@ -114,8 +114,8 @@ class RequestDetailScreen extends StatelessWidget {
                     const SizedBox(height: 20),
                     if (subrequests.isEmpty)
                       KarmicEmptyState(
-                        icon: const AuraIcon.drawn(
-                          SFGlyph.leaf,
+                        icon: const AuraIcon(
+                          SFSymbols.sparkles,
                           level: AuraLevel.sacral,
                           size: 33,
                         ),

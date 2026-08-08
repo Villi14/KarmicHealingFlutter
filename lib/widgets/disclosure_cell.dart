@@ -1,7 +1,35 @@
 import 'package:flutter/material.dart';
 
+import '../constants/design_constants.dart';
 import 'aura_widgets.dart';
 import 'sf_symbols.dart';
+
+/// A settings list: every cell in a card of its own.
+///
+/// The card in SwiftUI is put on the group's contents, and a modifier on a
+/// several-view builder lands on each view separately — so what the iOS app
+/// shows is one card per row, not one card holding the rows.
+class DisclosureGroup extends StatelessWidget {
+  const DisclosureGroup({
+    super.key,
+    required this.level,
+    required this.children,
+  });
+
+  final AuraLevel level;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      for (final (index, child) in children.indexed) ...[
+        if (index > 0) const SizedBox(height: DesignConstants.spacingSmall),
+        AuraCard(level: level, padding: EdgeInsets.zero, child: child),
+      ],
+    ],
+  );
+}
 
 class DisclosureCell extends StatelessWidget {
   const DisclosureCell({

@@ -166,8 +166,8 @@ class _RequestsScreenState extends State<RequestsScreen> {
     padding: const EdgeInsets.fromLTRB(8, 0, 8, 24),
     children: [
       KarmicEmptyState(
-        icon: const AuraIcon.drawn(
-          SFGlyph.leaf,
+        icon: const AuraIcon(
+          SFSymbols.sparkles,
           level: AuraLevel.sacral,
           size: 33,
         ),

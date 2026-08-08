@@ -64,27 +64,23 @@ class _State extends State<BalancingEnergyListScreen> {
                     16,
                     16,
                   ),
-                  child: AuraCard(
+                  child: DisclosureGroup(
                     level: AuraLevel.heart,
-                    padding: EdgeInsets.zero,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (!settings.initialProcessCompleted)
-                          DisclosureCell(
-                            title: SessionKind.initialProcess.title(l10n),
-                            onTap: () => _open(SessionKind.initialProcess),
-                          ),
+                    children: [
+                      if (!settings.initialProcessCompleted)
                         DisclosureCell(
-                          title: SessionKind.essentialSelf.title(l10n),
-                          onTap: () => _open(SessionKind.essentialSelf),
+                          title: SessionKind.initialProcess.title(l10n),
+                          onTap: () => _open(SessionKind.initialProcess),
                         ),
-                        DisclosureCell(
-                          title: SessionKind.divineSelf.title(l10n),
-                          onTap: () => _open(SessionKind.divineSelf),
-                        ),
-                      ],
-                    ),
+                      DisclosureCell(
+                        title: SessionKind.essentialSelf.title(l10n),
+                        onTap: () => _open(SessionKind.essentialSelf),
+                      ),
+                      DisclosureCell(
+                        title: SessionKind.divineSelf.title(l10n),
+                        onTap: () => _open(SessionKind.divineSelf),
+                      ),
+                    ],
                   ),
                 ),
               ),

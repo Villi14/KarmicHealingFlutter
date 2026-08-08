@@ -150,47 +150,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   16,
                   24,
                 ),
-                child: AuraCard(
+                child: DisclosureGroup(
                   level: AuraLevel.brow,
-                  padding: EdgeInsets.zero,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      DisclosureCell(title: l10n.about, onTap: _showAbout),
-                      DisclosureCell(
-                        title: l10n.theme,
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => const ThemeSettingsScreen(),
-                            fullscreenDialog: true,
-                          ),
+                  children: [
+                    DisclosureCell(title: l10n.about, onTap: _showAbout),
+                    DisclosureCell(
+                      title: l10n.theme,
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const ThemeSettingsScreen(),
+                          fullscreenDialog: true,
                         ),
                       ),
-                      DisclosureCell(
-                        title: l10n.sessionDuration,
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => const EnergySettingsScreen(),
-                            fullscreenDialog: true,
-                          ),
+                    ),
+                    DisclosureCell(
+                      title: l10n.sessionDuration,
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const EnergySettingsScreen(),
+                          fullscreenDialog: true,
                         ),
                       ),
-                      DisclosureCell(
-                        title: l10n.changeLanguage,
-                        onTap: _showChangeLanguage,
-                      ),
-                      DisclosureCell(
-                        title: l10n.privacyPolicy,
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => const PrivacyPolicyScreen(),
-                            fullscreenDialog: true,
-                          ),
+                    ),
+                    DisclosureCell(
+                      title: l10n.changeLanguage,
+                      onTap: _showChangeLanguage,
+                    ),
+                    DisclosureCell(
+                      title: l10n.privacyPolicy,
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const PrivacyPolicyScreen(),
+                          fullscreenDialog: true,
                         ),
                       ),
-                      DisclosureCell(title: l10n.writeToUs, onTap: _writeToUs),
-                    ],
-                  ),
+                    ),
+                    DisclosureCell(title: l10n.writeToUs, onTap: _writeToUs),
+                  ],
                 ),
               ),
             ),
