@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'constants/app_colors.dart';
 import 'constants/app_theme.dart';
 import 'l10n/app_localizations.dart';
 import 'data/app_database.dart';
@@ -29,6 +30,7 @@ import 'screens/requests/requests_screen.dart';
 import 'screens/settings/privacy_policy_screen.dart';
 import 'screens/settings/settings_screen.dart';
 import 'screens/settings/theme_settings_screen.dart';
+import 'widgets/gradient_background.dart';
 
 const _qaScreen = String.fromEnvironment('QA_SCREEN');
 
@@ -210,7 +212,18 @@ class _AppWrapperState extends State<AppWrapper> {
     }
 
     if (_isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      // The one moment before the first screen. On the aura like everything
+      // after it, so the app does not open on a flash of bare white.
+      return Scaffold(
+        body: GradientBackground(
+          tone: AppColors.of(context).health,
+          child: Center(
+            child: CircularProgressIndicator(
+              color: AppColors.of(context).health,
+            ),
+          ),
+        ),
+      );
     }
 
     return _hasCompletedOnboarding

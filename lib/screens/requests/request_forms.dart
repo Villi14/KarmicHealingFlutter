@@ -43,7 +43,7 @@ class _SubrequestFormScreenState extends State<SubrequestFormScreen> {
   @override
   Widget build(BuildContext context) => KarmicFormShell(
     title: widget.screenTitle ?? AppLocalizations.of(context).newSubRequest,
-    tone: AppColors.of(context).friendly,
+    level: AuraLevel.sacral,
     onSave: _save,
     child: ListView(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
@@ -111,7 +111,7 @@ class _RequestFormScreenState extends State<RequestFormScreen> {
         (widget.request == null
             ? AppLocalizations.of(context).request
             : AppLocalizations.of(context).editList),
-    tone: AppColors.of(context).friendly,
+    level: AuraLevel.sacral,
     onSave: _save,
     child: ListView(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),

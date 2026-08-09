@@ -1,5 +1,4 @@
 import 'package:flutter/services.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
@@ -14,17 +13,21 @@ import 'sf_symbols.dart';
 /// The chrome every form wears: Cancel and Save on either side of the bar, and
 /// the screen title below it taking the whole width so a long one wraps instead
 /// of being cut short between the two buttons.
+///
+/// The two buttons carry the level's gradient rather than a flat tint, as the
+/// Swift app gives them — each word the whole ramp across its own width — and
+/// the page sits on the same level's aura.
 class KarmicFormShell extends StatelessWidget {
   const KarmicFormShell({
     super.key,
     required this.title,
-    required this.tone,
+    required this.level,
     required this.child,
     this.onSave,
   });
 
   final String title;
-  final Color tone;
+  final AuraLevel level;
   final Widget child;
   final VoidCallback? onSave;
 
@@ -42,26 +45,35 @@ class KarmicFormShell extends StatelessWidget {
           elevation: 0,
           scrolledUnderElevation: 0,
           automaticallyImplyLeading: false,
-          leadingWidth: 90,
-          leading: TextButton(
-            onPressed: () => Navigator.of(context).maybePop(),
-            child: Text(
-              AppLocalizations.of(context).cancel,
-              style: TextStyle(color: tone, fontSize: 17),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: onSave ?? () => Navigator.of(context).maybePop(),
-              child: Text(
-                AppLocalizations.of(context).save,
-                style: TextStyle(color: tone, fontSize: 17),
+          // Both buttons sit in the title, which is the only slot that spans
+          // the bar: a leading slot has to be given a width in advance, and no
+          // width is right for every language — "Скасувати" is twice the word
+          // "Cancel" is, and broke onto a second line inside a fitted 90.
+          titleSpacing: 0,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              TextButton(
+                onPressed: () => Navigator.of(context).maybePop(),
+                child: AuraText(
+                  AppLocalizations.of(context).cancel,
+                  level: level,
+                  fontSize: 17,
+                ),
               ),
-            ),
-          ],
+              TextButton(
+                onPressed: onSave ?? () => Navigator.of(context).maybePop(),
+                child: AuraText(
+                  AppLocalizations.of(context).save,
+                  level: level,
+                  fontSize: 17,
+                ),
+              ),
+            ],
+          ),
         ),
         body: GradientBackground(
-          tone: tone,
+          tone: level.color(context),
           child: SafeArea(
             top: false,
             child: Column(
@@ -132,12 +144,15 @@ class KarmicFormField extends StatelessWidget {
   final int minLines;
   final bool serif;
   final bool centered;
+
+  /// The tone a field's own text carries — a request wears the colour it was
+  /// given. Laid on as the gradient the Swift app lays on it, not as a flat
+  /// fill, and only over words: an empty field keeps the plain hint.
   final Color? color;
 
   @override
-  Widget build(BuildContext context) => KarmicFormCard(
-    level: level,
-    child: TextField(
+  Widget build(BuildContext context) {
+    final field = TextField(
       controller: controller,
       minLines: minLines,
       maxLines: null,
@@ -156,8 +171,27 @@ class KarmicFormField extends StatelessWidget {
         ),
         border: InputBorder.none,
       ),
-    ),
-  );
+    );
+
+    final tone = color;
+    return KarmicFormCard(
+      level: level,
+      child: tone == null || controller == null
+          ? field
+          : ValueListenableBuilder<TextEditingValue>(
+              valueListenable: controller!,
+              // The mask paints over whatever is under it, hint included, so it
+              // only goes on once there are words of the field's own to tint.
+              builder: (context, value, child) => value.text.isEmpty
+                  ? child!
+                  : ShaderMask(
+                      shaderCallback: toneGradient(tone).createShader,
+                      child: child,
+                    ),
+              child: field,
+            ),
+    );
+  }
 }
 
 /// A row of a form that turns something on or off.
@@ -193,9 +227,13 @@ class KarmicFormToggle extends StatelessWidget {
             ),
           ),
         ),
-        CupertinoSwitch(
+        // Green, as the Swift app tints it and as the settings screens wear
+        // it — but with the heart level's own gradient across the track rather
+        // than the platform's single fill.
+        AuraSwitch(
           value: value,
-          activeTrackColor: AppColors.of(context).health,
+          level: AuraLevel.heart,
+          label: title,
           onChanged: onChanged,
         ),
       ],
@@ -244,7 +282,6 @@ class KarmicFormPicker<T> extends StatelessWidget {
         ),
         PopupMenuButton<T>(
           onSelected: onSelected,
-          color: AppColors.of(context).backgroundSecondary,
           itemBuilder: (context) => [
             for (final option in options)
               PopupMenuItem(value: option, child: Text(label(option))),

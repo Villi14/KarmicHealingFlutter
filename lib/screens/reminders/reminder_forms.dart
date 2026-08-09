@@ -58,7 +58,7 @@ class _ReminderFormScreenState extends State<ReminderFormScreen> {
       title:
           widget.screenTitle ??
           (widget.reminder == null ? l10n.newList : l10n.editList),
-      tone: AppColors.of(context).clarity,
+      level: AuraLevel.solar,
       onSave: _save,
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
@@ -266,7 +266,7 @@ class _TopicFormScreenState extends State<TopicFormScreen> {
         (widget.topic == null
             ? AppLocalizations.of(context).newList
             : AppLocalizations.of(context).editList),
-    tone: AppColors.of(context).clarity,
+    level: AuraLevel.solar,
     onSave: _save,
     child: ListView(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
