@@ -1,3 +1,6 @@
+import 'dart:math' as math;
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
@@ -85,18 +88,127 @@ class AuraRings extends StatelessWidget {
   );
 }
 
+/// One inhale and exhale of the ambient breath.
+const breathPeriod = Duration(seconds: 8);
+
+/// Where the breath is at a given moment, 0 (emptied) to 1 (full).
+///
+/// Taken from the clock rather than from when a view appeared, so everything
+/// breathing anywhere in the app is on the same inhale.
+double breathPhaseAt(DateTime moment) {
+  final period = breathPeriod.inMilliseconds;
+  final turn = moment.millisecondsSinceEpoch % period / period;
+  return (1 - math.cos(turn * 2 * math.pi)) / 2;
+}
+
+/// The session ring: [AuraRings] with a filled core, breathing on the ambient
+/// curve — the rings widening and the core coming up to full over one inhale,
+/// and back over the exhale, eight seconds for the pair.
+///
+/// The phase is read off the wall clock rather than counted from when the
+/// widget was built, so rings on pages a [PageView] only builds when they are
+/// swiped to are on the same breath as the one already on screen. It holds
+/// still where the platform asks for reduced motion, and stops along with the
+/// rest of the tickers under a disabled [TickerMode] — which is how a resting
+/// session parks it rather than breathing at a black screen.
+class BreathingRings extends StatefulWidget {
+  const BreathingRings({
+    super.key,
+    required this.level,
+    this.tone,
+    this.size = DesignConstants.breathingRingSize,
+    this.count = 3,
+  });
+
+  final AuraLevel level;
+  final Color? tone;
+  final double size;
+  final int count;
+
+  @override
+  State<BreathingRings> createState() => _BreathingRingsState();
+}
+
+class _BreathingRingsState extends State<BreathingRings>
+    with SingleTickerProviderStateMixin {
+  /// How often the ring is redrawn. A curve this slow is smooth at 30 a
+  /// second, and the ticker offers up to four times that.
+  static const _tick = Duration(milliseconds: 33);
+
+  /// The ticker only paces the redraws; where the breath is comes from the
+  /// clock, so a frame dropped or skipped costs nothing.
+  late final _heartbeat =
+      AnimationController(vsync: this, duration: breathPeriod)
+        ..addListener(_redraw);
+
+  final _phase = ValueNotifier<double>(1);
+  Duration _last = Duration.zero;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _heartbeat.stop();
+      // Reduced motion leaves the ring where the breath is fullest.
+      _phase.value = 1;
+    } else if (!_heartbeat.isAnimating) {
+      _heartbeat.repeat();
+    }
+  }
+
+  void _redraw() {
+    final elapsed = _heartbeat.lastElapsedDuration ?? Duration.zero;
+    if ((elapsed - _last).abs() < _tick) return;
+    _last = elapsed;
+    _phase.value = breathPhaseAt(DateTime.now());
+  }
+
+  @override
+  void dispose() {
+    _heartbeat.dispose();
+    _phase.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => SizedBox.square(
+    dimension: widget.size,
+    child: CustomPaint(
+      painter: _RingsPainter(
+        colors: widget.tone == null
+            ? widget.level.gradientColors(context)
+            : [
+                widget.tone!,
+                Color.lerp(widget.tone!, Colors.white, .3)!,
+              ],
+        count: widget.count,
+        opacity: .5,
+        core: true,
+        phase: _phase,
+      ),
+    ),
+  );
+}
+
 class _RingsPainter extends CustomPainter {
-  const _RingsPainter({
+  _RingsPainter({
     required this.colors,
     required this.count,
     required this.opacity,
     required this.core,
-  });
+    this.phase,
+  }) : super(repaint: phase);
 
   final List<Color> colors;
   final int count;
   final double opacity;
   final bool core;
+
+  /// Where the breath is, 0 (emptied) to 1 (full). A ring that does not
+  /// breathe leaves this off and is drawn at full.
+  final ValueListenable<double>? phase;
+
+  double get _breath => phase?.value ?? 1;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -107,17 +219,22 @@ class _RingsPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1
       ..color = Colors.white.withValues(alpha: opacity);
+    // The rings draw in from their full width as the breath empties.
+    final scale = DesignConstants.breathScale +
+        (1 - DesignConstants.breathScale) * _breath;
     for (var i = 0; i < count; i++) {
       final radius = size.shortestSide / 2 * (i + 1) / count;
-      canvas.drawCircle(rect.center, radius - .5, paint);
+      canvas.drawCircle(rect.center, (radius - .5) * scale, paint);
     }
     if (core) {
       canvas.drawCircle(
         rect.center,
-        6,
+        DesignConstants.ringCoreSize / 2,
         Paint()
           ..shader = shader
-          ..style = PaintingStyle.fill,
+          ..style = PaintingStyle.fill
+          // And the core dims with them, never below half.
+          ..color = Colors.white.withValues(alpha: .5 + .5 * _breath),
       );
     }
   }
@@ -247,6 +364,48 @@ class ToneIcon extends StatelessWidget {
   Widget build(BuildContext context) => ShaderMask(
     shaderCallback: toneGradient(tone).createShader,
     child: Icon(icon, size: size, color: Colors.white),
+  );
+}
+
+/// A word under the same gradient the glyph beside it takes.
+///
+/// The Swift app gives the label of a bar button the level's gradient, exactly
+/// as it gives it to the plus in front of it — each carries the whole ramp
+/// across its own width rather than sharing one sweep, so this wraps the text
+/// on its own and leaves the glyph to [AuraIcon].
+class AuraText extends StatelessWidget {
+  const AuraText(this.text, {super.key, required this.level, this.fontSize});
+
+  final String text;
+  final AuraLevel level;
+  final double? fontSize;
+
+  @override
+  Widget build(BuildContext context) => ShaderMask(
+    shaderCallback: level.gradient(context).createShader,
+    child: Text(
+      text,
+      style: TextStyle(color: Colors.white, fontSize: fontSize),
+    ),
+  );
+}
+
+/// The same treatment as [AuraText], tinted by a colour a topic or a request
+/// carries rather than by a spectrum level.
+class ToneText extends StatelessWidget {
+  const ToneText(this.text, {super.key, required this.tone, this.fontSize});
+
+  final String text;
+  final Color tone;
+  final double? fontSize;
+
+  @override
+  Widget build(BuildContext context) => ShaderMask(
+    shaderCallback: toneGradient(tone).createShader,
+    child: Text(
+      text,
+      style: TextStyle(color: Colors.white, fontSize: fontSize),
+    ),
   );
 }
 

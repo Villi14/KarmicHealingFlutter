@@ -24,8 +24,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   static const _stepCount = 4;
 
   static List<_Step> _steps(AppLocalizations l10n) => [
-    _Step(
-      SFSymbols.book,
+    _Step.drawn(
+      SFGlyph.bookClosed,
       l10n.onboardingBookTitle,
       l10n.onboardingBookDescription,
     ),
@@ -40,7 +40,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       l10n.onboardingHealingDescription,
     ),
     _Step(
-      SFSymbols.staroflife,
+      SFSymbols.star,
       l10n.onboardingJourneyTitle,
       l10n.onboardingJourneyDescription,
     ),
@@ -199,7 +199,10 @@ class _StepView extends StatelessWidget {
             alignment: Alignment.center,
             children: [
               AuraRings(level: level, size: 92, opacity: .35),
-              AuraIcon(step.icon, level: level, size: 30),
+              if (step.symbol case final symbol?)
+                AuraIcon(symbol, level: level, size: 30)
+              else
+                AuraIcon.drawn(step.glyph!, level: level, size: 30),
             ],
           ),
         ),
@@ -230,8 +233,16 @@ class _StepView extends StatelessWidget {
 }
 
 class _Step {
-  const _Step(this.icon, this.title, this.description);
-  final IconData icon;
+  const _Step(IconData icon, this.title, this.description)
+    : symbol = icon,
+      glyph = null;
+
+  /// For a step whose SF Symbol is one of the hand-drawn [SFGlyph]s.
+  const _Step.drawn(SFGlyph this.glyph, this.title, this.description)
+    : symbol = null;
+
+  final IconData? symbol;
+  final SFGlyph? glyph;
   final String title;
   final String description;
 }

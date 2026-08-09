@@ -102,12 +102,10 @@ class _RequestsScreenState extends State<RequestsScreen> {
                 level: AuraLevel.sacral,
                 size: 20,
               ),
-              label: Text(
+              label: AuraText(
                 AppLocalizations.of(context).request,
-                style: TextStyle(
-                  color: AppColors.of(context).friendly,
-                  fontSize: 17,
-                ),
+                level: AuraLevel.sacral,
+                fontSize: 17,
               ),
             ),
           ),

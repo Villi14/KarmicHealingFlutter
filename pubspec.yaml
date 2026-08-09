@@ -51,6 +51,7 @@ dependencies:
   audioplayers: ^6.8.1
   wakelock_plus: ^1.7.0
   screen_brightness: ^2.1.11
+  flex_color_picker: ^3.8.0
 
 dev_dependencies:
   flutter_test:

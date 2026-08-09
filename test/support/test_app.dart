@@ -27,6 +27,15 @@ Widget testApp({
     theme: theme,
     darkTheme: darkTheme,
     themeMode: themeMode ?? ThemeMode.system,
+    // Under test the app is told to hold its ambient motion still, as a device
+    // asking for reduced motion would. The session ring breathes for as long
+    // as it is on screen, and a tree with a never-ending animation in it is a
+    // tree [WidgetTester.pumpAndSettle] can never settle. Applied through the
+    // builder so it reaches pushed routes too, not only [home].
+    builder: (context, child) => MediaQuery(
+      data: MediaQuery.of(context).copyWith(disableAnimations: true),
+      child: child!,
+    ),
     home: home,
   );
 

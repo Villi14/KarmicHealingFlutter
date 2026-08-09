@@ -426,9 +426,6 @@ class _BottomAction extends StatelessWidget {
   Widget build(BuildContext context) => TextButton.icon(
     onPressed: onPressed,
     icon: const AuraIcon(SFSymbols.plus, level: AuraLevel.solar, size: 20),
-    label: Text(
-      label,
-      style: TextStyle(color: AppColors.of(context).clarity, fontSize: 17),
-    ),
+    label: AuraText(label, level: AuraLevel.solar, fontSize: 17),
   );
 }

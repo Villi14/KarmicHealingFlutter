@@ -207,7 +207,12 @@ class _BalancingEnergyScreenState extends State<BalancingEnergyScreen>
   @override
   Widget build(BuildContext context) => Stack(
     fit: StackFit.expand,
-    children: [_buildSession(context), if (_isResting) _buildScreenRest()],
+    children: [
+      // A resting session is still built, under the black; holding its tickers
+      // keeps the ring from breathing at a screen nobody is looking at.
+      TickerMode(enabled: !_isResting, child: _buildSession(context)),
+      if (_isResting) _buildScreenRest(),
+    ],
   );
 
   /// The darkness the screen rests in.
@@ -491,28 +496,39 @@ class _StepCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          Center(child: AuraRings(level: level, size: 78, core: true)),
+          Center(child: BreathingRings(level: level)),
           const SizedBox(height: 20),
-          Text(
-            step.title,
-            style: TextStyle(
-              fontFamily: 'Source Serif 4',
-              fontSize: 20,
-              color: AppColors.of(context).textPrimary,
-            ),
-          ),
-          if (step.description.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Text(
-              step.description,
-              style: TextStyle(
-                color: AppColors.of(context).textSecondary,
-                fontSize: 15,
-                height: 1.35,
+          // The counter and the ring hold their place and keep breathing; only
+          // the words move, so a step with a long passage stays readable
+          // without the card growing past the screen.
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    step.title,
+                    style: TextStyle(
+                      fontFamily: 'Source Serif 4',
+                      fontSize: 20,
+                      color: AppColors.of(context).textPrimary,
+                    ),
+                  ),
+                  if (step.description.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      step.description,
+                      style: TextStyle(
+                        color: AppColors.of(context).textSecondary,
+                        fontSize: 15,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
-          ],
-          const Spacer(),
+          ),
         ],
       ),
     ),

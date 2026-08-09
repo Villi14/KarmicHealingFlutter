@@ -183,9 +183,6 @@
   "reminders": "Reminders",
   "remindersEmptyMessage": "Reminders live in topics. Create one, and small reminders will turn the practice into a steady ritual.",
   "remindersEmptyTitle": "Create your first topic",
-  "remindersNoMatchesMessage": "Reminders that match will show up here.",
-  "remindersNothingHereTitle": "Nothing here yet",
-  "remindersTopicEmptyMessage": "Small reminders turn the practice into a steady ritual.",
   "request": "Request",
   "requestEverySubrequestFulfilled": "Every subrequest is fulfilled",
   "requestLockedHint": "Fulfil every subrequest first",
@@ -248,8 +245,6 @@
       }
     }
   },
-  "subrequestsEmptyMessage": "A request that cannot be fulfilled right away is broken into subrequests — the steps that pave the way to it.",
-  "subrequestsEmptyTitle": "Nothing under it yet",
   "subrequestsHint": "Every subrequest belongs to a request",
   "system": "System",
   "tapSearch": "Tap to search",

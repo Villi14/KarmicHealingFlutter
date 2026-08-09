@@ -8,7 +8,6 @@ import '../../l10n/app_localizations.dart';
 import '../../widgets/aura_widgets.dart';
 import '../../widgets/bottom_bar.dart';
 import '../../widgets/gradient_background.dart';
-import '../../widgets/karmic_empty_state.dart';
 import '../../widgets/scroll_blur.dart';
 import '../../widgets/sf_symbols.dart';
 import 'reminder_forms.dart';
@@ -95,9 +94,10 @@ class _RemindersDetailScreenState extends State<RemindersDetailScreen> {
                           ),
                         ),
                         icon: ToneIcon(SFSymbols.plus, tone: tone),
-                        label: Text(
+                        label: ToneText(
                           AppLocalizations.of(context).reminder,
-                          style: TextStyle(color: tone, fontSize: 17),
+                          tone: tone,
+                          fontSize: 17,
                         ),
                       ),
                     ),
@@ -135,37 +135,19 @@ class _RemindersDetailScreenState extends State<RemindersDetailScreen> {
                           color: tone,
                         ),
                         const SizedBox(height: 20),
-                        if (reminders.isEmpty)
-                          KarmicEmptyState(
-                            icon: const AuraIcon(
-                              SFSymbols.bell,
-                              level: AuraLevel.solar,
-                              size: 33,
-                            ),
-                            title: AppLocalizations.of(
-                              context,
-                            ).remindersNothingHereTitle,
-                            message: topic == null
-                                ? AppLocalizations.of(
-                                    context,
-                                  ).remindersNoMatchesMessage
-                                : AppLocalizations.of(
-                                    context,
-                                  ).remindersTopicEmptyMessage,
-                            level: AuraLevel.solar,
-                          )
-                        else
-                          for (final reminder in reminders) ...[
-                            ReminderRow(
-                              reminder: reminder,
-                              topic: repository.topicById(
-                                reminder.remindersListId,
-                              )!,
-                              tone: tone,
-                              showsTopic: topic == null,
-                            ),
-                            const SizedBox(height: 8),
-                          ],
+                        // Nothing stands in for an empty list: the bar at the
+                        // foot already says what to do about it.
+                        for (final reminder in reminders) ...[
+                          ReminderRow(
+                            reminder: reminder,
+                            topic: repository.topicById(
+                              reminder.remindersListId,
+                            )!,
+                            tone: tone,
+                            showsTopic: topic == null,
+                          ),
+                          const SizedBox(height: 8),
+                        ],
                       ],
                     ),
                   ),

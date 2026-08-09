@@ -9,6 +9,13 @@ import 'package:sqflite/sqflite.dart';
 /// new row the next free `position` — is done here in
 /// [AppDatabase.nextPosition], because a trigger created per connection is a
 /// thing to remember to recreate, and a query is not.
+///
+/// The one thing not carried over is `STRICT` on the tables. Android hands the
+/// app whichever SQLite its system image shipped with, and the keyword only
+/// arrived in 3.37 — on anything older `CREATE TABLE` fails outright and the
+/// app cannot open its store at all. Nothing about the file changes without it:
+/// the columns, their declared types and the values written into them are the
+/// same, so the Swift app still reads what this one writes.
 class AppDatabase {
   const AppDatabase._(this.db);
 
@@ -50,7 +57,7 @@ class AppDatabase {
           "priority" INTEGER,
           "dueDate" TEXT,
           "notes" TEXT NOT NULL DEFAULT ''
-        ) STRICT
+        )
       ''');
 
       // No `priority` here: a subrequest borrows its request's urgency the same
@@ -67,7 +74,7 @@ class AppDatabase {
           "title" TEXT NOT NULL,
 
           FOREIGN KEY("requestsListID") REFERENCES "requestsLists"("id") ON DELETE CASCADE
-        ) STRICT
+        )
       ''');
 
       await db.execute('''
@@ -76,7 +83,7 @@ class AppDatabase {
           "color" INTEGER NOT NULL DEFAULT 1251712256,
           "position" INTEGER NOT NULL DEFAULT 0,
           "title" TEXT NOT NULL
-        ) STRICT
+        )
       ''');
 
       await db.execute('''
@@ -92,7 +99,7 @@ class AppDatabase {
           "title" TEXT NOT NULL,
 
           FOREIGN KEY("remindersListID") REFERENCES "remindersLists"("id") ON DELETE CASCADE
-        ) STRICT
+        )
       ''');
     },
   );

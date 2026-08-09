@@ -10,7 +10,6 @@ import '../../data/requests_repository.dart';
 import '../../widgets/aura_widgets.dart';
 import '../../widgets/bottom_bar.dart';
 import '../../widgets/gradient_background.dart';
-import '../../widgets/karmic_empty_state.dart';
 import '../../widgets/scroll_blur.dart';
 import '../../widgets/sf_symbols.dart';
 import 'request_forms.dart';
@@ -82,9 +81,10 @@ class RequestDetailScreen extends StatelessWidget {
             child: TextButton.icon(
               onPressed: () => _addSubrequest(context, repository, request),
               icon: ToneIcon(SFSymbols.plus, tone: request.color),
-              label: Text(
+              label: ToneText(
                 AppLocalizations.of(context).addSubRequest,
-                style: TextStyle(color: request.color, fontSize: 17),
+                tone: request.color,
+                fontSize: 17,
               ),
             ),
           ),
@@ -112,29 +112,12 @@ class RequestDetailScreen extends StatelessWidget {
                       progress: repository.progressOf(request.id),
                     ),
                     const SizedBox(height: 20),
-                    if (subrequests.isEmpty)
-                      KarmicEmptyState(
-                        icon: const AuraIcon(
-                          SFSymbols.sparkles,
-                          level: AuraLevel.sacral,
-                          size: 33,
-                        ),
-                        title: AppLocalizations.of(
-                          context,
-                        ).subrequestsEmptyTitle,
-                        message: AppLocalizations.of(
-                          context,
-                        ).subrequestsEmptyMessage,
-                        level: AuraLevel.sacral,
-                        actionTitle: AppLocalizations.of(context).addSubRequest,
-                        onAction: () =>
-                            _addSubrequest(context, repository, request),
-                      )
-                    else
-                      for (final subrequest in subrequests) ...[
-                        SubrequestRow(subrequest: subrequest, request: request),
-                        const SizedBox(height: 8),
-                      ],
+                    // Nothing stands in for an empty list: the bar at the foot
+                    // already says what to do about it.
+                    for (final subrequest in subrequests) ...[
+                      SubrequestRow(subrequest: subrequest, request: request),
+                      const SizedBox(height: 8),
+                    ],
                   ],
                 ),
               ),

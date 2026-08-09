@@ -105,7 +105,7 @@ class EdgeBlur extends StatelessWidget {
     super.key,
     required this.edge,
     this.sigma = 12,
-    this.layers = 4,
+    this.layers = 6,
     this.opacity = 1,
   });
 
@@ -119,6 +119,12 @@ class EdgeBlur extends StatelessWidget {
 
   /// Scales the whole effect, for a bar that fades in as content reaches it.
   final double opacity;
+
+  /// The blur band `i` adds on top of the bands beneath it.
+  double _band(int i) {
+    final fraction = (i + 1) / layers;
+    return sigma * fraction * fraction;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -140,6 +146,13 @@ class EdgeBlur extends StatelessWidget {
           // shorter of the content. The shorter the band the stronger its
           // blur, so the step down at the strip's inner edge — the one that
           // would read as a seam across the content — is the faintest of them.
+          //
+          // Squaring the ramp is what leaves no seam at all: the strength a
+          // band adds is what the eye catches where that band ends, and a
+          // linear ramp's outermost band still starts at a whole 1/layers of
+          // the blur. Squared, it starts at 1/layers² — nothing — and the
+          // steps only grow as they climb towards the screen's edge, where the
+          // tint below is at its heaviest and hides them.
           for (var i = 0; i < layers; i++)
             Align(
               alignment: atEdge,
@@ -148,8 +161,8 @@ class EdgeBlur extends StatelessWidget {
                 child: ClipRect(
                   child: BackdropFilter(
                     filter: ImageFilter.blur(
-                      sigmaX: sigma * (i + 1) / layers,
-                      sigmaY: sigma * (i + 1) / layers,
+                      sigmaX: _band(i),
+                      sigmaY: _band(i),
                     ),
                     child: const SizedBox.expand(),
                   ),
@@ -163,8 +176,12 @@ class EdgeBlur extends StatelessWidget {
               gradient: LinearGradient(
                 begin: atEdge,
                 end: inwards,
+                // Eased the same way the blur is, so the two thin out
+                // together and neither outlasts the other on the way in.
+                stops: const [0, .55, 1],
                 colors: [
                   colors.backgroundPrimary.withValues(alpha: .55 * opacity),
+                  colors.backgroundPrimary.withValues(alpha: .17 * opacity),
                   colors.backgroundPrimary.withValues(alpha: 0),
                 ],
               ),

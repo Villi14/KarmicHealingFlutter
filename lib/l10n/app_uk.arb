@@ -183,9 +183,6 @@
   "reminders": "Нагадування",
   "remindersEmptyMessage": "Нагадування живуть у темах. Створіть першу — і невеликі нагадування перетворять практику на сталий ритуал.",
   "remindersEmptyTitle": "Створіть першу тему",
-  "remindersNoMatchesMessage": "Нагадування, які сюди підходять, з’являться тут.",
-  "remindersNothingHereTitle": "Поки що тут порожньо",
-  "remindersTopicEmptyMessage": "Маленькі нагадування перетворюють практику на сталий ритуал.",
   "request": "Прохання",
   "requestEverySubrequestFulfilled": "Усі підзапити здійснені",
   "requestLockedHint": "Спершу виконайте всі підпрохання",
@@ -248,8 +245,6 @@
       }
     }
   },
-  "subrequestsEmptyMessage": "Запит, який не здійснити одразу, розкладається на підзапити — кроки, що торують до нього шлях.",
-  "subrequestsEmptyTitle": "Поки що нічого під ним",
   "subrequestsHint": "Кожне підпрохання належить проханню",
   "system": "Системна",
   "tapSearch": "Натисніть, щоб шукати",

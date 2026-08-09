@@ -7,8 +7,8 @@ import 'package:flutter/cupertino.dart';
 /// Cupertino Icons is a port of the SF Symbols glyphs, so nearly every symbol
 /// the iOS app uses has an exact counterpart there — reaching for a Material
 /// icon instead is what put the port's glyphs out of step with the original.
-/// The four symbols Cupertino Icons has no counterpart for are drawn by hand
-/// as [SFIcon] instead.
+/// The symbols Cupertino Icons has no counterpart for are drawn by hand as
+/// [SFIcon] instead.
 abstract final class SFSymbols {
   static const chevronLeft = CupertinoIcons.chevron_left;
   static const chevronRight = CupertinoIcons.chevron_right;
@@ -46,6 +46,7 @@ abstract final class SFSymbols {
   static const chartBar = CupertinoIcons.chart_bar;
   static const textformatCharacters = CupertinoIcons.textformat_abc;
   static const lightbulb = CupertinoIcons.lightbulb;
+  static const star = CupertinoIcons.star;
   static const staroflife = CupertinoIcons.staroflife;
   static const moonStars = CupertinoIcons.moon_stars;
   static const sunMax = CupertinoIcons.sun_max;
@@ -63,7 +64,13 @@ abstract final class SFSymbols {
 
 /// An SF Symbol with no Cupertino Icons counterpart, drawn to match the weight
 /// and proportions of the font glyphs it sits beside.
-enum SFGlyph { meditate, gearshape, pencilAndListClipboard, iphoneRadiowaves }
+enum SFGlyph {
+  meditate,
+  gearshape,
+  pencilAndListClipboard,
+  iphoneRadiowaves,
+  bookClosed,
+}
 
 /// Renders an [SFGlyph]. Sizes and tints itself from the ambient [IconTheme]
 /// exactly as [Icon] does, so it drops into any slot a font glyph would fill.
@@ -129,6 +136,8 @@ class _SFGlyphPainter extends CustomPainter {
         _paintClipboard(canvas, paint);
       case SFGlyph.iphoneRadiowaves:
         _paintRadiowaves(canvas, paint);
+      case SFGlyph.bookClosed:
+        _paintBookClosed(canvas, paint);
     }
     canvas.restore();
   }
@@ -293,6 +302,57 @@ class _SFGlyphPainter extends CustomPainter {
         );
       }
     }
+  }
+
+  /// `book.closed` — a book stood shut, front on, traced off the symbol: the
+  /// cover with its spine strip down the left, the page block banded across the
+  /// foot, and the fore edge of that block curling in on the right.
+  void _paintBookClosed(Canvas canvas, Paint paint) {
+    const left = 18.8;
+    const right = 81.2;
+    const top = 9.3;
+    // Where the cover ends and the band of pages beneath it begins.
+    const fold = 72.1;
+    const bottom = 90.6;
+    const radius = 7.7;
+
+    canvas.drawPath(
+      Path()
+        ..moveTo(left, top + radius)
+        ..arcToPoint(
+          Offset(left + radius, top),
+          radius: const Radius.circular(radius),
+        )
+        ..lineTo(right - radius, top)
+        ..arcToPoint(
+          Offset(right, top + radius),
+          radius: const Radius.circular(radius),
+        )
+        ..lineTo(right, fold)
+        // The curl: between the fold and the foot the edge leaves the side of
+        // the book altogether and bows in, as the fore edge of a page block
+        // rolled under does. Very nearly a half circle — the arc's radius is
+        // only a shade over half the span it crosses.
+        ..arcToPoint(
+          const Offset(right, bottom),
+          radius: const Radius.circular(9.7),
+          clockwise: false,
+        )
+        ..lineTo(left + radius, bottom)
+        ..arcToPoint(
+          Offset(left, bottom - radius),
+          radius: const Radius.circular(radius),
+        )
+        ..close(),
+      paint,
+    );
+    canvas.drawLine(const Offset(left, fold), const Offset(right, fold), paint);
+    // The spine is drawn lighter than the outline it sits inside.
+    canvas.drawLine(
+      const Offset(29.6, top),
+      const Offset(29.6, fold),
+      Paint.from(paint)..strokeWidth = _stroke * .81,
+    );
   }
 
   @override
