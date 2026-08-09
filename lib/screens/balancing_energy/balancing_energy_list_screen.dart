@@ -149,7 +149,7 @@ class BalancingEnergyHelpScreen extends StatelessWidget {
         ),
         TipsCard(
           title: l10n.helpTipsTitle,
-          tips: importantTips(l10n),
+          tips: importantTips(l10n, initialProcess: true),
           level: AuraLevel.heart,
         ),
       ],

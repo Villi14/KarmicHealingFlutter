@@ -391,21 +391,27 @@ class _BalancingEnergyScreenState extends State<BalancingEnergyScreen>
       constraints: const BoxConstraints(maxWidth: 700),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+        // The buttons share the row evenly so a long translation wraps inside
+        // its own half instead of crowding the other.
         child: Row(
+          spacing: 12,
           children: [
             if (_currentStep > 0)
-              AuraButton(
-                label: AppLocalizations.of(context).back,
-                level: _sessionLevel,
-                onPressed: _previousStep,
+              Expanded(
+                child: AuraButton(
+                  label: AppLocalizations.of(context).back,
+                  level: _sessionLevel,
+                  onPressed: _previousStep,
+                ),
               ),
-            const Spacer(),
-            AuraButton(
-              label: _isLastStep
-                  ? AppLocalizations.of(context).done
-                  : AppLocalizations.of(context).next,
-              level: _sessionLevel,
-              onPressed: _nextStep,
+            Expanded(
+              child: AuraButton(
+                label: _isLastStep
+                    ? AppLocalizations.of(context).done
+                    : AppLocalizations.of(context).next,
+                level: _sessionLevel,
+                onPressed: _nextStep,
+              ),
             ),
           ],
         ),

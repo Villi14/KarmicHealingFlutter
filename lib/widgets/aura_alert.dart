@@ -43,31 +43,41 @@ Future<void> showAuraAlert(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (icon != null) ...[
-              AuraIcon(icon, level: level, size: 36),
-              const SizedBox(height: 16),
-            ],
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'Source Serif 4',
-                fontSize: 20,
-                color: AppColors.of(context).textPrimary,
-              ),
-            ),
-            if (message != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                message,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: AppColors.of(context).textSecondary,
-                  fontSize: 15,
-                  height: 1.35,
+            // A long message scrolls within the card rather than pushing the
+            // buttons off the screen.
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    if (icon != null) ...[
+                      AuraIcon(icon, level: level, size: 36),
+                      const SizedBox(height: 16),
+                    ],
+                    Text(
+                      title,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Source Serif 4',
+                        fontSize: 20,
+                        color: AppColors.of(context).textPrimary,
+                      ),
+                    ),
+                    if (message != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        message,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: AppColors.of(context).textSecondary,
+                          fontSize: 15,
+                          height: 1.35,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
-            ],
+            ),
             const SizedBox(height: 32),
             for (final button in buttons) ...[
               SizedBox(

@@ -1,9 +1,8 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:karmic_healing_flutter/data/energy_settings.dart';
 import 'package:karmic_healing_flutter/screens/balancing_energy/balancing_energy_list_screen.dart';
 import 'package:karmic_healing_flutter/screens/balancing_energy/energy_settings_screen.dart';
+import 'package:karmic_healing_flutter/widgets/aura_widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'support/test_app.dart';
@@ -99,13 +98,19 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(tester.widget<Slider>(find.byType(Slider)).onChanged, isNull);
+    expect(
+      tester.widget<AuraSlider>(find.byType(AuraSlider)).onChanged,
+      isNull,
+    );
 
-    await tester.tap(find.byType(CupertinoSwitch).at(1));
+    await tester.tap(find.byType(AuraSwitch).at(1));
     await tester.pumpAndSettle();
 
     expect(settings.soundEnabled, isTrue);
-    expect(tester.widget<Slider>(find.byType(Slider)).onChanged, isNotNull);
+    expect(
+      tester.widget<AuraSlider>(find.byType(AuraSlider)).onChanged,
+      isNotNull,
+    );
   });
 
   testWidgets('the initial process steps aside once it has been walked', (

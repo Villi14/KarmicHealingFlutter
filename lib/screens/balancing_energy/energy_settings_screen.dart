@@ -1,5 +1,4 @@
 import 'package:flutter/services.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../constants/app_colors.dart';
@@ -108,17 +107,16 @@ class EnergySettingsScreen extends StatelessWidget {
                           ],
                         ),
                       ),
-                      SliderTheme(
-                        data: SliderTheme.of(context).copyWith(
-                          activeTrackColor: AppColors.of(context).health,
-                          thumbColor: AppColors.of(context).health,
-                          overlayColor: AppColors.of(
-                            context,
-                          ).health.withValues(alpha: .12),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
                         ),
-                        child: Slider(
+                        child: AuraSlider(
                           value: settings.audioVolume,
+                          level: AuraLevel.heart,
                           divisions: 10,
+                          label: l10n.volume,
                           onChanged: settings.soundEnabled
                               ? settings.setAudioVolume
                               : null,
@@ -224,9 +222,10 @@ class _SwitchRow extends StatelessWidget {
             ),
           ),
         ),
-        CupertinoSwitch(
+        AuraSwitch(
           value: value,
-          activeTrackColor: AppColors.of(context).health,
+          level: AuraLevel.heart,
+          label: title,
           onChanged: onChanged,
         ),
       ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
+import '../constants/design_constants.dart';
 import 'sf_symbols.dart';
 
 enum AuraLevel { root, sacral, solar, heart, throat, brow, crown }
@@ -22,18 +23,32 @@ extension AuraLevelStyle on AuraLevel {
     };
   }
 
-  Color nextColor(BuildContext context) {
+  /// The neighbour a level borrows its second tone from: the next one up the
+  /// spectrum, except for sacral — requests sit between root and sacral, so
+  /// their identity runs from red into orange rather than on into yellow.
+  AuraLevel get companion {
+    if (this == AuraLevel.sacral) return AuraLevel.root;
     final levels = AuraLevel.values;
-    return levels[index == levels.length - 1 ? index - 1 : index + 1].color(
-      context,
-    );
+    return levels[index == levels.length - 1 ? index - 1 : index + 1];
   }
+
+  Color nextColor(BuildContext context) => companion.color(context);
+
+  /// Sacral reads from its companion into itself, so the spectrum still runs
+  /// red to orange rather than backwards.
+  List<Color> gradientColors(BuildContext context) => this == AuraLevel.sacral
+      ? [nextColor(context), color(context)]
+      : [color(context), nextColor(context)];
 
   LinearGradient gradient(BuildContext context) => LinearGradient(
     begin: Alignment.bottomLeft,
     end: Alignment.topRight,
-    colors: [color(context), nextColor(context)],
+    colors: gradientColors(context),
   );
+
+  /// The same two tones laid left to right, for a track or a bar.
+  LinearGradient horizontalGradient(BuildContext context) =>
+      LinearGradient(colors: gradientColors(context));
 }
 
 class AuraRings extends StatelessWidget {
@@ -60,7 +75,7 @@ class AuraRings extends StatelessWidget {
     child: CustomPaint(
       painter: _RingsPainter(
         colors: tone == null
-            ? [level.color(context), level.nextColor(context)]
+            ? level.gradientColors(context)
             : [tone!, Color.lerp(tone!, Colors.white, .3)!],
         count: count,
         opacity: opacity,
@@ -261,6 +276,221 @@ class AuraLabel extends StatelessWidget {
   }
 }
 
+/// A switch whose active track carries the same two-tone aura as the screen,
+/// in place of the platform's single tint.
+class AuraSwitch extends StatelessWidget {
+  const AuraSwitch({
+    super.key,
+    required this.value,
+    required this.level,
+    required this.onChanged,
+    this.label,
+  });
+
+  final bool value;
+  final AuraLevel level;
+  final ValueChanged<bool> onChanged;
+
+  /// What a screen reader calls the switch, since the row's own text sits in a
+  /// separate widget.
+  final String? label;
+
+  static const _width = 51.0;
+  static const _height = 31.0;
+  static const _knobInset = 2.0;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    label: label,
+    toggled: value,
+    child: GestureDetector(
+      onTap: () => onChanged(!value),
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+        width: _width,
+        height: _height,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(_height / 2),
+          gradient: value ? level.horizontalGradient(context) : null,
+          color: value
+              ? null
+              : AppColors.of(context).textSecondary.withValues(alpha: .28),
+        ),
+        child: AnimatedAlign(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+          alignment: value ? Alignment.centerRight : Alignment.centerLeft,
+          child: Container(
+            margin: const EdgeInsets.all(_knobInset),
+            width: _height - _knobInset * 2,
+            height: _height - _knobInset * 2,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: .16),
+                  blurRadius: 2,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+/// A slider with a gradient-filled progress track, so the control reads as part
+/// of the screen's spectrum rather than as a platform accent.
+class AuraSlider extends StatelessWidget {
+  const AuraSlider({
+    super.key,
+    required this.value,
+    required this.level,
+    required this.onChanged,
+    this.divisions,
+    this.label,
+  });
+
+  final double value;
+  final AuraLevel level;
+
+  /// A null callback disables the slider, as it does on [Slider].
+  final ValueChanged<double>? onChanged;
+  final int? divisions;
+  final String? label;
+
+  static const _thumbDiameter = 28.0;
+  static const _trackHeight = 6.0;
+
+  double _steppedValue(double raw) {
+    final clamped = raw.clamp(0.0, 1.0);
+    if (divisions == null) return clamped;
+    return (clamped * divisions!).roundToDouble() / divisions!;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final enabled = onChanged != null;
+    final progress = value.clamp(0.0, 1.0);
+
+    return Semantics(
+      label: label,
+      slider: true,
+      value: '${(progress * 100).round()}%',
+      child: SizedBox(
+        height: 32,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final travel = (constraints.maxWidth - _thumbDiameter).clamp(
+              1.0,
+              double.infinity,
+            );
+
+            void update(Offset position) {
+              if (!enabled) return;
+              onChanged!(
+                _steppedValue((position.dx - _thumbDiameter / 2) / travel),
+              );
+            }
+
+            return GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTapDown: (details) => update(details.localPosition),
+              onHorizontalDragStart: (details) => update(details.localPosition),
+              onHorizontalDragUpdate: (details) =>
+                  update(details.localPosition),
+              child: Opacity(
+                opacity: enabled ? 1 : DesignConstants.opacityMedium,
+                child: Stack(
+                  alignment: Alignment.centerLeft,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: _thumbDiameter / 2,
+                      ),
+                      child: Container(
+                        height: _trackHeight,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(_trackHeight / 2),
+                          color: AppColors.of(
+                            context,
+                          ).textSecondary.withValues(alpha: .20),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: _thumbDiameter / 2),
+                      child: Container(
+                        width: travel * progress,
+                        height: _trackHeight,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(_trackHeight / 2),
+                          gradient: level.horizontalGradient(context),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      left: travel * progress,
+                      child: Container(
+                        width: _thumbDiameter,
+                        height: _thumbDiameter,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: .16),
+                              blurRadius: 3,
+                              offset: const Offset(0, 1),
+                            ),
+                          ],
+                        ),
+                        child: CustomPaint(
+                          painter: _ThumbRingPainter(
+                            gradient: level.gradient(context),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _ThumbRingPainter extends CustomPainter {
+  const _ThumbRingPainter({required this.gradient});
+
+  final LinearGradient gradient;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    canvas.drawCircle(
+      rect.center,
+      size.shortestSide / 2 - DesignConstants.lineWidth / 2,
+      Paint()
+        ..shader = gradient.createShader(rect)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = DesignConstants.lineWidth,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _ThumbRingPainter oldDelegate) =>
+      oldDelegate.gradient != gradient;
+}
+
 /// How loudly a button asks to be pressed: filled with the tone for the one
 /// action that moves the screen forward, the tone on a wash of itself otherwise.
 enum AuraProminence { filled, quiet }
@@ -290,8 +520,8 @@ class AuraButton extends StatelessWidget {
               begin: Alignment.bottomLeft,
               end: Alignment.topRight,
               colors: [
-                level.color(context).withValues(alpha: .22),
-                level.nextColor(context).withValues(alpha: .16),
+                level.gradientColors(context)[0].withValues(alpha: .22),
+                level.gradientColors(context)[1].withValues(alpha: .16),
               ],
             ),
       borderRadius: BorderRadius.circular(20),
@@ -299,7 +529,7 @@ class AuraButton extends StatelessWidget {
     child: TextButton.icon(
       onPressed: onPressed,
       icon: icon == null ? const SizedBox.shrink() : Icon(icon, size: 18),
-      label: Text(label),
+      label: Text(label, textAlign: TextAlign.center),
       style: TextButton.styleFrom(
         foregroundColor: prominence == AuraProminence.filled
             ? AppColors.onAccent

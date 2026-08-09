@@ -122,21 +122,27 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                   Padding(
                     padding: const EdgeInsets.all(16),
+                    // The buttons share the row evenly so a long translation
+                    // wraps inside its own half instead of crowding the other.
                     child: Row(
+                      spacing: 12,
                       children: [
                         if (_current > 0)
-                          AuraButton(
-                            label: l10n.back,
-                            level: _level,
-                            onPressed: _back,
+                          Expanded(
+                            child: AuraButton(
+                              label: l10n.back,
+                              level: _level,
+                              onPressed: _back,
+                            ),
                           ),
-                        const Spacer(),
-                        AuraButton(
-                          label: _current == _stepCount - 1
-                              ? l10n.done
-                              : l10n.next,
-                          level: _level,
-                          onPressed: _next,
+                        Expanded(
+                          child: AuraButton(
+                            label: _current == _stepCount - 1
+                                ? l10n.done
+                                : l10n.next,
+                            level: _level,
+                            onPressed: _next,
+                          ),
                         ),
                       ],
                     ),

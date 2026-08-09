@@ -17,7 +17,13 @@ List<(String, String, IconData)> helpSteps(AppLocalizations l10n) => [
   (l10n.helpStep5Title, l10n.helpStep5Description, SFSymbols.checkmarkCircle),
 ];
 
-List<String> importantTips(AppLocalizations l10n) => [
+/// The energy balancing help opens with the one rule that is specific to it —
+/// the Initial Process is walked once, the rest as often as they are needed.
+List<String> importantTips(
+  AppLocalizations l10n, {
+  bool initialProcess = false,
+}) => [
+  if (initialProcess) l10n.helpTipInitialProcess,
   l10n.helpTip1,
   l10n.helpTip2,
   l10n.helpTip3,
