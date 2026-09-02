@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:karmic_healing_flutter/screens/home/home_screen.dart';
+import 'package:karmic_healing_flutter/widgets/aura_widgets.dart';
 
 import 'support/test_app.dart';
 
@@ -20,8 +21,10 @@ void main() {
       tester.state(find.byType(Scrollable).first);
 
   // Every window with the height for the screen shows it whole: the desktop
-  // and tablet sizes, and the phones — a 1080p phone is about 390 x 840
-  // points, whichever way its pixels are counted.
+  // and tablet sizes, and the phones. A 1080p phone counts its pixels three,
+  // two and three quarters, or two and five eighths to the point, and 360 x 640
+  // — the narrowest and shortest of those — is the one the screen has to be
+  // laid out to hold.
   for (final size in const [
     Size(1920, 1080),
     Size(1440, 900),
@@ -29,6 +32,8 @@ void main() {
     Size(1024, 768),
     Size(834, 1194),
     Size(390, 844),
+    Size(360, 640),
+    Size(360, 720),
     Size(411, 731),
     Size(393, 698),
     Size(375, 667),
@@ -42,12 +47,28 @@ void main() {
         0,
         reason: 'content should fit at $size',
       );
+      Rect card(String tool) => tester.getRect(
+        find.ancestor(of: find.text(tool), matching: find.byType(AuraCard)),
+      );
+
       for (final tool in const ['Requests', 'Reminders', 'Settings']) {
         expect(find.text(tool), findsOneWidget);
         expect(
-          tester.getRect(find.text(tool)).bottom,
+          card(tool).bottom,
           lessThanOrEqualTo(size.height),
           reason: '$tool should be on screen at $size',
+        );
+      }
+      // The two tools share the row under the heading, the third sits under
+      // the first along the foot of the screen, and all three are one size.
+      expect(card('Requests').top, moreOrLessEquals(card('Reminders').top));
+      expect(card('Requests').right, lessThan(card('Reminders').left));
+      expect(card('Settings').top, greaterThan(card('Requests').bottom));
+      expect(card('Settings').left, moreOrLessEquals(card('Requests').left));
+      for (final tool in const ['Reminders', 'Settings']) {
+        expect(
+          card(tool).size,
+          within(distance: 0.5, from: card('Requests').size),
         );
       }
       expect(tester.takeException(), isNull);

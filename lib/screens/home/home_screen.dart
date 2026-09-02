@@ -105,10 +105,12 @@ class _HomeBodyState extends State<_HomeBody> {
 
   @override
   Widget build(BuildContext context) {
+    // The same shoulder under the bar every other screen has — see
+    // [DesignConstants.contentTopInset], spelled out here because the inset
+    // above the Scaffold is the one to add the gap to.
     final padding = EdgeInsets.fromLTRB(
       DesignConstants.paddingLarge,
-      widget.navigationBarInset +
-          DesignConstants.screenVerticalPadding(context),
+      widget.navigationBarInset + DesignConstants.navigationBarGap,
       DesignConstants.paddingLarge,
       DesignConstants.screenVerticalPadding(context),
     );
@@ -156,7 +158,7 @@ class _HomeContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tools = _ToolsGrid(
+    final tools = _ToolsLayout(
       onTooShort: onTooShort,
       items: [
         _Tool(
@@ -229,102 +231,121 @@ class _Tool {
   final Widget Function() screen;
 }
 
-/// The tools, in as many columns as the space asks for.
+/// The pair of tools, and under them the one that closes the screen.
 ///
-/// Two columns is the phone layout. Given a box too short for its two rows —
-/// a landscape phone, a desktop window — the cards first lose height, and then,
-/// where the width allows, the grid folds into a single row.
-class _ToolsGrid extends StatelessWidget {
-  const _ToolsGrid({required this.items, this.onTooShort});
+/// All three cards are cut to one size — half the width, and a height short
+/// enough to leave the window some air: the two keep the top of the box,
+/// straight under the heading, the third sits under the first along the foot
+/// of it, and the room the window has to spare opens up between them. A box
+/// too short even for that says so, and the screen goes back to scrolling.
+class _ToolsLayout extends StatelessWidget {
+  const _ToolsLayout({required this.items, this.onTooShort});
 
   final List<_Tool> items;
 
-  /// Told, during layout, that the box the grid was given cannot hold its cards
+  /// Told, during layout, that the box the tools were given cannot hold them
   /// at a readable size.
   final VoidCallback? onTooShort;
 
-  /// Below this a card is too small to hold its icon and its title; the grid
-  /// stops shrinking and the layout looks elsewhere for the room.
-  static const _minCardHeight = 108.0;
+  /// Below this a card is too small to hold its icon and its title over two
+  /// lines; the cards stop shrinking and the layout looks elsewhere for the
+  /// room.
+  static const _minCardHeight = 96.0;
 
-  /// Under this width a card holds its title in the smaller of the two sizes,
-  /// so that a folded row on a phone still reads.
-  static const _denseCardWidth = 160.0;
-
-  /// A single row needs at least this much width to keep its cards square-ish.
-  static const _singleRowMinWidth = 340.0;
+  /// A card is a tile, not a panel: given a wide window it stops growing here
+  /// rather than following its width up.
+  static const _maxCardHeight = 124.0;
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, box) {
       const spacing = DesignConstants.spacingMedium;
       final ratio = DesignConstants.cardAspectRatio(context);
+      final pair = items.take(2).toList();
+      final foot = items.length > 2 ? items[2] : null;
+      final rows = foot == null ? 1 : 2;
 
-      double naturalHeight(int columns) =>
-          (box.maxWidth - spacing * (columns - 1)) / columns / ratio;
-      int rowsFor(int columns) => (items.length / columns).ceil();
-
-      double rowsHeight(int columns, double card) =>
-          rowsFor(columns) * card + spacing * (rowsFor(columns) - 1);
-
-      var columns = 2;
-      var height = naturalHeight(columns);
-      // Whether the grid still ends up taller than the box it was given — on a
-      // phone the hero card leaves too little for even one row of cards, and
-      // the screen goes back to scrolling.
+      var height = math.min(
+        (box.maxWidth - spacing) / 2 / ratio,
+        _maxCardHeight,
+      );
+      // Whether the tools still end up taller than the box they were given, in
+      // which case the screen goes back to scrolling.
       var overflows = false;
 
       if (box.hasBoundedHeight) {
-        double fit(int columns) =>
-            (box.maxHeight - spacing * (rowsFor(columns) - 1)) /
-            rowsFor(columns);
-
-        height = math.min(height, fit(columns));
-        if (height < _minCardHeight && box.maxWidth >= _singleRowMinWidth) {
-          columns = items.length;
-          height = math.min(naturalHeight(columns), fit(columns));
-        }
-        height = math.max(height, _minCardHeight);
-        overflows = rowsHeight(columns, height) > box.maxHeight + 0.5;
+        height = math.max(
+          math.min(height, (box.maxHeight - spacing * (rows - 1)) / rows),
+          _minCardHeight,
+        );
+        overflows = height * rows + spacing * (rows - 1) > box.maxHeight + 0.5;
         if (overflows) onTooShort?.call();
       }
 
-      final cardWidth = (box.maxWidth - spacing * (columns - 1)) / columns;
-
-      return GridView.builder(
-        primary: false,
-        padding: EdgeInsets.zero,
-        shrinkWrap: true,
-        physics: overflows
-            ? const ClampingScrollPhysics()
-            : const NeverScrollableScrollPhysics(),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: columns,
-          crossAxisSpacing: spacing,
-          mainAxisSpacing: spacing,
-          mainAxisExtent: height,
+      Widget row(List<_Tool?> tools) => SizedBox(
+        height: height,
+        child: Row(
+          children: [
+            for (final (index, tool) in tools.indexed) ...[
+              if (index > 0) const SizedBox(width: spacing),
+              // An empty half keeps the card beside it to the width of the
+              // ones above.
+              Expanded(
+                child: tool == null
+                    ? const SizedBox.shrink()
+                    : _card(context, tool),
+              ),
+            ],
+          ],
         ),
-        itemCount: items.length,
-        itemBuilder: (context, index) {
-          final tool = items[index];
-          return _ToolCard(
-            title: tool.title,
-            icon: tool.icon,
-            level: tool.level,
-            dense: cardWidth < _denseCardWidth,
-            onTap: () => Navigator.of(
-              context,
-            ).push(MaterialPageRoute<void>(builder: (_) => tool.screen())),
-          );
-        },
       );
+
+      final column = Column(
+        children: [
+          row(pair),
+          if (foot != null) ...[
+            // The window's slack, where it has any and the cards are not
+            // already pressed against its edges.
+            if (box.hasBoundedHeight && !overflows)
+              const Spacer()
+            else
+              const SizedBox(height: spacing),
+            row([foot, null]),
+          ],
+        ],
+      );
+
+      // A box this content has outgrown scrolls for the one frame before the
+      // screen settles into its scrolling arrangement, rather than overflowing.
+      return overflows
+          ? SingleChildScrollView(
+              primary: false,
+              physics: const ClampingScrollPhysics(),
+              child: column,
+            )
+          : column;
     },
+  );
+
+  Widget _card(BuildContext context, _Tool tool) => _ToolCard(
+    title: tool.title,
+    icon: tool.icon,
+    level: tool.level,
+    onTap: () => Navigator.of(
+      context,
+    ).push(MaterialPageRoute<void>(builder: (_) => tool.screen())),
   );
 }
 
 class _HeroCard extends StatelessWidget {
   const _HeroCard({required this.onTap});
   final VoidCallback onTap;
+
+  /// Under this much window the card comes down a size. The tools below it
+  /// need some 350 points between the heading and the foot of the screen, and
+  /// on a phone — 1080 pixels over three, or two and five eighths, to the
+  /// point — that is all the card can be allowed to leave them.
+  static const _tightBelowHeight = 800.0;
 
   /// Under this width the badge moves above the words rather than beside them:
   /// a 28pt serif line in the column that is left over next to the badge wraps
@@ -335,9 +356,14 @@ class _HeroCard extends StatelessWidget {
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, box) {
       final stacked = box.maxWidth < _stackedBelowWidth;
+      // On a short window the card gives up a size and some of its air: it is
+      // the tallest block on the screen, and the room the tools need at the
+      // foot has to come from somewhere.
+      final tight = MediaQuery.sizeOf(context).height < _tightBelowHeight;
+      final badgeSize = tight ? 44.0 : 56.0;
       final badge = Container(
-        width: 56,
-        height: 56,
+        width: badgeSize,
+        height: badgeSize,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           gradient: LinearGradient(
@@ -347,11 +373,11 @@ class _HeroCard extends StatelessWidget {
             ],
           ),
         ),
-        child: const Center(
+        child: Center(
           child: AuraIcon.drawn(
             SFGlyph.meditate,
             level: AuraLevel.heart,
-            size: 36,
+            size: tight ? 28 : 36,
           ),
         ),
       );
@@ -367,26 +393,31 @@ class _HeroCard extends StatelessWidget {
               letterSpacing: 1.2,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: tight ? 4 : 8),
           Text(
             AppLocalizations.of(context).homeDailyTitle,
             style: TextStyle(
               fontFamily: 'Source Serif 4',
               color: AppColors.of(context).textPrimary,
-              fontSize: stacked ? 24 : 28,
+              fontSize: tight ? 21 : (stacked ? 24 : 28),
+              height: 1.2,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: tight ? 4 : 8),
           Text(
             AppLocalizations.of(context).homeDailySubtitle,
             style: TextStyle(
               color: AppColors.of(context).textSecondary,
-              fontSize: 15,
-              height: 1.35,
+              fontSize: tight ? 13 : 15,
+              height: 1.3,
             ),
+            maxLines: tight ? 2 : null,
+            overflow: tight ? TextOverflow.ellipsis : null,
           ),
-          const SizedBox(
-            height: DesignConstants.spacingSmall + DesignConstants.paddingSmall,
+          SizedBox(
+            height: tight
+                ? DesignConstants.spacingSmall
+                : DesignConstants.spacingSmall + DesignConstants.paddingSmall,
           ),
           Align(
             alignment: Alignment.centerLeft,
@@ -403,11 +434,7 @@ class _HeroCard extends StatelessWidget {
       return AuraCard(
         level: AuraLevel.heart,
         padding: EdgeInsets.all(
-          DesignConstants.compact(
-            context,
-            DesignConstants.paddingXLarge,
-            DesignConstants.paddingLarge,
-          ),
+          tight ? DesignConstants.paddingLarge : DesignConstants.paddingXLarge,
         ),
         onTap: onTap,
         child: stacked
@@ -415,7 +442,11 @@ class _HeroCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   badge,
-                  SizedBox(height: DesignConstants.spacingMedium),
+                  SizedBox(
+                    height: tight
+                        ? DesignConstants.spacingSmall
+                        : DesignConstants.spacingMedium,
+                  ),
                   words,
                 ],
               )
@@ -438,7 +469,6 @@ class _ToolCard extends StatelessWidget {
     required this.icon,
     required this.level,
     required this.onTap,
-    this.dense = false,
   });
 
   final String title;
@@ -446,17 +476,11 @@ class _ToolCard extends StatelessWidget {
   final AuraLevel level;
   final VoidCallback onTap;
 
-  /// A card narrow enough that its title needs the smaller size and tighter
-  /// padding — three cards across a phone.
-  final bool dense;
-
   @override
   Widget build(BuildContext context) => AuraCard(
     level: level,
     onTap: onTap,
-    padding: EdgeInsets.all(
-      dense ? DesignConstants.paddingMedium : DesignConstants.paddingLarge,
-    ),
+    padding: const EdgeInsets.all(DesignConstants.paddingMedium),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -481,7 +505,7 @@ class _ToolCard extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
             fontFamily: 'Source Serif 4',
-            fontSize: dense ? 14 : 17,
+            fontSize: 16,
             color: AppColors.of(context).textPrimary,
           ),
         ),
