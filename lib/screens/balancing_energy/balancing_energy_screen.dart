@@ -264,9 +264,9 @@ class _BalancingEnergyScreenState extends State<BalancingEnergyScreen>
           top: false,
           child: Column(
             children: [
-              SizedBox(height: DesignConstants.navigationBarInset(context)),
+              SizedBox(height: DesignConstants.contentTopInset(context)),
               Padding(
-                padding: EdgeInsets.fromLTRB(24, 16, 24, 0),
+                padding: EdgeInsets.fromLTRB(24, 0, 24, 0),
                 child: Text(
                   AppLocalizations.of(
                     context,

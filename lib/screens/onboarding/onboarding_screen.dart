@@ -71,8 +71,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               constraints: const BoxConstraints(maxWidth: 700),
               child: Column(
                 children: [
+                  // The same shoulder a navigation bar gives the screens that
+                  // have one, so that stepping out of onboarding does not shift
+                  // the content up or down.
                   SizedBox(
-                    height: 60,
+                    height: kToolbarHeight,
                     child: Align(
                       alignment: Alignment.centerRight,
                       child: _current == 0

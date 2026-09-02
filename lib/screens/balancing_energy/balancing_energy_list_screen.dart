@@ -60,7 +60,7 @@ class _State extends State<BalancingEnergyListScreen> {
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(
                     16,
-                    DesignConstants.navigationBarInset(context) + 16,
+                    DesignConstants.contentTopInset(context),
                     16,
                     16,
                   ),

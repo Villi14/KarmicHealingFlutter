@@ -80,7 +80,7 @@ class HelpScreen extends StatelessWidget {
                 child: SingleChildScrollView(
                   padding: EdgeInsets.fromLTRB(
                     16,
-                    DesignConstants.navigationBarInset(context) + 24,
+                    DesignConstants.contentTopInset(context),
                     16,
                     32,
                   ),

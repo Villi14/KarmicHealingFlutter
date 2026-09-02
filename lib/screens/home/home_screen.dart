@@ -33,10 +33,16 @@ class HomeScreen extends StatelessWidget {
           surfaceTintColor: Colors.transparent,
           elevation: 0,
           scrolledUnderElevation: 0,
+          // Larger than the 17 the bar hands every other title, because Source
+          // Serif 4 draws smaller inside its em than Inter does — a cap of
+          // .670em against .728, an x-height of .475 against .546, measured off
+          // the two files. At a matched 17 this title read a size down from the
+          // rest; 19 puts its lowercase and its capitals back alongside theirs.
           title: Text(
             AppLocalizations.of(context).karmicHealing,
             style: TextStyle(
               fontFamily: 'Source Serif 4',
+              fontSize: 19,
               fontWeight: FontWeight.w600,
             ),
           ),

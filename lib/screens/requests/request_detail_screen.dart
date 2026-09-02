@@ -101,7 +101,7 @@ class RequestDetailScreen extends StatelessWidget {
                 child: ListView(
                   padding: EdgeInsets.fromLTRB(
                     20,
-                    DesignConstants.navigationBarInset(context) + 8,
+                    DesignConstants.contentTopInset(context),
                     20,
                     DesignConstants.bottomBarInset(context) +
                         DesignConstants.paddingXLarge,

@@ -115,9 +115,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
                 constraints: const BoxConstraints(maxWidth: 700),
                 child: Column(
                   children: [
-                    SizedBox(
-                      height: DesignConstants.navigationBarInset(context) + 8,
-                    ),
+                    SizedBox(height: DesignConstants.contentTopInset(context)),
                     KarmicSearchBar(
                       controller: _searchController,
                       onChanged: (_) => setState(() {

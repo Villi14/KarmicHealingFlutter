@@ -110,6 +110,15 @@ abstract final class DesignConstants {
   static double navigationBarInset(BuildContext context) =>
       MediaQuery.paddingOf(context).top + kToolbarHeight;
 
+  /// Air between the navigation bar and the first line of content under it.
+  static const navigationBarGap = 8.0;
+
+  /// Where a screen's content starts: below the bar, with [navigationBarGap]
+  /// of air. Every screen that draws behind the bar begins here, so that the
+  /// shoulder above the content is the same one on all of them.
+  static double contentTopInset(BuildContext context) =>
+      navigationBarInset(context) + navigationBarGap;
+
   /// The toolbar of actions along the bottom of a list screen, above the home
   /// indicator.
   static const bottomBarHeight = 48.0;

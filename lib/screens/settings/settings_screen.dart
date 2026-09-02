@@ -286,7 +286,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: SingleChildScrollView(
                 padding: EdgeInsets.fromLTRB(
                   16,
-                  DesignConstants.navigationBarInset(context) + 16,
+                  DesignConstants.contentTopInset(context),
                   16,
                   24,
                 ),

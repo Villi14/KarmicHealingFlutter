@@ -78,7 +78,7 @@ class KarmicFormShell extends StatelessWidget {
             top: false,
             child: Column(
               children: [
-                SizedBox(height: DesignConstants.navigationBarInset(context)),
+                SizedBox(height: DesignConstants.contentTopInset(context)),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                   child: Text(

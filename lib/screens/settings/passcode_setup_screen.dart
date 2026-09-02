@@ -83,7 +83,7 @@ class _PasscodeSetupScreenState extends State<PasscodeSetupScreen> {
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(
                 horizontal: DesignConstants.paddingXLarge,
-                vertical: DesignConstants.paddingLarge,
+                vertical: DesignConstants.paddingXLarge,
               ),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(
@@ -96,9 +96,9 @@ class _PasscodeSetupScreenState extends State<PasscodeSetupScreen> {
                       l10n.appLock,
                       textAlign: TextAlign.center,
                       style: TextStyle(
+                        fontFamily: 'Source Serif 4',
+                        fontSize: 28,
                         color: colors.textPrimary,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     SizedBox(height: DesignConstants.sectionSpacing(context)),

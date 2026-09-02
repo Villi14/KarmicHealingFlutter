@@ -56,7 +56,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                 child: ListView(
                   padding: EdgeInsets.fromLTRB(
                     12,
-                    DesignConstants.navigationBarInset(context) + 8,
+                    DesignConstants.contentTopInset(context),
                     12,
                     32,
                   ),
