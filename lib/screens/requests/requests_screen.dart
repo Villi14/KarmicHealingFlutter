@@ -151,15 +151,22 @@ class _RequestsScreenState extends State<RequestsScreen> {
     return _requests(context, repository);
   }
 
+  /// The margin every panel on the screen stands in — the one the search bar
+  /// above the list keeps, and the one the other screens keep.
   EdgeInsets get _listPadding => EdgeInsets.fromLTRB(
+    DesignConstants.paddingLarge,
     DesignConstants.padding,
-    DesignConstants.padding,
-    DesignConstants.padding,
+    DesignConstants.paddingLarge,
     DesignConstants.bottomBarInset(context) + DesignConstants.paddingXLarge,
   );
 
   Widget _emptyState(BuildContext context) => ListView(
-    padding: const EdgeInsets.fromLTRB(8, 0, 8, 24),
+    padding: const EdgeInsets.fromLTRB(
+      DesignConstants.paddingLarge,
+      0,
+      DesignConstants.paddingLarge,
+      DesignConstants.paddingXLarge,
+    ),
     children: [
       KarmicEmptyState(
         icon: const AuraIcon(

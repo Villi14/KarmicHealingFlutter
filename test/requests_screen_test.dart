@@ -3,6 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:karmic_healing_flutter/data/repository_scope.dart';
 import 'package:karmic_healing_flutter/screens/requests/request_detail_screen.dart';
 import 'package:karmic_healing_flutter/screens/requests/requests_screen.dart';
+import 'package:karmic_healing_flutter/widgets/aura_widgets.dart';
+import 'package:karmic_healing_flutter/widgets/karmic_empty_state.dart';
+import 'package:karmic_healing_flutter/widgets/karmic_search_bar.dart';
 import 'package:karmic_healing_flutter/widgets/list_row.dart';
 
 import 'support/test_app.dart';
@@ -42,6 +45,22 @@ void main() {
 
     expect(find.text('Start with a request'), findsOneWidget);
     expect(find.byType(ListRow), findsNothing);
+  });
+
+  testWidgets('the empty state stands in the margin the search bar keeps', (
+    tester,
+  ) async {
+    await pumpRequests(tester);
+
+    final search = tester.getRect(
+      find.descendant(
+        of: find.byType(KarmicSearchBar),
+        matching: find.byType(AuraCard),
+      ),
+    );
+    final empty = tester.getRect(find.byType(KarmicEmptyState));
+    expect(empty.left, moreOrLessEquals(search.left));
+    expect(empty.right, moreOrLessEquals(search.right));
   });
 
   testWidgets('a request written to the store shows up as a row', (
