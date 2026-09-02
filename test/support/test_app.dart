@@ -3,6 +3,7 @@ import 'package:karmic_healing_flutter/data/app_lock.dart';
 import 'package:karmic_healing_flutter/data/energy_settings.dart';
 import 'package:karmic_healing_flutter/l10n/app_locales.dart';
 import 'package:karmic_healing_flutter/l10n/app_localizations.dart';
+import 'package:karmic_healing_flutter/locale_controller.dart';
 
 /// The app shell a screen needs under test: every screen reads its text from
 /// [AppLocalizations], so a bare [MaterialApp] would leave it with nothing to
@@ -14,6 +15,10 @@ import 'package:karmic_healing_flutter/l10n/app_localizations.dart';
 /// A screen that reads the meditation settings is given [energySettings] to
 /// read them from, and one that reads the app lock is given [appLock]; the rest
 /// need neither, and are left without the scope.
+///
+/// The language controller is always there, since the settings screen can push
+/// the language picker from anywhere; a test that wants to read the choice back
+/// passes its own [locales].
 Widget testApp({
   required Widget home,
   Locale locale = const Locale('en'),
@@ -22,6 +27,7 @@ Widget testApp({
   ThemeMode? themeMode,
   EnergySettings? energySettings,
   AppLockSettings? appLock,
+  LocaleController? locales,
 }) {
   final app = MaterialApp(
     debugShowCheckedModeBanner: false,
@@ -45,9 +51,14 @@ Widget testApp({
     home: home,
   );
 
+  final spoken = LocaleScope(
+    controller: locales ?? LocaleController(),
+    child: app,
+  );
+
   final locked = appLock == null
-      ? app
-      : AppLockScope(settings: appLock, child: app);
+      ? spoken
+      : AppLockScope(settings: appLock, child: spoken);
 
   return energySettings == null
       ? locked

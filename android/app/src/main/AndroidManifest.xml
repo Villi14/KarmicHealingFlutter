@@ -8,11 +8,15 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <!-- The app lock asks the device to vouch for whoever is holding it. -->
     <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
+    <!-- The locale config is what makes Android 13 and up give this app its own
+         language screen, the one the "change language" row in Settings opens.
+         Without it that row leads only to the phone's own language. -->
     <application
         android:label="Karmic Healing Flutter"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
-        android:roundIcon="@mipmap/ic_launcher_round">
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:localeConfig="@xml/locales_config">
         <!-- The app is drawn for one hand holding a phone upright: the aura is
              laid out top to bottom, and the session screens read as a column.
              Nothing here has a landscape layout to turn into, so the window

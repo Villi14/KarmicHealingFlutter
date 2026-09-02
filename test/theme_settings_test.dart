@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:karmic_healing_flutter/constants/app_colors.dart';
 import 'package:karmic_healing_flutter/data/energy_settings.dart';
+import 'package:karmic_healing_flutter/locale_controller.dart';
 import 'package:karmic_healing_flutter/main.dart';
 import 'package:karmic_healing_flutter/screens/settings/theme_settings_screen.dart';
 import 'package:karmic_healing_flutter/theme_controller.dart';
@@ -53,6 +54,7 @@ void main() {
     await tester.pumpWidget(
       KarmicHealingApp(
         controller: controller,
+        locales: LocaleController(),
         energySettings: await EnergySettings.load(),
         appLock: await testAppLock(),
         requests: repositories.requests,

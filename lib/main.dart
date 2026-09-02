@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,6 +16,7 @@ import 'data/repository_scope.dart';
 import 'data/requests_repository.dart';
 import 'data/seed_sample_data.dart';
 import 'qa/qa_routes.dart';
+import 'locale_controller.dart';
 import 'theme_controller.dart';
 import 'screens/app_lock/app_lock_screen.dart';
 import 'screens/home/home_screen.dart';
@@ -50,14 +49,17 @@ void _openReminder(String reminderId) {
 }
 
 /// The locale the notification channel is named in — the app itself has not
-/// been built yet when the channel is created, so the device is asked directly.
-Locale _deviceLocale() =>
-    AppLocales.resolve(PlatformDispatcher.instance.locales);
+/// been built yet when the channel is created, so the stored choice is read and
+/// the device asked only where there is none.
+Locale _channelLocale(LocaleController locales) =>
+    LocaleController.resolved(locales.value);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
+  final locales = await LocaleController.load();
 
   // A QA run must not touch the store the user keeps, nor put anything in the
   // notification tray, so it gets a store that lives only as long as the
@@ -65,7 +67,7 @@ void main() async {
   final scheduler = qaScreen.isEmpty
       ? await LocalReminderScheduler.start(
           channelName: (await AppLocalizations.delegate.load(
-            _deviceLocale(),
+            _channelLocale(locales),
           )).reminders,
           onOpened: _openReminder,
         )
@@ -84,6 +86,7 @@ void main() async {
   runApp(
     KarmicHealingApp(
       controller: await ThemeController.load(),
+      locales: locales,
       energySettings: await EnergySettings.load(),
       // A QA run gets a device that offers nothing and a code that lives only
       // as long as the process, so no screenshot waits behind a lock.
@@ -114,6 +117,7 @@ class KarmicHealingApp extends StatelessWidget {
   const KarmicHealingApp({
     super.key,
     required this.controller,
+    required this.locales,
     required this.energySettings,
     required this.appLock,
     required this.requests,
@@ -121,6 +125,7 @@ class KarmicHealingApp extends StatelessWidget {
   });
 
   final ThemeController controller;
+  final LocaleController locales;
   final EnergySettings energySettings;
   final AppLockSettings appLock;
   final RequestsRepository requests;
@@ -138,25 +143,36 @@ class KarmicHealingApp extends StatelessWidget {
           settings: energySettings,
           child: AppLockScope(
             settings: appLock,
-            child: MaterialApp(
-              navigatorKey: _navigatorKey,
-              onGenerateTitle: (context) =>
-                  AppLocalizations.of(context).karmicHealing,
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
-              supportedLocales: AppLocalizations.supportedLocales,
-              localeListResolutionCallback: (preferred, _) =>
-                  AppLocales.resolve(preferred),
-              theme: appTheme(Brightness.light),
-              darkTheme: appTheme(Brightness.dark),
-              themeMode: mode,
-              // The lock goes on the builder rather than on `home`: `home` is
-              // only the first route, and a lock there left every pushed screen
-              // above it on display. The builder wraps the navigator itself, so
-              // nothing the app is guarding is on screen — or in the task
-              // switcher's snapshot — until the lock opens.
-              builder: (context, child) => AppLockGate(child: child!),
-              home: const AppWrapper(),
-              debugShowCheckedModeBanner: false,
+            child: LocaleScope(
+              controller: locales,
+              child: ValueListenableBuilder<Locale?>(
+                valueListenable: locales,
+                builder: (context, locale, _) => MaterialApp(
+                  navigatorKey: _navigatorKey,
+                  onGenerateTitle: (context) =>
+                      AppLocalizations.of(context).karmicHealing,
+                  localizationsDelegates:
+                      AppLocalizations.localizationsDelegates,
+                  supportedLocales: AppLocalizations.supportedLocales,
+                  // The chosen language, or none — in which case the app
+                  // falls to this callback and speaks whatever the device
+                  // asks for that it can answer in.
+                  locale: locale,
+                  localeListResolutionCallback: (preferred, _) =>
+                      AppLocales.resolve(preferred),
+                  theme: appTheme(Brightness.light),
+                  darkTheme: appTheme(Brightness.dark),
+                  themeMode: mode,
+                  // The lock goes on the builder rather than on `home`: `home` is
+                  // only the first route, and a lock there left every pushed screen
+                  // above it on display. The builder wraps the navigator itself, so
+                  // nothing the app is guarding is on screen — or in the task
+                  // switcher's snapshot — until the lock opens.
+                  builder: (context, child) => AppLockGate(child: child!),
+                  home: const AppWrapper(),
+                  debugShowCheckedModeBanner: false,
+                ),
+              ),
             ),
           ),
         ),

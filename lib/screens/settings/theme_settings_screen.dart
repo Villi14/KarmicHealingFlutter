@@ -5,9 +5,9 @@ import '../../constants/app_colors.dart';
 import '../../constants/app_theme.dart';
 import '../../l10n/app_localizations.dart';
 import '../../widgets/aura_widgets.dart';
+import '../../widgets/choice_card.dart';
 import '../../widgets/gradient_background.dart';
 import '../../theme_controller.dart';
-import '../../widgets/sf_symbols.dart';
 
 /// Which appearance the app follows. A dialog rather than a page: three options
 /// on their own cards, and the one action that closes them.
@@ -51,7 +51,7 @@ class ThemeSettingsScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 20),
                       for (final theme in _themes(l10n).entries) ...[
-                        _ThemeOption(
+                        ChoiceCard(
                           title: theme.value,
                           isSelected: theme.key == ThemeScope.of(context).value,
                           onTap: () =>
@@ -78,41 +78,4 @@ class ThemeSettingsScreen extends StatelessWidget {
       ),
     );
   }
-}
-
-class _ThemeOption extends StatelessWidget {
-  const _ThemeOption({
-    required this.title,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final String title;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => AuraCard(
-    level: AuraLevel.brow,
-    watermark: false,
-    onTap: onTap,
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-    child: Row(
-      children: [
-        Expanded(
-          child: Text(
-            title,
-            style: TextStyle(
-              color: isSelected
-                  ? AppColors.of(context).textPrimary
-                  : AppColors.of(context).textSecondary,
-              fontSize: 17,
-            ),
-          ),
-        ),
-        if (isSelected)
-          const AuraIcon(SFSymbols.checkmark, level: AuraLevel.brow, size: 18),
-      ],
-    ),
-  );
 }

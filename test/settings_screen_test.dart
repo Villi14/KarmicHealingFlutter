@@ -1,5 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:karmic_healing_flutter/data/app_lock.dart';
+import 'package:karmic_healing_flutter/locale_controller.dart';
 import 'package:karmic_healing_flutter/screens/settings/settings_actions.dart';
 import 'package:karmic_healing_flutter/screens/settings/settings_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,7 +22,6 @@ class RecordingActions extends SettingsActions {
 
   final List<Uri> opened = [];
   final List<String> copied = [];
-  int systemSettingsOpened = 0;
 
   @override
   Future<String> appVersion() async => version;
@@ -30,9 +31,6 @@ class RecordingActions extends SettingsActions {
     opened.add(url);
     return url.scheme == 'mailto' ? mailAppAnswers : true;
   }
-
-  @override
-  Future<void> openSystemSettings() async => systemSettingsOpened++;
 
   @override
   Future<void> copyToClipboard(String text) async => copied.add(text);
@@ -50,10 +48,15 @@ void main() {
   Future<RecordingActions> openSettings(
     WidgetTester tester, {
     bool mailAppAnswers = true,
+    LocaleController? locales,
   }) async {
     final actions = RecordingActions(mailAppAnswers: mailAppAnswers);
     await tester.pumpWidget(
-      testApp(home: SettingsScreen(actions: actions), appLock: appLock),
+      testApp(
+        home: SettingsScreen(actions: actions),
+        appLock: appLock,
+        locales: locales,
+      ),
     );
     await tester.pumpAndSettle();
     return actions;
@@ -84,17 +87,41 @@ void main() {
     expect(actions.opened, [SettingsScreen.authorSite]);
   });
 
-  testWidgets('changing the language leaves for the system settings', (
+  testWidgets('the language is chosen in the app, not in the system', (
     tester,
   ) async {
-    final actions = await openSettings(tester);
+    final locales = LocaleController();
+    await openSettings(tester, locales: locales);
 
     await tester.tap(find.text('Change Language'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Open Settings'));
+
+    // Named in itself, so that somebody who has landed here in a language they
+    // cannot read still recognises their own. It sits far enough down the list
+    // to need scrolling to on a short window.
+    await tester.scrollUntilVisible(find.text('Українська'), 100);
+    await tester.tap(find.text('Українська'));
     await tester.pumpAndSettle();
 
-    expect(actions.systemSettingsOpened, 1);
+    expect(locales.value, const Locale('uk'));
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getString(LocaleController.storageKey), 'uk');
+  });
+
+  testWidgets('following the device is what the picker offers first', (
+    tester,
+  ) async {
+    final locales = LocaleController(const Locale('uk'));
+    await openSettings(tester, locales: locales);
+
+    await tester.tap(find.text('Change Language'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('System'));
+    await tester.pumpAndSettle();
+
+    expect(locales.value, isNull);
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getString(LocaleController.storageKey), 'system');
   });
 
   testWidgets('writing to us opens a mail app addressed to us', (tester) async {

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The fifteen languages the app is written in, told to Android so that its
+     own per-app language screen has something to offer. Without this list the
+     screen does not exist for us, and the "change language" row in Settings
+     leads nowhere but the phone's own language.
+
+     Kept in step with AppLocalizations.supportedLocales, which is generated
+     from the ARB files in lib/l10n: a language added there belongs here too.
+     The default is the one AppLocales falls back on. -->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android"
+    android:defaultLocale="en">
+    <locale android:name="en"/>
+    <locale android:name="bn"/>
+    <locale android:name="de"/>
+    <locale android:name="es"/>
+    <locale android:name="fr"/>
+    <locale android:name="hi"/>
+    <locale android:name="it"/>
+    <locale android:name="ja"/>
+    <locale android:name="ko"/>
+    <locale android:name="pl"/>
+    <locale android:name="pt"/>
+    <locale android:name="ru"/>
+    <locale android:name="tr"/>
+    <locale android:name="uk"/>
+    <locale android:name="zh"/>
+</locale-config>

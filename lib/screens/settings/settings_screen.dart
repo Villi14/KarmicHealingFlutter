@@ -14,6 +14,7 @@ import '../../widgets/gradient_background.dart';
 import '../../widgets/scroll_blur.dart';
 import '../../widgets/sf_symbols.dart';
 import '../balancing_energy/energy_settings_screen.dart';
+import 'language_settings_screen.dart';
 import 'passcode_setup_screen.dart';
 import 'privacy_policy_screen.dart';
 import 'settings_actions.dart';
@@ -110,25 +111,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         AuraAlertButton(
           l10n.authorSite,
           onPressed: () => widget.actions.openUrl(SettingsScreen.authorSite),
-        ),
-        AuraAlertButton(l10n.done, prominence: AuraProminence.quiet),
-      ],
-    );
-  }
-
-  /// The app speaks whatever language the device does, so changing it means
-  /// leaving for the system settings.
-  Future<void> _showChangeLanguage() {
-    final l10n = AppLocalizations.of(context);
-    return showAuraAlert(
-      context,
-      level: AuraLevel.brow,
-      title: l10n.changeLanguage,
-      message: l10n.changeLanguageMessage,
-      buttons: [
-        AuraAlertButton(
-          l10n.openSystemSettings,
-          onPressed: widget.actions.openSystemSettings,
         ),
         AuraAlertButton(l10n.done, prominence: AuraProminence.quiet),
       ],
@@ -257,10 +239,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SizedBox(height: DesignConstants.paddingTiny),
                   Text(
                     l10n.appLockDescription,
-                    style: TextStyle(
-                      color: colors.textSecondary,
-                      fontSize: 13,
-                    ),
+                    style: TextStyle(color: colors.textSecondary, fontSize: 13),
                   ),
                 ],
               ),
@@ -335,7 +314,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     DisclosureCell(
                       title: l10n.changeLanguage,
-                      onTap: _showChangeLanguage,
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const LanguageSettingsScreen(),
+                          fullscreenDialog: true,
+                        ),
+                      ),
                     ),
                     if (Translation.isMachineTranslated(
                       Localizations.localeOf(context),
