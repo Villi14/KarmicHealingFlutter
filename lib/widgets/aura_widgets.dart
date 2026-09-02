@@ -251,6 +251,41 @@ LinearGradient toneGradient(Color tone) => LinearGradient(
   colors: [tone, Color.lerp(tone, Colors.white, .3)!],
 );
 
+/// How far off what is under it a card is lifted.
+enum AuraElevation {
+  /// A panel on the screen's own background.
+  raised,
+
+  /// An inset lying on top of a panel: it is only a little way above what it
+  /// covers, so its shadow is shorter and softer than a panel's.
+  inset,
+
+  /// A row or a field flush with the surface it belongs to.
+  flat;
+
+  List<BoxShadow>? shadows() => switch (this) {
+    raised => [
+      BoxShadow(
+        color: Colors.black.withValues(
+          alpha: DesignConstants.opacityCardShadow,
+        ),
+        blurRadius: DesignConstants.shadowRadiusCard,
+        offset: const Offset(0, DesignConstants.shadowOffsetCard),
+      ),
+    ],
+    inset => [
+      BoxShadow(
+        color: Colors.black.withValues(
+          alpha: DesignConstants.opacityInsetShadow,
+        ),
+        blurRadius: DesignConstants.shadowRadiusInset,
+        offset: const Offset(0, DesignConstants.shadowOffsetInset),
+      ),
+    ],
+    flat => null,
+  };
+}
+
 class AuraCard extends StatelessWidget {
   const AuraCard({
     super.key,
@@ -260,7 +295,7 @@ class AuraCard extends StatelessWidget {
     this.watermark = true,
     this.onTap,
     this.tone,
-    this.elevated = true,
+    this.elevation = AuraElevation.raised,
   });
 
   final AuraLevel level;
@@ -269,7 +304,7 @@ class AuraCard extends StatelessWidget {
   final bool watermark;
   final VoidCallback? onTap;
   final Color? tone;
-  final bool elevated;
+  final AuraElevation elevation;
 
   @override
   Widget build(BuildContext context) {
@@ -286,15 +321,7 @@ class AuraCard extends StatelessWidget {
                   .withValues(alpha: .45),
           width: .5,
         ),
-        boxShadow: elevated
-            ? [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: .18),
-                  blurRadius: 16,
-                  offset: const Offset(0, 8),
-                ),
-              ]
-            : null,
+        boxShadow: elevation.shadows(),
       ),
       child: Stack(
         children: [

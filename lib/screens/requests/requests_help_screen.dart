@@ -151,7 +151,7 @@ class _QuoteCard extends StatelessWidget {
     return AuraCard(
       level: AuraLevel.sacral,
       watermark: false,
-      elevated: false,
+      elevation: AuraElevation.inset,
       padding: const EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

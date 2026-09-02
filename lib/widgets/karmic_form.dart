@@ -120,7 +120,7 @@ class KarmicFormCard extends StatelessWidget {
   Widget build(BuildContext context) => AuraCard(
     level: level,
     watermark: false,
-    elevated: false,
+    elevation: AuraElevation.flat,
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
     child: child,
   );

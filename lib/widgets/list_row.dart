@@ -49,7 +49,7 @@ class ListRow extends StatelessWidget {
     level: AuraLevel.solar,
     tone: tone,
     watermark: watermark,
-    elevated: false,
+    elevation: AuraElevation.flat,
     onTap: onTap,
     padding: EdgeInsets.zero,
     child: SizedBox(

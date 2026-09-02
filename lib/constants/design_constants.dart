@@ -73,6 +73,9 @@ abstract final class DesignConstants {
   static const opacityEdgeLight = 0.25;
   static const opacityCardShadow = 0.18;
 
+  /// The shadow of a card lying on another card, which is a shorter drop.
+  static const opacityInsetShadow = 0.12;
+
   // Aura
   static const watermarkSize = 96.0;
   static const watermarkOffset = 34.0;
@@ -96,6 +99,11 @@ abstract final class DesignConstants {
   // Shadow
   static const shadowRadiusCard = 16.0;
   static const shadowOffsetCard = 8.0;
+
+  /// A card lying on top of another one is a shorter drop than a card on the
+  /// screen's background, and casts a shorter shadow.
+  static const shadowRadiusInset = 8.0;
+  static const shadowOffsetInset = 3.0;
 
   // Threshold
   static const thresholdMedium = 50.0;
