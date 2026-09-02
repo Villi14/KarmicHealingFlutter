@@ -1,19 +1,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// Everything the settings screen reaches for outside the app: the bundle's own
-/// version, the author's site, a mail composer.
+/// Everything the settings screen reaches for outside the app: the author's
+/// site, a mail composer.
 ///
 /// The screen knows only this much of it, so a test can hand it one that
 /// records what was asked for instead of opening anything on the machine
 /// running the test.
 abstract class SettingsActions {
   const SettingsActions();
-
-  /// The version to show in About, as the store shows it — `1.0.0 (1)`.
-  Future<String> appVersion();
 
   /// Opens [url] outside the app. Returns false if nothing on the device would
   /// take it — a phone with no mail account set up, say.
@@ -25,12 +21,6 @@ abstract class SettingsActions {
 /// The actions the running app gets.
 class PlatformSettingsActions extends SettingsActions {
   const PlatformSettingsActions();
-
-  @override
-  Future<String> appVersion() async {
-    final info = await PackageInfo.fromPlatform();
-    return '${info.version} (${info.buildNumber})';
-  }
 
   @override
   Future<bool> openUrl(Uri url) async {

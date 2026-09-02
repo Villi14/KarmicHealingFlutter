@@ -281,14 +281,6 @@
   "topicsHint": "Every reminder belongs to a topic",
   "tryAnotherSearch": "Try a different word or clear the search.",
   "unlock": "Unlock",
-  "versionLabel": "Version {version}",
-  "@versionLabel": {
-    "placeholders": {
-      "version": {
-        "type": "String"
-      }
-    }
-  },
   "vibration": "Vibration",
   "volume": "Volume",
   "writeToUs": "Write to us",

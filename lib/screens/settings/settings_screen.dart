@@ -41,21 +41,9 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  /// Read from the bundle rather than written down here, so About cannot go on
-  /// claiming a version that shipped two releases ago.
-  String? _version;
-
   /// Whether a code has been chosen, which decides whether turning the lock on
   /// goes through choosing one first.
   bool _hasPasscode = false;
-
-  @override
-  void initState() {
-    super.initState();
-    widget.actions.appVersion().then((version) {
-      if (mounted) setState(() => _version = version);
-    });
-  }
 
   @override
   void didChangeDependencies() {
@@ -104,9 +92,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       icon: SFSymbols.infoCircle,
       level: AuraLevel.crown,
       title: l10n.karmicHealing,
-      message: _version == null
-          ? l10n.thanksForUsingKarmicHealing
-          : '${l10n.thanksForUsingKarmicHealing}\n\n${l10n.versionLabel(_version!)}',
+      message: l10n.thanksForUsingKarmicHealing,
       buttons: [
         AuraAlertButton(
           l10n.authorSite,

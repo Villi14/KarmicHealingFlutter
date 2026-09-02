@@ -12,9 +12,7 @@ import 'support/test_app_lock.dart';
 /// The outside world, written down instead of opened: whatever the screen asks
 /// for lands in a list the test can read back.
 class RecordingActions extends SettingsActions {
-  RecordingActions({this.version = '1.2.3 (4)', this.mailAppAnswers = true});
-
-  final String version;
+  RecordingActions({this.mailAppAnswers = true});
 
   /// Whether a mail app takes the `mailto:` handed to it. A phone with no mail
   /// account set up answers no, and the screen falls back to the address.
@@ -22,9 +20,6 @@ class RecordingActions extends SettingsActions {
 
   final List<Uri> opened = [];
   final List<String> copied = [];
-
-  @override
-  Future<String> appVersion() async => version;
 
   @override
   Future<bool> openUrl(Uri url) async {
@@ -61,20 +56,6 @@ void main() {
     await tester.pumpAndSettle();
     return actions;
   }
-
-  testWidgets('About names the version the bundle actually is', (tester) async {
-    await openSettings(tester);
-
-    await tester.tap(find.text('About'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Version 1.2.3 (4)'), findsNothing);
-    expect(
-      find.textContaining('Version 1.2.3 (4)'),
-      findsOneWidget,
-      reason: 'the version sits under the thanks, in the same paragraph',
-    );
-  });
 
   testWidgets('About sends a curious reader to the author', (tester) async {
     final actions = await openSettings(tester);

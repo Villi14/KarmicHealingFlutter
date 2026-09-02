@@ -281,14 +281,6 @@
   "topicsHint": "Кожне нагадування належить темі",
   "tryAnotherSearch": "Спробуйте інше слово або очистіть пошук.",
   "unlock": "Розблокувати",
-  "versionLabel": "Версія {version}",
-  "@versionLabel": {
-    "placeholders": {
-      "version": {
-        "type": "String"
-      }
-    }
-  },
   "vibration": "Вібрація",
   "volume": "Гучність",
   "writeToUs": "Напишіть нам",

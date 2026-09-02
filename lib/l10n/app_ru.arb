@@ -281,14 +281,6 @@
   "topicsHint": "Каждое напоминание принадлежит теме",
   "tryAnotherSearch": "Попробуйте другое слово или очистите поиск.",
   "unlock": "Разблокировать",
-  "versionLabel": "Версия {version}",
-  "@versionLabel": {
-    "placeholders": {
-      "version": {
-        "type": "String"
-      }
-    }
-  },
   "vibration": "Вибрация",
   "volume": "Громкость",
   "writeToUs": "Напишите нам",
