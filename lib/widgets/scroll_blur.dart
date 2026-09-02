@@ -65,7 +65,12 @@ class _ScrollBlurScope extends InheritedNotifier<ValueNotifier<double>> {
 /// [Scaffold] needs `extendBodyBehindAppBar: true` for there to be anything
 /// behind the bar to blur.
 class ScrollBlurBackdrop extends StatelessWidget {
-  const ScrollBlurBackdrop({super.key, this.sigma = 12, this.distance = 28});
+  const ScrollBlurBackdrop({
+    super.key,
+    this.sigma = 12,
+    this.distance = 28,
+    this.extend = 32,
+  });
 
   /// Blur of one layer at full strength; the layers stack, so the band right
   /// under the status bar ends up several times this.
@@ -74,12 +79,31 @@ class ScrollBlurBackdrop extends StatelessWidget {
   /// How far the content travels before the bar reaches full strength.
   final double distance;
 
+  /// How far below the bar the frosting keeps going before it thins out to
+  /// nothing. The bar's own height is a hard line for the glass to end on —
+  /// carrying the ramp past it gives the content longer to come out from
+  /// under the material.
+  final double extend;
+
   @override
   Widget build(BuildContext context) {
     final t = (_ScrollBlurScope.of(context) / distance).clamp(0.0, 1.0);
     // A zero-sigma BackdropFilter still forces a saveLayer, so at rest draw nothing.
     if (t == 0) return const SizedBox.expand();
-    return EdgeBlur(edge: VerticalEdge.top, sigma: sigma * t, opacity: t);
+    final blur = EdgeBlur(edge: VerticalEdge.top, sigma: sigma * t, opacity: t);
+    if (extend <= 0) return blur;
+    // The bar hands its flexible space exactly its own height; the strip is
+    // drawn taller than that and hangs below, over the content.
+    return LayoutBuilder(
+      builder: (context, box) {
+        final height = box.maxHeight + extend;
+        return OverflowBox(
+          alignment: Alignment.topCenter,
+          maxHeight: height,
+          child: SizedBox(height: height, child: blur),
+        );
+      },
+    );
   }
 }
 
