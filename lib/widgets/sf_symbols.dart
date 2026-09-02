@@ -60,6 +60,10 @@ abstract final class SFSymbols {
   static const pause = CupertinoIcons.pause;
   static const circle = CupertinoIcons.circle;
   static const circleFill = CupertinoIcons.largecircle_fill_circle;
+
+  static const lockFill = CupertinoIcons.lock_fill;
+  static const lockShield = CupertinoIcons.lock_shield;
+  static const deleteLeft = CupertinoIcons.delete_left;
 }
 
 /// An SF Symbol with no Cupertino Icons counterpart, drawn to match the weight
@@ -70,6 +74,8 @@ enum SFGlyph {
   pencilAndListClipboard,
   iphoneRadiowaves,
   bookClosed,
+  faceid,
+  touchid,
 }
 
 /// Renders an [SFGlyph]. Sizes and tints itself from the ambient [IconTheme]
@@ -138,6 +144,10 @@ class _SFGlyphPainter extends CustomPainter {
         _paintRadiowaves(canvas, paint);
       case SFGlyph.bookClosed:
         _paintBookClosed(canvas, paint);
+      case SFGlyph.faceid:
+        _paintFaceID(canvas, paint);
+      case SFGlyph.touchid:
+        _paintTouchID(canvas, paint);
     }
     canvas.restore();
   }
@@ -353,6 +363,103 @@ class _SFGlyphPainter extends CustomPainter {
       const Offset(29.6, fold),
       Paint.from(paint)..strokeWidth = _stroke * .81,
     );
+  }
+
+  /// `faceid` — four corner brackets around a face reduced to two eyes, a nose
+  /// and a smile, the way Apple draws it.
+  void _paintFaceID(Canvas canvas, Paint paint) {
+    const margin = 9.0;
+    const arm = 19.0;
+    const radius = 9.0;
+
+    for (final corner in const [
+      (x: 1.0, y: 1.0),
+      (x: -1.0, y: 1.0),
+      (x: 1.0, y: -1.0),
+      (x: -1.0, y: -1.0),
+    ]) {
+      // Read from the middle out, so one bracket serves all four corners.
+      double x(double from) => 50 + corner.x * (50 - from);
+      double y(double from) => 50 + corner.y * (50 - from);
+
+      canvas.drawPath(
+        Path()
+          ..moveTo(x(margin), y(margin + arm))
+          ..lineTo(x(margin), y(margin + radius))
+          ..arcToPoint(
+            Offset(x(margin + radius), y(margin)),
+            radius: const Radius.circular(radius),
+            clockwise: corner.x * corner.y > 0,
+          )
+          ..lineTo(x(margin + arm), y(margin)),
+        paint,
+      );
+    }
+
+    // The eyes: a short stroke each, set well above the middle.
+    for (final eyeX in const [34.0, 66.0]) {
+      canvas.drawLine(Offset(eyeX, 34), Offset(eyeX, 45), paint);
+    }
+
+    // The nose: down the middle, with the small foot to the right that gives
+    // the face its direction.
+    canvas.drawPath(
+      Path()
+        ..moveTo(50, 34)
+        ..lineTo(50, 55)
+        ..lineTo(57, 55),
+      paint,
+    );
+
+    // The smile, bowing under the nose from cheek to cheek.
+    canvas.drawPath(
+      Path()
+        ..moveTo(35, 66)
+        ..quadraticBezierTo(50, 78, 65, 66),
+      paint,
+    );
+  }
+
+  /// `touchid` — a fingertip's ridges: arcs nested about a common centre, each
+  /// carried past the horizontal and then run straight down, so what reads is a
+  /// print rolled onto a surface rather than a stack of rainbows.
+  void _paintTouchID(Canvas canvas, Paint paint) {
+    const centre = Offset(50, 44);
+    // The arc opens a little below the horizontal, which is where the ridge
+    // stops curving and the leg beneath it begins.
+    const start = math.pi * 170 / 180;
+    const sweep = math.pi * 200 / 180;
+
+    for (var ridge = 0; ridge < 4; ridge++) {
+      final rx = 8.5 + ridge * 12.5;
+      final ry = 10.0 + ridge * 12.5;
+      final box = Rect.fromCenter(
+        center: centre,
+        width: rx * 2,
+        height: ry * 2,
+      );
+
+      // The legs lengthen outwards: the innermost ridge is a hook with barely
+      // any, the outermost runs nearly to the foot of the glyph.
+      final leg = ridge * 8.0;
+      final left = Offset(
+        centre.dx + rx * math.cos(start),
+        centre.dy + ry * math.sin(start),
+      );
+      final right = Offset(
+        centre.dx + rx * math.cos(start + sweep),
+        centre.dy + ry * math.sin(start + sweep),
+      );
+
+      canvas.drawPath(
+        Path()
+          ..moveTo(left.dx, left.dy + leg)
+          ..lineTo(left.dx, left.dy)
+          ..arcTo(box, start, sweep, false)
+          ..lineTo(right.dx, right.dy + leg),
+        paint,
+      );
+    }
   }
 
   @override

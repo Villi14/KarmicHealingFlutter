@@ -8,6 +8,7 @@ import 'package:karmic_healing_flutter/theme_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'support/test_app.dart';
+import 'support/test_app_lock.dart';
 import 'support/test_repositories.dart';
 
 void main() {
@@ -53,6 +54,7 @@ void main() {
       KarmicHealingApp(
         controller: controller,
         energySettings: await EnergySettings.load(),
+        appLock: await testAppLock(),
         requests: repositories.requests,
         reminders: repositories.reminders,
       ),

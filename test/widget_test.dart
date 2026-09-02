@@ -12,6 +12,7 @@ import 'package:karmic_healing_flutter/data/energy_settings.dart';
 import 'package:karmic_healing_flutter/main.dart';
 import 'package:karmic_healing_flutter/theme_controller.dart';
 
+import 'support/test_app_lock.dart';
 import 'support/test_repositories.dart';
 
 void main() {
@@ -27,6 +28,7 @@ void main() {
       KarmicHealingApp(
         controller: ThemeController(),
         energySettings: await EnergySettings.load(),
+        appLock: await testAppLock(),
         requests: repositories.requests,
         reminders: repositories.reminders,
       ),

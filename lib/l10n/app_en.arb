@@ -6,6 +6,13 @@
   "addSubRequest": "Add Subrequest",
   "all": "All",
   "allCompleted": "All Completed",
+  "appLock": "App lock",
+  "appLockDescription": "Require your face, fingerprint, or code",
+  "appLocked": "Your space is protected",
+  "appLockFailed": "Authentication was unsuccessful. Please try again.",
+  "appLockReason": "Confirm it is you to open your Karmic Healing space.",
+  "appLockSubtitle": "Use your face, fingerprint, or code to continue your practice.",
+  "appLockUnavailable": "Set up face or fingerprint recognition, or a device passcode, to unlock Karmic Healing.",
   "attentionBeforeProceeding": "Complete the previous step before moving on to the next one. Each step takes about five minutes.",
   "authorSite": "Author's website",
   "back": "Back",
@@ -86,6 +93,8 @@
   "light": "Light",
   "list": "Topic",
   "low": "Low",
+  "machineTranslationNote": "This language was translated automatically, so some wording may be off. If you notice a mistake, please write to us — we would be very grateful.",
+  "machineTranslationTitle": "Machine translation",
   "meditationAutoScroll": "Meditation steps scroll automatically according to the set time interval.",
   "meditationSettingsTitle": "Meditation Step Settings",
   "meditationSoundSetting": "You can enable or disable sound playback when transitioning to the next step.",
@@ -158,6 +167,24 @@
   "part3Step15": "Ask your Divine Self to stay with you forever (the process may take several days).",
   "part3Step16": "Invite your Goddess to come into you and merge with your Divine Self, and also connect your energy with the energy of all your bodies. Talk to her, ask her name.",
   "part3Step17": "Ask that the process just completed become permanent.",
+  "passcodeChange": "Change code",
+  "passcodeCreateSubtitle": "Four digits to open the app when your face or fingerprint cannot.",
+  "passcodeCreateTitle": "Create a code",
+  "passcodeDelete": "Delete",
+  "passcodeEnterTitle": "Enter your code",
+  "passcodeForgot": "Forgot your code?",
+  "passcodeLockedOut": "Too many attempts. Try again in {seconds} s.",
+  "@passcodeLockedOut": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "passcodeMismatch": "Those two codes are different. Start again.",
+  "passcodeRepeatTitle": "Repeat the code",
+  "passcodeResetReason": "Confirm it is you to choose a new code.",
+  "passcodeWrong": "Wrong code. Try again.",
   "pause": "Pause",
   "paused": "Paused",
   "priority": "Priority",
@@ -255,6 +282,7 @@
   "topic": "Topic",
   "topicsHint": "Every reminder belongs to a topic",
   "tryAnotherSearch": "Try a different word or clear the search.",
+  "unlock": "Unlock",
   "versionLabel": "Version {version}",
   "@versionLabel": {
     "placeholders": {

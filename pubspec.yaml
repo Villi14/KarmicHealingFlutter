@@ -52,6 +52,9 @@ dependencies:
   wakelock_plus: ^1.7.0
   screen_brightness: ^2.1.11
   flex_color_picker: ^3.8.0
+  local_auth: ^3.0.2
+  flutter_secure_storage: ^10.3.1
+  crypto: ^3.0.6
 
 dev_dependencies:
   flutter_test:

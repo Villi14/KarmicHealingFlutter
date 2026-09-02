@@ -127,9 +127,8 @@ class LocalReminderScheduler extends ReminderScheduler {
         >();
     if (android != null) {
       await android.requestNotificationsPermission();
-      // An exact alarm is what lands a reminder on its own minute rather than
-      // whenever the system next feels like waking up.
-      await android.requestExactAlarmsPermission();
+      // No exact-alarm permission is asked for: reminders are scheduled
+      // inexactly, so there is nothing further to ask leave for here.
       return;
     }
 
@@ -181,7 +180,7 @@ class LocalReminderScheduler extends ReminderScheduler {
         body: reminder.notes.isEmpty ? null : reminder.notes,
         payload: reminder.id,
         scheduledDate: at,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         notificationDetails: const NotificationDetails(
           android: AndroidNotificationDetails(
             _channelId,
@@ -193,9 +192,9 @@ class LocalReminderScheduler extends ReminderScheduler {
         ),
       );
     } on PlatformException catch (error) {
-      // Android can refuse an exact alarm outright — the user may have turned
-      // that permission down. One reminder going unscheduled must not stop the
-      // rest, and it is offered again on the next sync.
+      // Android can still refuse to lay an alarm. One reminder going
+      // unscheduled must not stop the rest, and it is offered again on the
+      // next sync.
       debugPrint(
         'Could not schedule reminder ${reminder.id}: ${error.message}',
       );

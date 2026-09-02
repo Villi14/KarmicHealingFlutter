@@ -1,8 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:karmic_healing_flutter/data/app_lock.dart';
 import 'package:karmic_healing_flutter/screens/settings/settings_actions.dart';
 import 'package:karmic_healing_flutter/screens/settings/settings_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'support/test_app.dart';
+import 'support/test_app_lock.dart';
 
 /// The outside world, written down instead of opened: whatever the screen asks
 /// for lands in a list the test can read back.
@@ -36,12 +39,22 @@ class RecordingActions extends SettingsActions {
 }
 
 void main() {
+  // Loaded in `setUp` rather than in a test body: that body runs in a fake-async
+  // zone, and the read of the stored settings started there never completes.
+  late AppLockSettings appLock;
+  setUp(() async {
+    SharedPreferences.setMockInitialValues({});
+    appLock = await testAppLock();
+  });
+
   Future<RecordingActions> openSettings(
     WidgetTester tester, {
     bool mailAppAnswers = true,
   }) async {
     final actions = RecordingActions(mailAppAnswers: mailAppAnswers);
-    await tester.pumpWidget(testApp(home: SettingsScreen(actions: actions)));
+    await tester.pumpWidget(
+      testApp(home: SettingsScreen(actions: actions), appLock: appLock),
+    );
     await tester.pumpAndSettle();
     return actions;
   }

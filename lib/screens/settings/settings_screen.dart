@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../constants/app_colors.dart';
 import '../../constants/design_constants.dart';
+import '../../data/app_lock.dart';
 import '../../l10n/app_localizations.dart';
+import '../../l10n/translation.dart';
 import '../../widgets/aura_alert.dart';
 import '../../widgets/aura_widgets.dart';
 import '../../widgets/disclosure_cell.dart';
@@ -10,6 +14,7 @@ import '../../widgets/gradient_background.dart';
 import '../../widgets/scroll_blur.dart';
 import '../../widgets/sf_symbols.dart';
 import '../balancing_energy/energy_settings_screen.dart';
+import 'passcode_setup_screen.dart';
 import 'privacy_policy_screen.dart';
 import 'settings_actions.dart';
 import 'theme_settings_screen.dart';
@@ -39,12 +44,55 @@ class _SettingsScreenState extends State<SettingsScreen> {
   /// claiming a version that shipped two releases ago.
   String? _version;
 
+  /// Whether a code has been chosen, which decides whether turning the lock on
+  /// goes through choosing one first.
+  bool _hasPasscode = false;
+
   @override
   void initState() {
     super.initState();
     widget.actions.appVersion().then((version) {
       if (mounted) setState(() => _version = version);
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    AppLockScope.of(context).passcode.isSet().then((isSet) {
+      if (mounted) setState(() => _hasPasscode = isSet);
+    });
+  }
+
+  /// Turning the lock on needs a code to fall back on when a face or a finger
+  /// cannot answer, so the first switch of it goes through choosing one — and
+  /// leaves the switch off if that is abandoned.
+  Future<void> _setLockEnabled(bool isOn) async {
+    final lock = AppLockScope.of(context);
+    if (!isOn || _hasPasscode) {
+      await lock.setEnabled(isOn);
+      return;
+    }
+    await _chooseCode(thenEnable: true);
+  }
+
+  Future<void> _chooseCode({bool thenEnable = false}) async {
+    final lock = AppLockScope.of(context);
+    final navigator = Navigator.of(context);
+    await navigator.push(
+      MaterialPageRoute<void>(
+        builder: (_) => PasscodeSetupScreen(
+          passcode: lock.passcode,
+          onFinished: () {
+            if (mounted) setState(() => _hasPasscode = true);
+            if (thenEnable) unawaited(lock.setEnabled(true));
+            navigator.pop();
+          },
+          onCancelled: navigator.pop,
+        ),
+        fullscreenDialog: true,
+      ),
+    );
   }
 
   /// About tells the reader what the app is and offers them the book behind it.
@@ -117,6 +165,119 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  /// Shown only where the words on screen came from a machine. It sits under
+  /// the language row because that is where somebody who has just noticed a
+  /// strange one will look, and it opens the same letter the "write to us" row
+  /// does — the shortest path from noticing to telling.
+  Widget _machineTranslationRow(AppLocalizations l10n) {
+    final colors = AppColors.of(context);
+
+    return InkWell(
+      onTap: () => unawaited(_writeToUs()),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 56),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            children: [
+              const AuraRings(
+                level: AuraLevel.throat,
+                size: 18,
+                count: 2,
+                opacity: 1,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      l10n.machineTranslationTitle,
+                      style: const TextStyle(
+                        fontFamily: 'Source Serif 4',
+                        fontSize: 20,
+                      ),
+                    ),
+                    const SizedBox(height: DesignConstants.paddingTiny),
+                    Text(
+                      l10n.machineTranslationNote,
+                      style: TextStyle(
+                        color: colors.textSecondary,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              const AuraIcon(
+                SFSymbols.envelope,
+                level: AuraLevel.throat,
+                size: 18,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// The lock is a switch rather than a page of its own, so it sits in a row
+  /// shaped like the disclosure cells around it rather than beside them.
+  Widget _appLockRow(AppLocalizations l10n) {
+    final colors = AppColors.of(context);
+    final isEnabled = AppLockScope.of(context).isEnabled;
+
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 56),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
+          children: [
+            const AuraRings(
+              level: AuraLevel.brow,
+              size: 18,
+              count: 2,
+              opacity: 1,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    l10n.appLock,
+                    style: const TextStyle(
+                      fontFamily: 'Source Serif 4',
+                      fontSize: 20,
+                    ),
+                  ),
+                  const SizedBox(height: DesignConstants.paddingTiny),
+                  Text(
+                    l10n.appLockDescription,
+                    style: TextStyle(
+                      color: colors.textSecondary,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            AuraSwitch(
+              value: isEnabled,
+              level: AuraLevel.brow,
+              label: l10n.appLock,
+              onChanged: (isOn) => unawaited(_setLockEnabled(isOn)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -176,6 +337,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       title: l10n.changeLanguage,
                       onTap: _showChangeLanguage,
                     ),
+                    if (Translation.isMachineTranslated(
+                      Localizations.localeOf(context),
+                    ))
+                      _machineTranslationRow(l10n),
+                    _appLockRow(l10n),
+                    if (AppLockScope.of(context).isEnabled)
+                      DisclosureCell(
+                        title: l10n.passcodeChange,
+                        level: AuraLevel.brow,
+                        onTap: _chooseCode,
+                      ),
                     DisclosureCell(
                       title: l10n.privacyPolicy,
                       onTap: () => Navigator.of(context).push(

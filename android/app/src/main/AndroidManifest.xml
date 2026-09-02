@@ -1,11 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Reminders speak up at the minute they were set for, which needs an
-         exact alarm, and they have to be laid again after a restart because the
-         alarms an old boot held are gone. -->
+    <!-- Reminders are scheduled inexactly: a practice is kept to within a few
+         minutes, not to the second, and the exact-alarm permissions Google Play
+         reviews by hand are not worth asking for over that. They do have to be
+         laid again after a restart, because the alarms an old boot held are
+         gone. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
-    <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <!-- The app lock asks the device to vouch for whoever is holding it. -->
+    <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
     <application
         android:label="Karmic Healing Flutter"
         android:name="${applicationName}"

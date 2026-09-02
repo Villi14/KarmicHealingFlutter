@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:karmic_healing_flutter/data/app_lock.dart';
 import 'package:karmic_healing_flutter/data/energy_settings.dart';
+import 'package:karmic_healing_flutter/l10n/app_locales.dart';
 import 'package:karmic_healing_flutter/l10n/app_localizations.dart';
 
 /// The app shell a screen needs under test: every screen reads its text from
@@ -10,7 +12,8 @@ import 'package:karmic_healing_flutter/l10n/app_localizations.dart';
 /// looks for a word finds the same word wherever it runs.
 ///
 /// A screen that reads the meditation settings is given [energySettings] to
-/// read them from; the rest need none, and are left without the scope.
+/// read them from, and one that reads the app lock is given [appLock]; the rest
+/// need neither, and are left without the scope.
 Widget testApp({
   required Widget home,
   Locale locale = const Locale('en'),
@@ -18,11 +21,14 @@ Widget testApp({
   ThemeData? darkTheme,
   ThemeMode? themeMode,
   EnergySettings? energySettings,
+  AppLockSettings? appLock,
 }) {
   final app = MaterialApp(
     debugShowCheckedModeBanner: false,
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
+    localeListResolutionCallback: (preferred, _) =>
+        AppLocales.resolve(preferred),
     locale: locale,
     theme: theme,
     darkTheme: darkTheme,
@@ -39,7 +45,11 @@ Widget testApp({
     home: home,
   );
 
-  return energySettings == null
+  final locked = appLock == null
       ? app
-      : EnergySettingsScope(settings: energySettings, child: app);
+      : AppLockScope(settings: appLock, child: app);
+
+  return energySettings == null
+      ? locked
+      : EnergySettingsScope(settings: energySettings, child: locked);
 }
