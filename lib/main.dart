@@ -17,6 +17,7 @@ import 'data/requests_repository.dart';
 import 'data/seed_sample_data.dart';
 import 'qa/qa_routes.dart';
 import 'locale_controller.dart';
+import 'orientation_policy.dart';
 import 'theme_controller.dart';
 import 'screens/app_lock/app_lock_screen.dart';
 import 'screens/home/home_screen.dart';
@@ -163,12 +164,17 @@ class KarmicHealingApp extends StatelessWidget {
                   theme: appTheme(Brightness.light),
                   darkTheme: appTheme(Brightness.dark),
                   themeMode: mode,
-                  // The lock goes on the builder rather than on `home`: `home` is
-                  // only the first route, and a lock there left every pushed screen
-                  // above it on display. The builder wraps the navigator itself, so
-                  // nothing the app is guarding is on screen — or in the task
-                  // switcher's snapshot — until the lock opens.
-                  builder: (context, child) => AppLockGate(child: child!),
+                  // Both of these go on the builder rather than on `home`.
+                  // `home` is only the first route, and a lock there left every
+                  // pushed screen above it on display; the builder wraps the
+                  // navigator itself, so nothing the app is guarding is on
+                  // screen — or in the task switcher's snapshot — until the
+                  // lock opens. The orientation policy sits outside it to read
+                  // the window the app was given rather than the one the lock
+                  // is drawn in.
+                  builder: (context, child) => OrientationPolicy(
+                    child: AppLockGate(child: child!),
+                  ),
                   home: const AppWrapper(),
                   debugShowCheckedModeBanner: false,
                 ),

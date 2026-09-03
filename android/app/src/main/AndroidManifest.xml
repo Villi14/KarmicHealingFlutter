@@ -17,15 +17,18 @@
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:localeConfig="@xml/locales_config">
-        <!-- The app is drawn for one hand holding a phone upright: the aura is
-             laid out top to bottom, and the session screens read as a column.
-             Nothing here has a landscape layout to turn into, so the window
-             stays portrait however the device is held. -->
+        <!-- No orientation is declared here on purpose. The app is drawn for
+             one hand holding a phone upright — the aura is laid out top to
+             bottom, and the session screens read as a column — while a tablet
+             is wide enough on its side to hold every screen; and a manifest
+             attribute, resolved when the package is parsed with no device
+             configuration to hand, cannot tell the two apart. `MainActivity`
+             decides before the first frame, and `OrientationPolicy` keeps the
+             decision honest afterwards. -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait"
             android:taskAffinity=""
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
@@ -59,14 +62,6 @@
                 <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
             </intent-filter>
         </receiver>
-        <!-- On a screen 600dp or wider — a tablet, an unfolded foldable, a
-             desktop window — Android 16 ignores an activity's orientation
-             outright unless the app asks to keep it. This is the ask. It buys
-             time only until the platform drops the opt-out, so a landscape
-             layout is still worth having one day. -->
-        <property
-            android:name="android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_ORIENTATION"
-            android:value="true"/>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
