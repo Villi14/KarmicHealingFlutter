@@ -12,9 +12,11 @@
         </shape>
     </item>
 
+    <!-- 246dp of canvas puts the lamp itself at 175dp, the size Android 12 and
+         up draws it at inside its own splash — see `values-v31/styles.xml`. -->
     <item
-        android:width="320dp"
-        android:height="320dp"
+        android:width="246dp"
+        android:height="246dp"
         android:gravity="center">
         <bitmap
             android:gravity="fill"

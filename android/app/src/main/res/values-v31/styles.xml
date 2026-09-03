@@ -1,7 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Android 12 and up draws its own splash before the window background is
-         ever seen, so the lamp and the dark ground are handed to it as well. -->
+    <!-- Android 12 and up draws its own splash before the window background
+         is ever seen, so the lamp and the dark ground are handed to it as well.
+
+         The lamp it is given is `launch_icon` on a canvas half again as wide
+         as the lamp needs, and the margin has to be in the image itself: the
+         platform scales whatever it is handed to fill a 288dp canvas and then
+         masks that to the 192dp circle inside it, so a margin expressed in the
+         drawable — a transparent layer sized around the artwork, say — is
+         scaled away along with everything else and the ring around the lamp is
+         cut clean off. Padded into the file, the margin survives the scaling:
+         the lamp lands 175dp across, a comfortable 8dp inside the mask, and
+         about the size the iOS launch screen gives it. -->
     <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar">
         <item name="android:windowBackground">@drawable/launch_background</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
