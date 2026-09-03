@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:karmic_healing_flutter/constants/design_constants.dart';
 import 'package:karmic_healing_flutter/screens/home/home_screen.dart';
 import 'package:karmic_healing_flutter/widgets/aura_widgets.dart';
 
@@ -59,12 +60,17 @@ void main() {
           reason: '$tool should be on screen at $size',
         );
       }
-      // The two tools share the row under the heading, the third sits under
-      // the first along the foot of the screen, and all three are one size.
+      // The two tools share the row under the heading, the third follows one
+      // gap under the first — not driven down to the foot of the window — and
+      // all three are one size.
       expect(card('Requests').top, moreOrLessEquals(card('Reminders').top));
       expect(card('Requests').right, lessThan(card('Reminders').left));
-      expect(card('Settings').top, greaterThan(card('Requests').bottom));
       expect(card('Settings').left, moreOrLessEquals(card('Requests').left));
+      expect(
+        card('Settings').top - card('Requests').bottom,
+        moreOrLessEquals(DesignConstants.spacingMedium),
+        reason: 'the tools should stay one block at $size',
+      );
       for (final tool in const ['Reminders', 'Settings']) {
         expect(
           card(tool).size,

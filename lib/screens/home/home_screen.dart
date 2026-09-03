@@ -234,10 +234,12 @@ class _Tool {
 /// The pair of tools, and under them the one that closes the screen.
 ///
 /// All three cards are cut to one size — half the width, and a height short
-/// enough to leave the window some air: the two keep the top of the box,
-/// straight under the heading, the third sits under the first along the foot
-/// of it, and the room the window has to spare opens up between them. A box
-/// too short even for that says so, and the screen goes back to scrolling.
+/// enough to leave the window some air. The two keep the top of the box,
+/// straight under the heading, and the third follows straight under the first,
+/// one gap below: the three read as one block of tools rather than as two
+/// rows with the window's slack driven between them. What the window has to
+/// spare is left under the block. A box too short even for that says so, and
+/// the screen goes back to scrolling.
 class _ToolsLayout extends StatelessWidget {
   const _ToolsLayout({required this.items, this.onTooShort});
 
@@ -301,15 +303,14 @@ class _ToolsLayout extends StatelessWidget {
       );
 
       final column = Column(
+        // The block keeps the top of the box however much of it is spare, so
+        // the tools stay together under the heading rather than the last one
+        // being carried off to the foot of the window.
+        mainAxisSize: MainAxisSize.min,
         children: [
           row(pair),
           if (foot != null) ...[
-            // The window's slack, where it has any and the cards are not
-            // already pressed against its edges.
-            if (box.hasBoundedHeight && !overflows)
-              const Spacer()
-            else
-              const SizedBox(height: spacing),
+            const SizedBox(height: spacing),
             row([foot, null]),
           ],
         ],
