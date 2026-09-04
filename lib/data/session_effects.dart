@@ -97,7 +97,16 @@ class DeviceSessionEffects extends SessionEffects {
       // Heard over the silent switch, and over whatever is already playing:
       // the user's music is lowered for the moment the chime lands rather
       // than stopped.
-      await AudioPlayer.global.setAudioContext(
+      //
+      // It has to be set on this player and not on `AudioPlayer.global`. iOS
+      // has one audio session for the whole app, so either call reaches it;
+      // Android gives every player its own copy of the context, taken when the
+      // player is made — and this one was made with the field above, long
+      // before the first chime. A global setting after that lands on the next
+      // player, never on this one, which would go on holding the full focus
+      // Android hands out by default and stop the user's music dead instead of
+      // ducking it.
+      await _player.setAudioContext(
         AudioContextConfig(focus: AudioContextConfigFocus.duckOthers).build(),
       );
       _audioReady = true;
