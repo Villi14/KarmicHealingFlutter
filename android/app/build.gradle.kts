@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.karmichealing.karmic_healing_flutter"
+    namespace = "com.villi.karmic_healing"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -18,7 +18,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.karmichealing.karmic_healing_flutter"
+        applicationId = "com.villi.karmic_healing"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

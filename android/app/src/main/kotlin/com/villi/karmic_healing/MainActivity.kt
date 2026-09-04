@@ -1,4 +1,4 @@
-package com.karmichealing.karmic_healing_flutter
+package com.villi.karmic_healing
 
 import android.content.pm.ActivityInfo
 import android.os.Bundle
