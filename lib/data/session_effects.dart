@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -57,9 +59,21 @@ class NoSessionEffects extends SessionEffects {
 
 /// The effects the device itself gives.
 class DeviceSessionEffects extends SessionEffects {
-  DeviceSessionEffects();
+  DeviceSessionEffects() {
+    // A player that cannot read what it was handed says so on this stream and
+    // nowhere else — `play` returns as if all were well, so there is nothing
+    // for `_quietly` to catch and the session simply goes quiet. Without this
+    // a mute chime looks exactly like a chime nobody asked for.
+    _log = _player.onLog.listen(
+      (message) => debugPrint('Chime: $message'),
+      onError: (Object error) => debugPrint('Chime failed: $error'),
+    );
+  }
 
   final AudioPlayer _player = AudioPlayer();
+
+  /// What the player has to say for itself, for as long as the session lasts.
+  StreamSubscription<String>? _log;
 
   /// Whether the audio session has been set up. It is done at the first chime
   /// rather than at the start of the session: a meditation run in silence
@@ -77,6 +91,8 @@ class DeviceSessionEffects extends SessionEffects {
     await WakelockPlus.disable();
     await ScreenBrightness.instance.resetApplicationScreenBrightness();
     await _player.stop();
+    await _log?.cancel();
+    _log = null;
   });
 
   @override
