@@ -442,10 +442,19 @@ class _BalancingEnergyScreenState extends State<BalancingEnergyScreen>
 
   void _nextStep() {
     if (!_isLastStep) {
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
+      // The slide is worth watching only when there is someone to watch it. A
+      // resting session has its tickers muted, and a muted ticker never drives
+      // the animation to its end — so the page would sit where it was, and the
+      // chime, the tap and the light with it, until a touch lifted the rest.
+      // Under the black the page is moved outright instead.
+      if (_isResting) {
+        _pageController.jumpToPage(_currentStep + 1);
+      } else {
+        _pageController.nextPage(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
     } else {
       _ticker?.cancel();
       widget.onCompleted?.call();

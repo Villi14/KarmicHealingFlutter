@@ -246,6 +246,36 @@ void main() {
     expect(effects.calls, isNot(contains('dim')));
   });
 
+  testWidgets('a step running out on a resting screen still rings, taps and '
+      'brings the light back', (tester) async {
+    var now = DateTime(2026);
+    final settings = await settingsFrom({
+      EnergySettings.sessionDurationKey: 1,
+      EnergySettings.screenRestDelayKey: 15,
+      EnergySettings.soundEnabledKey: true,
+      EnergySettings.vibrationEnabledKey: true,
+    });
+    final effects = await openSession(
+      tester,
+      settings: settings,
+      now: () => now,
+    );
+
+    now = now.add(const Duration(seconds: 16));
+    await tester.pump(const Duration(seconds: 1));
+    expect(effects.calls, contains('dim'));
+
+    // The step runs out with nobody touching the screen. It is the session
+    // itself that has to wake the phone, not the user.
+    now = now.add(const Duration(minutes: 1));
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(effects.calls, containsAllInOrder(['dim', 'chime', 'vibrate']));
+    expect(effects.calls, containsAllInOrder(['dim', 'undim']));
+    expect(find.bySemanticsLabel('Rest the screen'), findsNothing);
+    expect(find.text('STEP 2 OF 3'), findsOneWidget);
+  });
+
   testWidgets('a session left behind holds its place rather than racing '
       'through the steps it was not watched for', (tester) async {
     var now = DateTime(2026);
