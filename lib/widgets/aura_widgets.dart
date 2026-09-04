@@ -52,6 +52,17 @@ extension AuraLevelStyle on AuraLevel {
   /// The same two tones laid left to right, for a track or a bar.
   LinearGradient horizontalGradient(BuildContext context) =>
       LinearGradient(colors: gradientColors(context));
+
+  /// The gradient worn down to a tint: what a halo or a quiet button's fill is
+  /// made of, faint enough to sit under whatever it surrounds.
+  LinearGradient softGradient(BuildContext context) => LinearGradient(
+    begin: Alignment.bottomLeft,
+    end: Alignment.topRight,
+    colors: [
+      gradientColors(context)[0].withValues(alpha: .22),
+      gradientColors(context)[1].withValues(alpha: .16),
+    ],
+  );
 }
 
 class AuraRings extends StatelessWidget {
@@ -702,14 +713,7 @@ class AuraButton extends StatelessWidget {
     decoration: BoxDecoration(
       gradient: prominence == AuraProminence.filled
           ? level.gradient(context)
-          : LinearGradient(
-              begin: Alignment.bottomLeft,
-              end: Alignment.topRight,
-              colors: [
-                level.gradientColors(context)[0].withValues(alpha: .22),
-                level.gradientColors(context)[1].withValues(alpha: .16),
-              ],
-            ),
+          : level.softGradient(context),
       borderRadius: BorderRadius.circular(20),
     ),
     child: TextButton.icon(

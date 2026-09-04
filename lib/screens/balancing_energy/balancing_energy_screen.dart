@@ -561,31 +561,63 @@ class _StepLadder extends StatelessWidget {
     children: [
       for (var index = count - 1; index >= 0; index--)
         Container(
-          width: 9,
-          height: 9,
-          margin: EdgeInsets.only(bottom: index == 0 ? 0 : 8),
+          width: DesignConstants.rungSize,
+          height: DesignConstants.rungSize,
+          margin: EdgeInsets.only(
+            bottom: index == 0 ? 0 : DesignConstants.spacingSmall,
+          ),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: index <= currentStep ? level.gradient(context) : null,
             border: Border.all(
               color: level
                   .color(context)
-                  .withValues(alpha: index <= currentStep ? 1 : .5),
+                  .withValues(
+                    alpha: index <= currentStep
+                        ? 1
+                        : DesignConstants.opacityMedium,
+                  ),
+              width: DesignConstants.lineWidthThin * 2,
             ),
-            boxShadow: index == currentStep
-                ? [
-                    BoxShadow(
-                      color: AppColors.of(
-                        context,
-                      ).health.withValues(alpha: .22),
-                      spreadRadius: 4,
-                    ),
-                  ]
-                : null,
           ),
+          // The halo the step being walked wears: a ring straddling the rung's
+          // own edge, not a glow cast behind it. It is painted past the rung's
+          // bounds on purpose, so the ladder keeps its spacing whichever rung
+          // is lit — exactly what the Swift app's overlay does.
+          child: index == currentStep
+              ? CustomPaint(
+                  painter: _RungHaloPainter(
+                    gradient: AuraLevel.heart.softGradient(context),
+                  ),
+                )
+              : null,
         ),
     ],
   );
+}
+
+/// The ring around the rung the session is on.
+class _RungHaloPainter extends CustomPainter {
+  const _RungHaloPainter({required this.gradient});
+
+  final LinearGradient gradient;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    canvas.drawCircle(
+      rect.center,
+      size.shortestSide / 2,
+      Paint()
+        ..shader = gradient.createShader(rect)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = DesignConstants.rungHaloWidth,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _RungHaloPainter oldDelegate) =>
+      oldDelegate.gradient != gradient;
 }
 
 /// Which of the three meditations is running.
