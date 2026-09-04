@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -60,5 +62,30 @@ void main() {
       globalCalls.map((call) => call.method),
       isNot(contains('setAudioContext')),
     );
+  });
+
+  test('the chime is a plain 16-bit PCM wav, which is all Android will '
+      'play', () {
+    // The sound came from the Swift app as a 24-bit broadcast wav carrying a
+    // `bext` chunk and a hundred markers. iOS plays that; Android's wav
+    // extractor does not, and it fails without a word — the player reports
+    // the error on a log stream nobody is listening to, so the session simply
+    // goes silent. Whatever is put here has to stay something Android reads.
+    final bytes = ByteData.sublistView(
+      File('assets/sounds/ding.wav').readAsBytesSync(),
+    );
+    String tag(int at) => String.fromCharCodes(
+      Uint8List.sublistView(bytes, at, at + 4),
+    );
+
+    expect(tag(0), 'RIFF');
+    expect(tag(8), 'WAVE');
+    expect(tag(12), 'fmt ');
+    // A 16-byte `fmt ` holding format 1 — uncompressed PCM — and nothing
+    // between it and the samples for an extractor to trip over.
+    expect(bytes.getUint32(16, Endian.little), 16);
+    expect(bytes.getUint16(20, Endian.little), 1);
+    expect(bytes.getUint16(34, Endian.little), 16, reason: 'bits per sample');
+    expect(tag(36), 'data');
   });
 }
