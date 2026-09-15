@@ -12,7 +12,7 @@
          language screen, the one the "change language" row in Settings opens.
          Without it that row leads only to the phone's own language. -->
     <application
-        android:label="Karmic Healing Flutter"
+        android:label="Karmic Healing"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
