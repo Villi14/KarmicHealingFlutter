@@ -38,21 +38,21 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.9
   shared_preferences: ^2.5.5
-  intl: ^0.20.2
-  sqflite: ^2.4.3
+  intl: ^0.20.3
+  sqflite: ^2.4.4
   path: ^1.9.1
   uuid: ^4.6.0
-  flutter_local_notifications: ^22.2.0
+  flutter_local_notifications: ^22.3.1
   timezone: ^0.11.1
   flutter_timezone: ^5.1.0
   url_launcher: ^6.3.2
   audioplayers: ^6.8.1
-  wakelock_plus: ^1.7.0
+  wakelock_plus: ^1.8.0
   screen_brightness: ^2.1.11
   flex_color_picker: ^3.8.0
   local_auth: ^3.0.2
-  flutter_secure_storage: ^10.3.1
-  crypto: ^3.0.6
+  flutter_secure_storage: ^10.3.4
+  crypto: ^3.0.7
 
 dev_dependencies:
   flutter_test:
@@ -64,7 +64,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
-  sqflite_common_ffi: ^2.4.2
+  sqflite_common_ffi: ^2.4.3
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
