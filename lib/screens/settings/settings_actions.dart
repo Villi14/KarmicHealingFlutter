@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Everything the settings screen reaches for outside the app: the author's
-/// site, a mail composer.
+/// site, the privacy policy, a mail composer.
 ///
 /// The screen knows only this much of it, so a test can hand it one that
 /// records what was asked for instead of opening anything on the machine

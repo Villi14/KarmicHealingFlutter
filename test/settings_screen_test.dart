@@ -44,6 +44,7 @@ void main() {
     WidgetTester tester, {
     bool mailAppAnswers = true,
     LocaleController? locales,
+    Locale locale = const Locale('en'),
   }) async {
     final actions = RecordingActions(mailAppAnswers: mailAppAnswers);
     await tester.pumpWidget(
@@ -51,6 +52,7 @@ void main() {
         home: SettingsScreen(actions: actions),
         appLock: appLock,
         locales: locales,
+        locale: locale,
       ),
     );
     await tester.pumpAndSettle();
@@ -66,6 +68,20 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(actions.opened, [SettingsScreen.authorSite]);
+  });
+
+  testWidgets('the privacy policy opens on the web in the app language', (
+    tester,
+  ) async {
+    final actions = await openSettings(tester, locale: const Locale('uk'));
+
+    final row = find.text('Політика конфіденційності');
+    await tester.ensureVisible(row);
+    await tester.tap(row);
+    await tester.pumpAndSettle();
+
+    expect(actions.opened, [SettingsScreen.privacyPolicy(const Locale('uk'))]);
+    expect(actions.opened.single.queryParameters['lang'], 'uk');
   });
 
   testWidgets('the language is chosen in the app, not in the system', (

@@ -16,7 +16,6 @@ import '../../widgets/sf_symbols.dart';
 import '../balancing_energy/energy_settings_screen.dart';
 import 'language_settings_screen.dart';
 import 'passcode_setup_screen.dart';
-import 'privacy_policy_screen.dart';
 import 'settings_actions.dart';
 import 'theme_settings_screen.dart';
 
@@ -35,6 +34,15 @@ class SettingsScreen extends StatefulWidget {
   /// The site of the author whose book the app follows; About names her, so
   /// that is where a reader looks for the source.
   static final authorSite = Uri.parse('https://www.dianestein.net');
+
+  /// The privacy policy is kept on the web, where the stores link to it too,
+  /// so it can change without a release. It is opened in the language the app
+  /// is showing; the page falls back to English for one it does not have.
+  static Uri privacyPolicy(Locale locale) => Uri.https(
+    'villi14.github.io',
+    '/karmic-healing-privacy-policy-github.io/privacy-policy.html',
+    {'lang': locale.languageCode},
+  );
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -320,10 +328,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     DisclosureCell(
                       title: l10n.privacyPolicy,
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => const PrivacyPolicyScreen(),
-                          fullscreenDialog: true,
+                      onTap: () => widget.actions.openUrl(
+                        SettingsScreen.privacyPolicy(
+                          Localizations.localeOf(context),
                         ),
                       ),
                     ),

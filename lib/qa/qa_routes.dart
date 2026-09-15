@@ -14,7 +14,6 @@ import '../screens/requests/request_detail_screen.dart';
 import '../screens/requests/request_forms.dart';
 import '../screens/requests/requests_help_screen.dart';
 import '../screens/requests/requests_screen.dart';
-import '../screens/settings/privacy_policy_screen.dart';
 import '../screens/settings/settings_screen.dart';
 import '../screens/settings/theme_settings_screen.dart';
 
@@ -84,8 +83,6 @@ Widget? buildQaScreen(BuildContext context) {
       return const SettingsScreen();
     case 'theme_settings':
       return const ThemeSettingsScreen();
-    case 'privacy_policy':
-      return const PrivacyPolicyScreen();
     default:
       return null;
   }

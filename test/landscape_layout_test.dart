@@ -17,7 +17,6 @@ import 'package:karmic_healing_flutter/screens/requests/request_detail_screen.da
 import 'package:karmic_healing_flutter/screens/requests/request_forms.dart';
 import 'package:karmic_healing_flutter/screens/requests/requests_help_screen.dart';
 import 'package:karmic_healing_flutter/screens/requests/requests_screen.dart';
-import 'package:karmic_healing_flutter/screens/settings/privacy_policy_screen.dart';
 import 'package:karmic_healing_flutter/screens/settings/settings_screen.dart';
 import 'package:karmic_healing_flutter/screens/settings/theme_settings_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -104,7 +103,6 @@ void main() {
     'topic form': (_) => const TopicFormScreen(),
     'settings': (_) => const SettingsScreen(),
     'theme settings': (_) => const ThemeSettingsScreen(),
-    'privacy policy': (_) => const PrivacyPolicyScreen(),
   };
 
   for (final size in landscapes) {
