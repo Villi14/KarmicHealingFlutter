@@ -100,6 +100,33 @@ flutter run --dart-define=QA_SCREEN=requests_list
 
 Seeded QA screens use an in-memory database and sample data. Empty-state QA screens also use an in-memory database but skip sample data.
 
+## Building a Release
+
+### Android
+
+Release builds are signed with a keystore, configured via `android/key.properties`
+(gitignored, never committed). To build a signed release on a machine that already
+has the keystore and `key.properties` in place:
+
+```bash
+flutter build apk --release
+# or, for the Play Store:
+flutter build appbundle --release
+```
+
+Without `android/key.properties`, the release build falls back to the debug key
+so `flutter run --release` still works, but that build cannot be uploaded to the
+Play Store as an update.
+
+### iOS
+
+```bash
+flutter build ipa --release
+```
+
+Signing is handled through Xcode's normal code signing (certificate and
+provisioning profile), not through this repo.
+
 ## Design Notes
 
 - The app uses a soft gradient background and custom color system for a calm visual tone.
